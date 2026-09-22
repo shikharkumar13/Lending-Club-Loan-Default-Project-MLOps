@@ -1,0 +1,132 @@
+# Single source of configuration for the whole pipeline.
+# Anything a human might want to change lives here, not in the code:
+# that way `dvc repro` knows a parameter changed and reruns the right stage,
+# and every experiment can be traced back to an exact config.
+
+seed: 42
+
+paths:
+  raw_csv: data/raw/accepted_2007_to_2018Q4.csv
+  raw_parquet: data/interim/accepted_raw.parquet      # allowlisted columns only
+  prepared: data/interim/prepared.parquet             # cleaned + labeled
+  processed_dir: data/processed
+  reports_dir: reports
+  figures_dir: reports/figures
+
+data:
+  # --- target (D-003) ---
+  positive_statuses: ["Charged Off", "Default"]
+  negative_statuses: ["Fully Paid"]
+  # Loans whose outcome is not yet known are dropped entirely.
+  drop_statuses: ["Current", "In Grace Period", "Late (16-30 days)", "Late (31-120 days)"]
+  # "Does not meet the credit policy. Status:..." rows are kept and flagged (D-026).
+  keep_credit_policy_loans: true
+
+  # --- maturity filter (D-004) ---
+  terms_months: [36]              # 60-month loans excluded in v1
+  max_issue_date: "2015-12-01"    # 36 months + buffer before the 2018Q4 snapshot
+  min_issue_date: "2007-06-01"
+
+split:                             # by issue date (D-005)
+  train: {start: "2007-06-01", end: "2013-12-31"}
+  validation: {start: "2014-01-01", end: "2014-12-31"}
+  test: {start: "2015-01-01", end: "2015-12-31"}
+  # Expanding-window CV inside the training period (D-022).
+  cv_folds:
+    - {train_end: "2010-12-31", validate_year: 2011}
+    - {train_end: "2011-12-31", validate_year: 2012}
+    - {train_end: "2012-12-31", validate_year: 2013}
+
+features:
+  # DRAFT allowlist (D-006). Finalized in Phase 1 after auditing every column
+  # against the data dictionary. Only these columns may become model inputs.
+  allowlist:
+    - loan_amnt
+    - term
+    - int_rate
+    - installment
+    - grade
+    - sub_grade
+    - emp_length
+    - home_ownership
+    - annual_inc
+    - verification_status
+    - purpose
+    - addr_state
+    - dti
+    - delinq_2yrs
+    - earliest_cr_line
+    - fico_range_low
+    - fico_range_high
+    - inq_last_6mths
+    - mths_since_last_delinq
+    - mths_since_last_record
+    - open_acc
+    - pub_rec
+    - revol_bal
+    - revol_util
+    - total_acc
+    - initial_list_status
+    - application_type
+    - mort_acc
+    - pub_rec_bankruptcies
+    - acc_now_delinq
+    - tot_coll_amt
+    - tot_cur_bal
+    - collections_12_mths_ex_med
+
+  # Needed by the pipeline but never used as model inputs:
+  # issue_d -> splitting, loan_status -> label, payment columns -> realized profit (D-008).
+  bookkeeping:
+    - issue_d
+    - loan_status
+    - total_pymnt
+    - recoveries
+    - funded_amnt
+
+  # Any column whose name starts with one of these must never reach the model.
+  # Enforced by a test (D-010 leakage safeguards).
+  forbidden_prefixes:
+    - total_pymnt
+    - total_rec
+    - out_prncp
+    - last_pymnt
+    - next_pymnt
+    - last_credit_pull
+    - last_fico
+    - recoveries
+    - collection_recovery
+    - hardship
+    - settlement
+    - debt_settlement
+    - pymnt_plan
+
+  # Structurally missing = "never happened" -> sentinel + missing flag (D-017).
+  never_happened_columns:
+    - mths_since_last_delinq
+    - mths_since_last_record
+  never_happened_sentinel: 999
+
+  # Skewed money columns: log1p + cap at the training percentile (D-019).
+  log_columns: [annual_inc, revol_bal, tot_cur_bal]
+  cap_percentile: 0.995
+  rare_category_min_frequency: 0.01     # levels below 1% of training rows -> "other"
+  max_missing_fraction: 0.5             # measured on TRAIN only; above this the column is dropped
+
+profit:
+  # Expected return per loan (D-009). LGD is estimated from training data in Phase 4;
+  # this value is only a fallback for tests.
+  lgd_fallback: 0.65
+  threshold_grid: {start: 0.02, stop: 0.60, step: 0.005}
+
+model:
+  logistic_regression:
+    C: [0.01, 0.1, 1.0]
+    class_weight: [null, balanced]
+  lightgbm:
+    n_iter: 25                # randomized search budget
+    fixed:
+      objective: binary
+      n_estimators: 2000
+      learning_rate: 0.05
+      early_stopping_rounds: 100

@@ -1,0 +1,30 @@
+# Data files are versioned by DVC, never by git.
+# The small .dvc pointer files (and DVC's own .gitignore files) MUST be
+# committed: they are how git records which data version belongs to a commit.
+data/**
+!data/**/
+!data/**/*.dvc
+!data/**/.gitignore
+*.parquet
+*.csv
+!docs/*.csv
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# Notebooks
+.ipynb_checkpoints/
+
+# MLflow / DVC local state
+mlruns/
+mlartifacts/
+/.dvc/cache
+/.dvc/tmp
+
+# OS
+.DS_Store
