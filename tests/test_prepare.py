@@ -4,6 +4,8 @@ These run on a few handmade rows, so they are instant and need no data file.
 Each test pins down one rule from DECISIONS.md.
 """
 
+import copy
+
 import polars as pl
 import pytest
 
@@ -134,3 +136,23 @@ def test_no_forbidden_column_survives():
     bookkeeping = {"total_pymnt", "realized_profit", "funded_amnt"}  # evaluation only
     leaked = [c for c in out.columns if c.startswith(forbidden) and c not in bookkeeping]
     assert not leaked, f"leaked columns: {leaked}"
+
+
+def test_unknown_status_raises():
+    """If a refreshed dataset adds a status we have never seen, fail loudly
+    rather than silently dropping those loans."""
+    with pytest.raises(ValueError, match="unclassified loan_status"):
+        run({"loan_status": "Settled In Full"})
+
+
+def test_credit_policy_loans_can_be_excluded():
+    """The keep_credit_policy_loans switch actually does something (D-026)."""
+    params = copy.deepcopy(load_params())
+    params["data"]["keep_credit_policy_loans"] = False
+    rows = pl.DataFrame(
+        [
+            _row(loan_status="Does not meet the credit policy. Status:Charged Off"),
+            _row(loan_status="Fully Paid"),
+        ]
+    )
+    assert transform(rows, params).height == 1

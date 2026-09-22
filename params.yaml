@@ -100,10 +100,8 @@ features:
     - debt_settlement
     - pymnt_plan
 
-  # Structurally missing = "never happened" -> sentinel + missing flag (D-017).
-  never_happened_columns:
-    - mths_since_last_delinq
-    - mths_since_last_record
+  # Sentinel for "this never happened" (D-017); the columns are listed under
+  # groups.structural_missing, which is the single source of truth.
   never_happened_sentinel: 999
 
   # --- feature groups used to build the sklearn pipeline (Phase 2) ---
@@ -112,7 +110,9 @@ features:
   groups:
     # Skewed money columns: cap at the training percentile, then log1p (D-019).
     skewed_amount: [annual_inc, revol_bal]
-    # Ordinary numeric: median imputation + missing indicator.
+    # Ordinary numeric: median imputation, no missing indicator.
+    # (Audit finding D-040: these columns are missing for the same ~30 early
+    # loans, so their indicators were seven identical columns.)
     numeric:
       - loan_amnt
       - int_rate
@@ -122,16 +122,19 @@ features:
       - inq_last_6mths
       - open_acc
       - pub_rec
-      - revol_util
       - total_acc
-      - pub_rec_bankruptcies
       - acc_now_delinq
       - collections_12_mths_ex_med
-      - emp_length_years
       - fico_mid
       - credit_history_months
       - loan_to_income
       - installment_to_income
+    # Median imputation PLUS a missing indicator, because for these columns
+    # being missing predicts default on its own (D-040):
+    #   emp_length_years     4.3% missing -> 18.2% default vs 12.4%
+    #   pub_rec_bankruptcies 0.8% missing -> 24.5% default vs 12.5%
+    #   revol_util           0.1% missing -> 16.9% default vs 12.6%
+    numeric_with_indicator: [emp_length_years, pub_rec_bankruptcies, revol_util]
     # "Never happened" columns: sentinel + missing indicator (D-017, D-031).
     structural_missing: [mths_since_last_delinq, mths_since_last_record]
     # Ordered categories -> integer codes that preserve the order (D-018).
@@ -148,7 +151,6 @@ features:
     #   issue_date      -> used for splitting only; as a feature it would just
     #                      encode "which year", which does not transfer to new loans
 
-  log_columns: [annual_inc, revol_bal]
   cap_percentile: 0.995
   rare_category_min_frequency: 0.01     # levels below 1% of training rows -> "other"
   # Measured on TRAIN only; above this share of missing values a column is dropped.

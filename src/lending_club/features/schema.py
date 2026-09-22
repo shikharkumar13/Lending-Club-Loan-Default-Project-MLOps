@@ -50,6 +50,36 @@ def assert_no_forbidden_columns(frame: pl.DataFrame, params: dict | None = None)
         raise ValueError(f"post-issuance columns found in processed data: {leaked}")
 
 
+def check_missingness(frame: pl.DataFrame, params: dict | None = None) -> None:
+    """Fail if a feature column is mostly empty in the TRAINING data (D-016).
+
+    Measured on training data only, because "is this column usable?" must be
+    decided without looking at the validation or test years. Columns whose
+    missingness means "this never happened" are exempt (D-031): there, missing
+    is information, not absent data.
+    """
+    params = params or load_params()
+    groups = params["features"]["groups"]
+    exempt = set(groups["structural_missing"])
+    threshold = params["features"]["max_missing_fraction"]
+
+    candidates = (
+        list(groups["skewed_amount"])
+        + list(groups["numeric"])
+        + list(groups["numeric_with_indicator"])
+        + list(groups["nominal"])
+    )
+    too_empty = {
+        column: round(frame[column].null_count() / frame.height, 4)
+        for column in candidates
+        if column not in exempt and frame[column].null_count() / frame.height > threshold
+    }
+    if too_empty:
+        raise ValueError(
+            f"columns exceed max_missing_fraction={threshold} in training data: {too_empty}"
+        )
+
+
 def validate(frame: pl.DataFrame, params: dict | None = None) -> pl.DataFrame:
     """Raise if the frame breaks the contract; otherwise return it unchanged."""
     assert_no_forbidden_columns(frame, params)

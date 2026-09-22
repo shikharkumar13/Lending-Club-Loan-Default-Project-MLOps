@@ -91,6 +91,12 @@ unnoticed.
   `emp_title` (free text; maybe in v2), `policy_code`, and any column that
   is mostly empty during the training years (many bureau fields were only
   added around 2015 and later)
+> **Phase 1/2 update:** `mort_acc`, `tot_cur_bal`, `tot_coll_amt` and
+> `application_type` were removed from this list after the data audit
+> (D-030), and `features.groups` in `params.yaml` now decides which of the
+> remaining columns become model inputs (D-035). `DECISIONS.md` is
+> authoritative where it differs from this section.
+
 - `int_rate` and `grade` **are allowed**. Lending Club assigns them before
   the listing goes live, so investors see them. Our model must therefore
   beat Lending Club's own grading, which makes it a tougher and more honest

@@ -20,7 +20,7 @@ import numpy as np
 import pandas as pd
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.compose import ColumnTransformer
-from sklearn.impute import SimpleImputer
+from sklearn.impute import MissingIndicator, SimpleImputer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder, StandardScaler
 
@@ -64,25 +64,27 @@ def build_preprocessor(params: dict, kind: str = "tree") -> Pipeline:
             ("impute", SimpleImputer(strategy="median", keep_empty_features=True)),
         ]
     )
-    numeric = Pipeline(
-        # add_indicator keeps a 0/1 column saying "this value was missing",
-        # because missingness itself can predict default (D-017).
-        # keep_empty_features: if a column happens to be entirely missing in one
-        # CV fold, sklearn would otherwise DROP it, changing the number of
-        # features between folds and breaking a served model. Keeping it means
-        # a stable output shape, always.
-        [("impute", SimpleImputer(strategy="median", add_indicator=True, keep_empty_features=True))]
-    )
+    # keep_empty_features: if a column happens to be entirely missing in one CV
+    # fold, sklearn would otherwise DROP it, changing the number of features
+    # between folds and breaking a served model (D-036).
+    numeric = Pipeline([("impute", SimpleImputer(strategy="median", keep_empty_features=True))])
+    # A separate 0/1 "was missing" column for the few columns where missingness
+    # predicts default by itself (D-040). Built with MissingIndicator(features="all")
+    # rather than SimpleImputer(add_indicator=True), because the latter only
+    # creates an indicator for columns that happened to contain a missing value
+    # while fitting. In a CV fold without any, the column would vanish and the
+    # feature count would change between folds (same trap as D-036).
+    missing_flags = MissingIndicator(features="all")
     structural = Pipeline(
         # Missing here means "never happened" -> a sentinel far outside the real
-        # range, plus the indicator (D-031).
+        # range (D-031). No indicator: the sentinel already says "missing", and
+        # the extra column was perfectly correlated with the value (D-040).
         [
             (
                 "impute",
                 SimpleImputer(
                     strategy="constant",
                     fill_value=cfg["never_happened_sentinel"],
-                    add_indicator=True,
                     keep_empty_features=True,
                 ),
             )
@@ -112,6 +114,9 @@ def build_preprocessor(params: dict, kind: str = "tree") -> Pipeline:
                     # joins them instead of raising an error (D-018).
                     min_frequency=cfg["rare_category_min_frequency"],
                     handle_unknown="infrequent_if_exist",
+                    # A two-level column needs one column, not two: the pair was
+                    # perfectly collinear (D-040).
+                    drop="if_binary",
                     sparse_output=False,
                 ),
             ),
@@ -121,7 +126,8 @@ def build_preprocessor(params: dict, kind: str = "tree") -> Pipeline:
     transformer = ColumnTransformer(
         [
             ("skewed", skewed, groups["skewed_amount"]),
-            ("numeric", numeric, groups["numeric"]),
+            ("numeric", numeric, groups["numeric"] + groups["numeric_with_indicator"]),
+            ("missing_flags", missing_flags, groups["numeric_with_indicator"]),
             ("structural", structural, groups["structural_missing"]),
             ("ordinal", ordinal, ["grade", "sub_grade"]),
             ("nominal", nominal, groups["nominal"]),
@@ -147,6 +153,7 @@ def feature_columns(params: dict) -> list[str]:
     return (
         list(groups["skewed_amount"])
         + list(groups["numeric"])
+        + list(groups["numeric_with_indicator"])
         + list(groups["structural_missing"])
         + ["grade", "sub_grade"]
         + list(groups["nominal"])

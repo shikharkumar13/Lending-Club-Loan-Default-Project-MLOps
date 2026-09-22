@@ -63,6 +63,18 @@ def transform(frame: pl.DataFrame, params: dict) -> pl.DataFrame:
     # --- label (D-003) -------------------------------------------------------
     positive = data_cfg["positive_statuses"]
     negative = data_cfg["negative_statuses"]
+
+    # Guard against a status value we have never seen. If Lending Club data is
+    # ever refreshed and adds one, it must be classified deliberately rather
+    # than silently dropped by the filter below.
+    known = set(positive) | set(negative) | set(data_cfg["drop_statuses"])
+    unknown = set(frame["status_clean"].unique().to_list()) - known - {None}
+    if unknown:
+        raise ValueError(f"unclassified loan_status values: {sorted(unknown)}")
+
+    if not data_cfg["keep_credit_policy_loans"]:
+        frame = frame.filter(~pl.col("not_credit_policy"))
+
     frame = frame.filter(pl.col("status_clean").is_in(positive + negative)).with_columns(
         pl.col("status_clean").is_in(positive).cast(pl.Int8).alias("target")
     )

@@ -11,7 +11,7 @@ import numpy as np
 import polars as pl
 
 from lending_club.config import load_params, path_of
-from lending_club.features.schema import validate
+from lending_club.features.schema import check_missingness, validate
 
 SPLIT_NAMES = ("train", "validation", "test")
 
@@ -68,6 +68,9 @@ def split() -> dict[str, pl.DataFrame]:
         part = frame.filter(pl.col("split") == name).drop("split")
         # Fail here, loudly, rather than during training three stages later.
         validate(part, params)
+        if name == "train":
+            # Whether a column is usable is decided on training data only.
+            check_missingness(part, params)
         part.write_parquet(out_dir / f"{name}.parquet")
         parts[name] = part
         print(

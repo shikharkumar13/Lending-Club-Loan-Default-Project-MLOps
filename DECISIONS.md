@@ -57,6 +57,10 @@ deleted, so the history stays readable.
 | [D-037](#d-037-schema-validation-runs-inside-the-split-stage) | Schema validation runs inside the split stage | Structure | Accepted | 2026-09-23 |
 | [D-038](#d-038-dvc-pipeline-with-three-stages) | DVC pipeline: ingest -> prepare -> split | Tooling | Accepted | 2026-09-23 |
 | [D-039](#d-039-keep-three-cv-folds-despite-the-small-first-fold) | Keep 3 CV folds, equally weighted, despite a small first fold | Validation | Accepted | 2026-09-23 |
+| [D-040](#d-040-prune-redundant-features-86---73) | Prune redundant features: 86 -> 73 | Features | Accepted | 2026-09-23 |
+| [D-041](#d-041-missing-indicators-are-built-unconditionally) | Missing indicators built unconditionally | Features | Accepted | 2026-09-23 |
+| [D-042](#d-042-every-config-key-must-do-something) | Every config key must do something (or be deleted) | Structure | Accepted | 2026-09-23 |
+| [D-043](#d-043-audit-confirmations-and-known-limitations) | Audit confirmations and known limitations | Evaluation | Accepted | 2026-09-23 |
 
 ---
 
@@ -439,6 +443,76 @@ deleted, so the history stays readable.
   robust estimate.
 - **Revisit if:** Phase 3 scores swing widely between folds, which would mean
   the first fold is adding noise rather than information.
+
+### D-040: Prune redundant features (86 -> 73)
+- **Decision:** Three changes after a correlation audit of the training
+  features:
+  1. **Missing indicators only where missingness predicts default.** Adding one
+     for every numeric column produced **seven perfectly correlated columns**,
+     because the same ~30 loans from 2007 are missing every bureau field.
+     Indicators are kept only for `emp_length_years` (4.3% missing, 18.2%
+     default vs. 12.4%), `pub_rec_bankruptcies` (0.8% missing, 24.5% vs.
+     12.5%) and `revol_util` (0.1% missing, 16.9% vs. 12.6%).
+  2. **No indicator for the structural columns.** The 999 sentinel already
+     says "never happened"; the flag was perfectly correlated with the value.
+  3. **`drop="if_binary"` for one-hot encoding.** A two-level column such as
+     `initial_list_status` produced two perfectly collinear columns.
+- **Why:** Duplicated columns add no information. They inflate the input,
+  slow training, and split the importance of one real effect across several
+  columns, which makes SHAP explanations misleading.
+- **Kept deliberately:** `loan_amnt`/`installment` (0.99), `grade`/`sub_grade`
+  (0.97), `int_rate`/`sub_grade` (0.96), `loan_to_income`/
+  `installment_to_income` (0.99). These are genuinely different measurements
+  that happen to move together, and both model types handle them (D-020).
+
+### D-041: Missing indicators are built unconditionally
+- **Decision:** Use `MissingIndicator(features="all")` instead of
+  `SimpleImputer(add_indicator=True)`.
+- **Why:** `add_indicator=True` creates an indicator **only for columns that
+  actually contained a missing value while fitting**. A cross-validation fold
+  (or a production batch) with no missing `revol_util` would produce one
+  feature fewer, and a model trained on 73 features cannot score 72. This is
+  the same class of bug as D-036, found by a test that used clean data.
+
+### D-042: Every config key must do something
+- **Decision:** An audit compared `params.yaml` against the code and found
+  four keys that described behavior nobody had implemented. All are now real:
+  - `data.drop_statuses` — the prepare stage now **raises** if the data
+    contains a `loan_status` value that is in none of the three lists, so a
+    refreshed dataset cannot silently drop loans.
+  - `data.keep_credit_policy_loans` — the switch now actually filters.
+  - `features.max_missing_fraction` — a guard now checks it on the **training
+    split only**, exempting the structural columns (D-031).
+  - `features.never_happened_columns` and `features.log_columns` were
+    **deleted**: they duplicated `features.groups`, and two copies of the same
+    list drift apart.
+- **Why:** Configuration that does nothing is worse than no configuration.
+  Someone (including a future you) changes the value, sees no effect, and
+  loses trust in the whole file.
+
+### D-043: Audit confirmations and known limitations
+- **Confirmed by measurement:**
+  1. **The 2015 cutoff is safe.** Only 0.05% of 36-month loans issued in 2015
+     were still unresolved at the snapshot (147 of 283,173), versus 28% for
+     2016 and 60% for 2017. The test set is not distorted by survivorship.
+  2. **`total_pymnt` already includes post-charge-off recoveries** — it equals
+     principal + interest + late fees + recoveries to within $1 for 100% of
+     charged-off loans. So LGD = 0.365 is right, and recoveries must **not**
+     be added again.
+  3. **No loan appears in two splits** (checked on seven identifying columns).
+  4. No zero-variance or duplicated feature columns, and no non-finite values.
+- **Known limitations, to state in the README:**
+  - Profit ignores Lending Club's ~1% service fee on payments and the
+    collection fee on recoveries. Including the collection fee alone would
+    raise LGD from 0.365 to 0.377, so our profit numbers are slightly
+    optimistic in absolute terms; the comparison between strategies is
+    unaffected because every strategy is measured the same way.
+  - Profit ignores the time value of money: $1 repaid in month 1 counts the
+    same as $1 in month 36.
+  - `initial_list_status` drifts sharply (82% "f" in training, 52% in
+    validation) because Lending Club changed how loans were listed. It is
+    known at listing time, so it stays, but it is a platform artifact rather
+    than a borrower trait.
 
 ---
 

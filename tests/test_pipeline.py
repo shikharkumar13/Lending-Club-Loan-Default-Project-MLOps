@@ -120,14 +120,18 @@ def test_rare_categories_are_grouped():
     assert "purpose_wedding" not in names
 
 
-def test_structural_missing_becomes_sentinel_plus_flag():
-    """Missing 'months since last delinquency' means 'never happened' (D-031)."""
+def test_structural_missing_becomes_sentinel():
+    """Missing 'months since last delinquency' means 'never happened' (D-031).
+
+    No separate flag: the sentinel already encodes it, and the extra column was
+    perfectly correlated with the value (D-040).
+    """
     pipeline = build_preprocessor(PARAMS, "tree").fit(frame(n=50))
     out = pipeline.transform(frame(n=1, mths_since_last_delinq=None))
     names = list(pipeline.get_feature_names_out())
     sentinel = PARAMS["features"]["never_happened_sentinel"]
     assert out[0, names.index("mths_since_last_delinq")] == sentinel
-    assert any("missingindicator_mths_since_last_delinq" in n for n in names)
+    assert not any("missingindicator_mths_since_last" in n for n in names)
 
 
 def test_output_has_no_missing_values():
@@ -147,3 +151,22 @@ def test_train_and_serve_produce_the_same_column_order():
     pipeline = build_preprocessor(PARAMS, "tree").fit(frame(n=100))
     shuffled = frame(n=1)[list(reversed(COLUMNS))]
     assert np.allclose(pipeline.transform(frame(n=1)), pipeline.transform(shuffled))
+
+
+def test_missing_indicators_are_stable_even_without_missing_values():
+    """The indicator columns must exist whether or not this particular batch
+    contains missing values, or the feature count would change (D-040)."""
+    pipeline = build_preprocessor(PARAMS, "tree").fit(frame(n=100))  # no NaNs at all
+    indicators = [n for n in pipeline.get_feature_names_out() if "missingindicator" in n]
+    expected = {
+        f"missingindicator_{c}" for c in PARAMS["features"]["groups"]["numeric_with_indicator"]
+    }
+    assert set(indicators) == expected
+
+
+def test_binary_category_produces_one_column():
+    """A two-level column needs one column; two would be perfectly collinear."""
+    train = frame(n=100, initial_list_status=["f"] * 50 + ["w"] * 50)
+    pipeline = build_preprocessor(PARAMS, "tree").fit(train)
+    columns = [n for n in pipeline.get_feature_names_out() if n.startswith("initial_list_status")]
+    assert len(columns) == 1
