@@ -47,6 +47,11 @@ deleted, so the history stays readable.
 | [D-027](#d-027-out-of-scope-for-v1) | Out of scope for v1: rejected loans, text NLP, cloud | Scope | Accepted | 2026-09-22 |
 | [D-028](#d-028-raw-data-via-manual-download-stored-as-uncompressed-csv) | Raw data downloaded by hand; stored as uncompressed CSV in `data/raw/` | Data | Accepted | 2026-09-22 |
 | [D-029](#d-029-phase-0-tooling-choices) | Phase 0 tooling: ruff + pre-commit, params.yaml as single config, DVC pointers in git | Tooling | Accepted | 2026-09-23 |
+| [D-030](#d-030-drop-four-columns-after-the-phase-1-audit) | Drop `mort_acc`, `tot_cur_bal`, `tot_coll_amt`, `application_type` | Features | Accepted | 2026-09-23 |
+| [D-031](#d-031-structurally-missing-columns-are-exempt-from-the-drop-rule) | "Never happened" columns exempt from the missingness drop rule | Features | Accepted | 2026-09-23 |
+| [D-032](#d-032-loss-given-default-is-365-not-65) | Loss given default is 36.5%, measured, not 65% | Business | Accepted | 2026-09-23 |
+| [D-033](#d-033-column-parsing-matches-this-mirrors-formats) | Parsing matches this mirror's formats; `dti` 999 and zero income become missing | Data | Accepted | 2026-09-23 |
+| [D-034](#d-034-pure-transform-functions-separate-from-file-io) | Pure transform functions, separate from file I/O | Structure | Accepted | 2026-09-23 |
 
 ---
 
@@ -266,6 +271,11 @@ deleted, so the history stays readable.
   them differently.
 - **Revisit if:** EDA in Phase 1 shows they behave very differently or only
   appear in years that distort the training data.
+- **Phase 1 result:** 2,438 such loans survive the filters (0.4% of the data),
+  they default at 26.6% vs. 13.95% overall, and they appear only in
+  2007–2010. Kept with the flag as planned. The flag is always `false` in the
+  validation and test years, so it only helps the model interpret the early
+  training loans.
 
 ### D-027: Out of scope for v1
 - **Decision:** Leave out the rejected-loans file, NLP on `desc` and
@@ -310,6 +320,67 @@ deleted, so the history stays readable.
 - **Note:** LightGBM 4.7 runs on this Mac without `brew install libomp`; the
   wheel bundles OpenMP. DVC's cache uses APFS copy-on-write, so tracking the
   1.6 GB file cost about 1 GB of disk rather than a full second copy.
+
+### D-030: Drop four columns after the Phase 1 audit
+- **Decision:** Remove `mort_acc`, `tot_cur_bal`, `tot_coll_amt` and
+  `application_type` from the feature allowlist.
+- **Why:** The first three are **100% missing for every loan issued before
+  2012** — Lending Club only started reporting them later. In the training
+  years they are 21–31% empty, and whether a value is present says "this is an
+  old loan", not anything about the borrower. A model would learn that, and it
+  would be useless in production, where every loan has the field. Imputing
+  them would quietly invent a value for a third of the training data.
+  `application_type` is 99.96% "Individual" in our window (239 joint
+  applications out of 621,022), so it carries no signal.
+- **Rejected:** Keeping them with a missing flag (the flag is really a
+  year indicator); starting training in 2012 instead (that would cut the
+  training data to two years and leave too few cross-validation folds).
+- **Revisit if:** a v2 restricts the project to 2013+ loans, where all three
+  columns are fully populated.
+
+### D-031: Structurally missing columns are exempt from the drop rule
+- **Decision:** `mths_since_last_delinq` (58% missing) and
+  `mths_since_last_record` (90% missing) are kept, despite the
+  `max_missing_fraction: 0.5` rule.
+- **Why:** Here missing means "this borrower has never had a delinquency or a
+  public record", which is a *good* sign, not absent data. The information is
+  preserved as a sentinel value (999) plus a missing flag. The drop rule is
+  meant for columns that are empty by accident, not by meaning.
+
+### D-032: Loss given default is 36.5%, not 65%
+- **Decision:** Charged-off loans repay on average **63.5%** of the funded
+  amount, so the loss given default is **0.365**. Realized profit is
+  `total_pymnt - funded_amnt`.
+- **Why:** Measured directly from the data, rather than assumed. Defaulting
+  borrowers usually make many payments before they stop, and some money is
+  recovered afterwards, so a default is nothing like a total loss.
+- **Consequence:** Rejecting a loan is *more* costly than we assumed, so the
+  profit-maximizing threshold will be higher (more loans funded) than a plan
+  based on a 65% loss would suggest.
+- **Also measured:** repaid loans return about +15.5% over three years, and
+  the average loan earns **+$1,029** (+8.25% per dollar invested). So
+  "fund everything" is a profitable baseline, and the model has to beat a
+  positive number, not zero.
+- **Note:** This figure is measured on all matured loans. Phase 4 re-estimates
+  it on the training split only, so no test information reaches the policy.
+
+### D-033: Column parsing matches this mirror's formats
+- **Decision:** In this Kaggle mirror, `int_rate` and `revol_util` are
+  **already numeric**, so no percent-string parsing is needed. Parsing is only
+  required for `term` (" 36 months"), `emp_length` ("10+ years"), and the
+  dates `issue_d` / `earliest_cr_line` ("Dec-2015"). `dti >= 999` (a
+  "not available" sentinel, 5 loans) and `annual_inc = 0` (2 loans) are
+  converted to missing.
+- **Why:** The plan assumed the raw Lending Club string formats. Checking the
+  actual file avoided writing parsing code that would have silently produced
+  all-null columns.
+
+### D-034: Pure transform functions, separate from file I/O
+- **Decision:** Each pipeline stage splits into a pure function (`transform`)
+  and a thin wrapper that reads and writes files (`prepare`).
+- **Why:** Tests can then feed the logic a handful of handmade rows instead of
+  the 1.6 GB dataset. The 12 tests covering labeling, filters and derived
+  features run in under a tenth of a second, so they can run on every commit.
 
 ---
 

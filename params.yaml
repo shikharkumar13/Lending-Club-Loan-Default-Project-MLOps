@@ -38,8 +38,11 @@ split:                             # by issue date (D-005)
     - {train_end: "2012-12-31", validate_year: 2013}
 
 features:
-  # DRAFT allowlist (D-006). Finalized in Phase 1 after auditing every column
-  # against the data dictionary. Only these columns may become model inputs.
+  # FINAL allowlist (D-006), audited in Phase 1. Only these may become model inputs.
+  # Removed after the Phase 1 recon (D-030):
+  #   mort_acc, tot_cur_bal, tot_coll_amt -> 100% missing before 2012, so the
+  #     missingness encodes "old loan" and would not generalize
+  #   application_type -> 99.96% "Individual" in our window (no signal)
   allowlist:
     - loan_amnt
     - term
@@ -67,12 +70,8 @@ features:
     - revol_util
     - total_acc
     - initial_list_status
-    - application_type
-    - mort_acc
     - pub_rec_bankruptcies
     - acc_now_delinq
-    - tot_coll_amt
-    - tot_cur_bal
     - collections_12_mths_ex_med
 
   # Needed by the pipeline but never used as model inputs:
@@ -111,12 +110,16 @@ features:
   log_columns: [annual_inc, revol_bal, tot_cur_bal]
   cap_percentile: 0.995
   rare_category_min_frequency: 0.01     # levels below 1% of training rows -> "other"
-  max_missing_fraction: 0.5             # measured on TRAIN only; above this the column is dropped
+  # Measured on TRAIN only; above this share of missing values a column is dropped.
+  # never_happened_columns are exempt: their missingness is meaningful, not absent
+  # data (D-031). mths_since_last_record is 90% missing and still kept.
+  max_missing_fraction: 0.5
 
 profit:
-  # Expected return per loan (D-009). LGD is estimated from training data in Phase 4;
-  # this value is only a fallback for tests.
-  lgd_fallback: 0.65
+  # Expected return per loan (D-009). LGD is re-estimated from TRAIN data in
+  # Phase 4; this fallback is the Phase 1 measurement (D-032): charged-off loans
+  # repay on average 63.5% of the funded amount, so the loss is ~36.5%.
+  lgd_fallback: 0.365
   threshold_grid: {start: 0.02, stop: 0.60, step: 0.005}
 
 model:
