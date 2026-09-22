@@ -52,6 +52,11 @@ deleted, so the history stays readable.
 | [D-032](#d-032-loss-given-default-is-365-not-65) | Loss given default is 36.5%, measured, not 65% | Business | Accepted | 2026-09-23 |
 | [D-033](#d-033-column-parsing-matches-this-mirrors-formats) | Parsing matches this mirror's formats; `dti` 999 and zero income become missing | Data | Accepted | 2026-09-23 |
 | [D-034](#d-034-pure-transform-functions-separate-from-file-io) | Pure transform functions, separate from file I/O | Structure | Accepted | 2026-09-23 |
+| [D-035](#d-035-feature-groups-live-in-paramsyaml) | Feature groups in `params.yaml`; drop `term_months`, raw FICO columns, `issue_date` | Features | Accepted | 2026-09-23 |
+| [D-036](#d-036-imputers-keep-empty-features) | Imputers use `keep_empty_features=True` | Features | Accepted | 2026-09-23 |
+| [D-037](#d-037-schema-validation-runs-inside-the-split-stage) | Schema validation runs inside the split stage | Structure | Accepted | 2026-09-23 |
+| [D-038](#d-038-dvc-pipeline-with-three-stages) | DVC pipeline: ingest -> prepare -> split | Tooling | Accepted | 2026-09-23 |
+| [D-039](#d-039-keep-three-cv-folds-despite-the-small-first-fold) | Keep 3 CV folds, equally weighted, despite a small first fold | Validation | Accepted | 2026-09-23 |
 
 ---
 
@@ -381,6 +386,59 @@ deleted, so the history stays readable.
 - **Why:** Tests can then feed the logic a handful of handmade rows instead of
   the 1.6 GB dataset. The 12 tests covering labeling, filters and derived
   features run in under a tenth of a second, so they can run on every commit.
+
+### D-035: Feature groups live in params.yaml
+- **Decision:** `features.groups` in `params.yaml` lists which columns get
+  which treatment (skewed amount, numeric, structurally missing, ordinal,
+  nominal, boolean). The pipeline code reads those lists. Three columns are
+  deliberately excluded from the model:
+  - `term_months` — always 36 in v1, so it carries no information
+  - `fico_range_low` / `fico_range_high` — replaced by their midpoint,
+    `fico_mid`; keeping all three would add two near-identical columns
+  - `issue_date` — used for splitting only. As a feature it would encode
+    "which year this loan came from", which cannot transfer to a new loan.
+- **Why:** Changing the pipeline then means editing configuration, not code,
+  and DVC can see that a parameter changed and rerun the affected stage.
+- **Result:** 30 input columns become 86 model features after encoding.
+
+### D-036: Imputers keep empty features
+- **Decision:** All imputers are built with `keep_empty_features=True`.
+- **Why:** Found while testing. By default, scikit-learn **silently drops** a
+  column that is entirely missing in the data it was fitted on. In one
+  cross-validation fold that would change the number of features, and a model
+  trained that way would break when served a batch where the column is
+  present. Keeping empty features guarantees the same output shape every time.
+
+### D-037: Schema validation runs inside the split stage
+- **Decision:** A Pandera schema checks each processed split (types, value
+  ranges, no forbidden columns) before it is written to disk.
+- **Why:** It caught three real problems the moment it was added: `target`
+  was `Int8` rather than `Int64`, `term_months` was `Int16`, and `annual_inc`
+  has 4 missing values (all from 2007) that the plan assumed could not exist.
+  Without the schema, those would have surfaced much later as a confusing
+  model error.
+- **How it applies:** `annual_inc` is now declared nullable and the 4 loans are
+  imputed by the pipeline, like any other missing value.
+
+### D-038: DVC pipeline with three stages
+- **Decision:** `dvc.yaml` defines `ingest` -> `prepare` -> `split`, with each
+  stage declaring its code, data and parameter dependencies.
+- **Why:** `dvc repro` reruns only what actually changed. Editing a split date
+  in `params.yaml` reruns the split stage but not the two-minute CSV read.
+  It also means nobody has to remember the running order, and the rebuild is
+  identical on another machine.
+
+### D-039: Keep three CV folds despite the small first fold
+- **Decision:** Keep the folds as planned: train 2007-10 -> validate 2011
+  (17k/14k rows), 2007-11 -> 2012 (32k/43k), 2007-12 -> 2013 (75k/100k). Each
+  fold counts equally in the average score.
+- **Why:** The early Lending Club years are genuinely small: 2007-2010 is only
+  17,433 loans out of 175,426 in training. Dropping the first fold would leave
+  two folds and lose the oldest data; weighting folds by size would let 2013
+  dominate the tuning, which is closer to the test period but gives a less
+  robust estimate.
+- **Revisit if:** Phase 3 scores swing widely between folds, which would mean
+  the first fold is adding noise rather than information.
 
 ---
 

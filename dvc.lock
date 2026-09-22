@@ -1,0 +1,162 @@
+schema: '2.0'
+stages:
+  ingest:
+    cmd: python -m lending_club.data.ingest
+    deps:
+    - path: data/raw/accepted_2007_to_2018Q4.csv
+      hash: md5
+      md5: 40d0463a883c602e3732b5f821a3dac7
+      size: 1675133810
+    - path: src/lending_club/data/ingest.py
+      hash: md5
+      md5: 9f6d46f74c023d3013bc2ec58e03f67b
+      size: 1385
+    params:
+      params.yaml:
+        features.allowlist:
+        - loan_amnt
+        - term
+        - int_rate
+        - installment
+        - grade
+        - sub_grade
+        - emp_length
+        - home_ownership
+        - annual_inc
+        - verification_status
+        - purpose
+        - addr_state
+        - dti
+        - delinq_2yrs
+        - earliest_cr_line
+        - fico_range_low
+        - fico_range_high
+        - inq_last_6mths
+        - mths_since_last_delinq
+        - mths_since_last_record
+        - open_acc
+        - pub_rec
+        - revol_bal
+        - revol_util
+        - total_acc
+        - initial_list_status
+        - pub_rec_bankruptcies
+        - acc_now_delinq
+        - collections_12_mths_ex_med
+        features.bookkeeping:
+        - issue_d
+        - loan_status
+        - total_pymnt
+        - recoveries
+        - funded_amnt
+        paths.raw_csv: data/raw/accepted_2007_to_2018Q4.csv
+        paths.raw_parquet: data/interim/accepted_raw.parquet
+    outs:
+    - path: data/interim/accepted_raw.parquet
+      hash: md5
+      md5: 815d6f6858f5089add6ee16fdb5c512d
+      size: 79016287
+  prepare:
+    cmd: python -m lending_club.data.prepare
+    deps:
+    - path: data/interim/accepted_raw.parquet
+      hash: md5
+      md5: 815d6f6858f5089add6ee16fdb5c512d
+      size: 79016287
+    - path: src/lending_club/data/prepare.py
+      hash: md5
+      md5: 1e28cadd049b37ebed83c1763dba6a03
+      size: 5414
+    params:
+      params.yaml:
+        data:
+          positive_statuses:
+          - Charged Off
+          - Default
+          negative_statuses:
+          - Fully Paid
+          drop_statuses:
+          - Current
+          - In Grace Period
+          - Late (16-30 days)
+          - Late (31-120 days)
+          keep_credit_policy_loans: true
+          terms_months:
+          - 36
+          max_issue_date: '2015-12-01'
+          min_issue_date: '2007-06-01'
+        features.allowlist:
+        - loan_amnt
+        - term
+        - int_rate
+        - installment
+        - grade
+        - sub_grade
+        - emp_length
+        - home_ownership
+        - annual_inc
+        - verification_status
+        - purpose
+        - addr_state
+        - dti
+        - delinq_2yrs
+        - earliest_cr_line
+        - fico_range_low
+        - fico_range_high
+        - inq_last_6mths
+        - mths_since_last_delinq
+        - mths_since_last_record
+        - open_acc
+        - pub_rec
+        - revol_bal
+        - revol_util
+        - total_acc
+        - initial_list_status
+        - pub_rec_bankruptcies
+        - acc_now_delinq
+        - collections_12_mths_ex_med
+    outs:
+    - path: data/interim/prepared.parquet
+      hash: md5
+      md5: 7bef3b4f5389ed0c3acfcd68e1f94c9d
+      size: 33497902
+  split:
+    cmd: python -m lending_club.data.split
+    deps:
+    - path: data/interim/prepared.parquet
+      hash: md5
+      md5: 7bef3b4f5389ed0c3acfcd68e1f94c9d
+      size: 33497902
+    - path: src/lending_club/data/split.py
+      hash: md5
+      md5: b63688cf624293102f82c99a486e4ab4
+      size: 3002
+    - path: src/lending_club/features/schema.py
+      hash: md5
+      md5: 0d6405addf35664bec45af481e602b2e
+      size: 2648
+    params:
+      params.yaml:
+        split:
+          train:
+            start: '2007-06-01'
+            end: '2013-12-31'
+          validation:
+            start: '2014-01-01'
+            end: '2014-12-31'
+          test:
+            start: '2015-01-01'
+            end: '2015-12-31'
+          cv_folds:
+          - train_end: '2010-12-31'
+            validate_year: 2011
+          - train_end: '2011-12-31'
+            validate_year: 2012
+          - train_end: '2012-12-31'
+            validate_year: 2013
+    outs:
+    - path: data/processed
+      hash: md5
+      md5: 6d8c0a392d8acd0867d28c058dc0db44.dir
+      size: 33593025
+      nfiles: 3

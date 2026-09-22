@@ -1,0 +1,41 @@
+# The data pipeline as a dependency graph.
+#
+# `dvc repro` reruns a stage only when its code, its inputs, or the parameters
+# it depends on have changed. That is what makes the project reproducible:
+# anyone can rebuild every file from the raw CSV, and nobody has to remember
+# which script to run in which order.
+stages:
+  ingest:
+    cmd: python -m lending_club.data.ingest
+    deps:
+      - data/raw/accepted_2007_to_2018Q4.csv
+      - src/lending_club/data/ingest.py
+    params:
+      - paths.raw_csv
+      - paths.raw_parquet
+      - features.allowlist
+      - features.bookkeeping
+    outs:
+      - data/interim/accepted_raw.parquet
+
+  prepare:
+    cmd: python -m lending_club.data.prepare
+    deps:
+      - data/interim/accepted_raw.parquet
+      - src/lending_club/data/prepare.py
+    params:
+      - data
+      - features.allowlist
+    outs:
+      - data/interim/prepared.parquet
+
+  split:
+    cmd: python -m lending_club.data.split
+    deps:
+      - data/interim/prepared.parquet
+      - src/lending_club/data/split.py
+      - src/lending_club/features/schema.py
+    params:
+      - split
+    outs:
+      - data/processed

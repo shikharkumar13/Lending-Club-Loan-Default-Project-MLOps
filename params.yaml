@@ -106,8 +106,49 @@ features:
     - mths_since_last_record
   never_happened_sentinel: 999
 
-  # Skewed money columns: log1p + cap at the training percentile (D-019).
-  log_columns: [annual_inc, revol_bal, tot_cur_bal]
+  # --- feature groups used to build the sklearn pipeline (Phase 2) ---
+  # Each group gets a different treatment; the code reads these lists, so adding
+  # a column here is enough to change the pipeline.
+  groups:
+    # Skewed money columns: cap at the training percentile, then log1p (D-019).
+    skewed_amount: [annual_inc, revol_bal]
+    # Ordinary numeric: median imputation + missing indicator.
+    numeric:
+      - loan_amnt
+      - int_rate
+      - installment
+      - dti
+      - delinq_2yrs
+      - inq_last_6mths
+      - open_acc
+      - pub_rec
+      - revol_util
+      - total_acc
+      - pub_rec_bankruptcies
+      - acc_now_delinq
+      - collections_12_mths_ex_med
+      - emp_length_years
+      - fico_mid
+      - credit_history_months
+      - loan_to_income
+      - installment_to_income
+    # "Never happened" columns: sentinel + missing indicator (D-017, D-031).
+    structural_missing: [mths_since_last_delinq, mths_since_last_record]
+    # Ordered categories -> integer codes that preserve the order (D-018).
+    ordinal:
+      grade: [A, B, C, D, E, F, G]
+      sub_grade: null        # generated as A1..G5 in code
+    # Unordered categories -> one-hot, rare levels grouped into "other".
+    nominal: [home_ownership, verification_status, purpose, addr_state, initial_list_status]
+    # Already 0/1.
+    boolean: [not_credit_policy]
+    # Excluded from the model on purpose:
+    #   term_months     -> always 36 in v1 (no variance)
+    #   fico_range_low/high -> replaced by fico_mid
+    #   issue_date      -> used for splitting only; as a feature it would just
+    #                      encode "which year", which does not transfer to new loans
+
+  log_columns: [annual_inc, revol_bal]
   cap_percentile: 0.995
   rare_category_min_frequency: 0.01     # levels below 1% of training rows -> "other"
   # Measured on TRAIN only; above this share of missing values a column is dropped.
