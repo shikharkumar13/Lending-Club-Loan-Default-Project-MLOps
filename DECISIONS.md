@@ -46,6 +46,7 @@ deleted, so the history stays readable.
 | [D-026](#d-026-does-not-meet-credit-policy-loans-kept-with-a-flag) | "Does not meet credit policy" loans kept, with a flag | Data | Accepted | 2026-09-22 |
 | [D-027](#d-027-out-of-scope-for-v1) | Out of scope for v1: rejected loans, text NLP, cloud | Scope | Accepted | 2026-09-22 |
 | [D-028](#d-028-raw-data-via-manual-download-stored-as-uncompressed-csv) | Raw data downloaded by hand; stored as uncompressed CSV in `data/raw/` | Data | Accepted | 2026-09-22 |
+| [D-029](#d-029-phase-0-tooling-choices) | Phase 0 tooling: ruff + pre-commit, params.yaml as single config, DVC pointers in git | Tooling | Accepted | 2026-09-23 |
 
 ---
 
@@ -286,6 +287,29 @@ deleted, so the history stays readable.
   file (the source isn't official, see D-002).
 - **Revisit if:** we automate data download in the Phase 6 retraining flow;
   that needs the Kaggle CLI and credentials.
+
+### D-029: Phase 0 tooling choices
+- **Decision:**
+  - **`params.yaml` is the single source of configuration.** Split dates, the
+    feature allowlist, forbidden column prefixes, and model settings all live
+    there, not in the code.
+  - **The `.dvc` pointer files are committed to git** (`.gitignore` uses
+    `data/**` plus exceptions), while the data files themselves are not.
+  - **ruff + pre-commit** run automatically on every commit: lint, format,
+    trailing whitespace, and a block on files over 5 MB.
+  - **`dvc config core.autostage true`** so DVC pointer changes are staged
+    automatically.
+  - **hatchling** packaging with a `src/` layout, so `lending_club` is
+    importable everywhere without `sys.path` hacks.
+- **Why:** Configuration in one file means `dvc repro` can tell when a
+  parameter changed and rerun only what's affected, and every experiment can
+  be traced back to an exact config. Committing the pointer files is what
+  links a git commit to the exact data version it used. The large-file hook
+  is a safety net so a stray 1.6 GB CSV can never enter git history, where it
+  would be permanent.
+- **Note:** LightGBM 4.7 runs on this Mac without `brew install libomp`; the
+  wheel bundles OpenMP. DVC's cache uses APFS copy-on-write, so tracking the
+  1.6 GB file cost about 1 GB of disk rather than a full second copy.
 
 ---
 
