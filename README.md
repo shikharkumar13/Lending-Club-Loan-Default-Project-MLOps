@@ -7,8 +7,16 @@ investor could see at listing time**, and fund a loan only when its
 - [`PLAN.md`](PLAN.md) — full project plan, phase by phase
 - [`DECISIONS.md`](DECISIONS.md) — every decision, with the reasoning
 
-> **Status:** Phase 1 complete (data pipeline + EDA). Phase 2 (feature pipeline) is next.
+> **Status:** Phase 3 complete (model comparison). Phase 4 (calibration + profit policy) is next.
 > Full setup and run instructions land in Phase 8.
+
+**Cross-validated results** (expanding-window folds inside 2007-2013, tuned on log loss):
+
+| model | log loss | ROC-AUC | PR-AUC | Brier |
+|---|---|---|---|---|
+| Lending Club grade (baseline) | 0.36015 | 0.6232 | 0.1663 | 0.10473 |
+| logistic regression | 0.35345 | 0.6618 | 0.2048 | 0.10331 |
+| **LightGBM** | **0.35172** | **0.6672** | **0.2079** | **0.10300** |
 
 **Headline numbers so far:** 621,022 matured 36-month loans, 13.95% default rate,
 average realized profit +$1,029 per loan (+8.25% per dollar). Charged-off loans
@@ -22,6 +30,8 @@ uv run pytest                            # 18 tests
 uv run python -m lending_club.data.ingest   # raw CSV -> parquet (~2 min)
 uv run python -m lending_club.data.prepare  # clean + label + filter
 jupyter lab notebooks/01_eda.ipynb          # Phase 1 EDA
+dvc repro                                   # rebuild everything, end to end
+mlflow ui --backend-store-uri sqlite:///mlflow.db   # browse the experiments
 ```
 
 ## Data

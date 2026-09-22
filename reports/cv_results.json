@@ -1,0 +1,784 @@
+{
+  "candidates": [
+    {
+      "family": "grade_prior",
+      "config": {},
+      "mean": {
+        "log_loss": 0.36015397568167123,
+        "roc_auc": 0.6232194912294688,
+        "pr_auc": 0.1663388002845504,
+        "brier": 0.10473007011063858
+      },
+      "std": {
+        "log_loss_std": 0.024112646856542266,
+        "roc_auc_std": 0.011316683735636858,
+        "pr_auc_std": 0.012482361388121267,
+        "brier_std": 0.009082865124550596
+      },
+      "best_iters": []
+    },
+    {
+      "family": "logistic_regression",
+      "config": {
+        "C": 0.01,
+        "class_weight": null
+      },
+      "mean": {
+        "log_loss": 0.35344840000584504,
+        "roc_auc": 0.6617664626138777,
+        "pr_auc": 0.20482477248742892,
+        "brier": 0.1033099626635781
+      },
+      "std": {
+        "log_loss_std": 0.025384290935203876,
+        "roc_auc_std": 0.010897884274593716,
+        "pr_auc_std": 0.006859439918801976,
+        "brier_std": 0.00924973838228643
+      },
+      "best_iters": []
+    },
+    {
+      "family": "logistic_regression",
+      "config": {
+        "C": 0.01,
+        "class_weight": "balanced"
+      },
+      "mean": {
+        "log_loss": 0.6324870781345276,
+        "roc_auc": 0.6626269309373871,
+        "pr_auc": 0.20569305567103416,
+        "brier": 0.22138215254829208
+      },
+      "std": {
+        "log_loss_std": 0.06794444794729322,
+        "roc_auc_std": 0.011525195620567646,
+        "pr_auc_std": 0.00622629490314285,
+        "brier_std": 0.030839388364125624
+      },
+      "best_iters": []
+    },
+    {
+      "family": "logistic_regression",
+      "config": {
+        "C": 0.1,
+        "class_weight": null
+      },
+      "mean": {
+        "log_loss": 0.3540682536609725,
+        "roc_auc": 0.6611825957072318,
+        "pr_auc": 0.20445118118843308,
+        "brier": 0.10339752052144273
+      },
+      "std": {
+        "log_loss_std": 0.02552209222564716,
+        "roc_auc_std": 0.010886586696983502,
+        "pr_auc_std": 0.006661014567972418,
+        "brier_std": 0.009279735678449558
+      },
+      "best_iters": []
+    },
+    {
+      "family": "logistic_regression",
+      "config": {
+        "C": 0.1,
+        "class_weight": "balanced"
+      },
+      "mean": {
+        "log_loss": 0.6361003758688973,
+        "roc_auc": 0.6621032737953246,
+        "pr_auc": 0.20519780226934983,
+        "brier": 0.22300144640430422
+      },
+      "std": {
+        "log_loss_std": 0.06899619456278817,
+        "roc_auc_std": 0.011512904505348785,
+        "pr_auc_std": 0.005922065436080202,
+        "brier_std": 0.03103701956938906
+      },
+      "best_iters": []
+    },
+    {
+      "family": "logistic_regression",
+      "config": {
+        "C": 1.0,
+        "class_weight": null
+      },
+      "mean": {
+        "log_loss": 0.35423076570346296,
+        "roc_auc": 0.6609899186542644,
+        "pr_auc": 0.20431586048191375,
+        "brier": 0.1034169811490811
+      },
+      "std": {
+        "log_loss_std": 0.02552940002864685,
+        "roc_auc_std": 0.010822979623676583,
+        "pr_auc_std": 0.00664034416137253,
+        "brier_std": 0.009278448783885047
+      },
+      "best_iters": []
+    },
+    {
+      "family": "logistic_regression",
+      "config": {
+        "C": 1.0,
+        "class_weight": "balanced"
+      },
+      "mean": {
+        "log_loss": 0.6367680291069476,
+        "roc_auc": 0.661964925051171,
+        "pr_auc": 0.20498335948691182,
+        "brier": 0.22331358646508015
+      },
+      "std": {
+        "log_loss_std": 0.06912279193011063,
+        "roc_auc_std": 0.011551962532140922,
+        "pr_auc_std": 0.005859774484074812,
+        "brier_std": 0.0310543130804228
+      },
+      "best_iters": []
+    },
+    {
+      "family": "lightgbm",
+      "config": {
+        "num_leaves": 15,
+        "max_depth": 8,
+        "min_child_samples": 100,
+        "subsample": 0.8,
+        "colsample_bytree": 0.8,
+        "reg_lambda": 20.0,
+        "learning_rate": 0.03
+      },
+      "mean": {
+        "log_loss": 0.35174177046667615,
+        "roc_auc": 0.6672853576900409,
+        "pr_auc": 0.2077787289837778,
+        "brier": 0.10300859108156317
+      },
+      "std": {
+        "log_loss_std": 0.02543829482421483,
+        "roc_auc_std": 0.012200263936396836,
+        "pr_auc_std": 0.005992379945653193,
+        "brier_std": 0.009245027830763202
+      },
+      "best_iters": [
+        264,
+        144,
+        472
+      ]
+    },
+    {
+      "family": "lightgbm",
+      "config": {
+        "num_leaves": 63,
+        "max_depth": -1,
+        "min_child_samples": 20,
+        "subsample": 0.8,
+        "colsample_bytree": 1.0,
+        "reg_lambda": 5.0,
+        "learning_rate": 0.1
+      },
+      "mean": {
+        "log_loss": 0.3531952909771677,
+        "roc_auc": 0.6609716730483962,
+        "pr_auc": 0.20104540218982916,
+        "brier": 0.10334508097055932
+      },
+      "std": {
+        "log_loss_std": 0.02511241390514884,
+        "roc_auc_std": 0.011810224447962085,
+        "pr_auc_std": 0.008324998827414632,
+        "brier_std": 0.009186339406002251
+      },
+      "best_iters": [
+        23,
+        20,
+        37
+      ]
+    },
+    {
+      "family": "lightgbm",
+      "config": {
+        "num_leaves": 63,
+        "max_depth": 8,
+        "min_child_samples": 100,
+        "subsample": 0.6,
+        "colsample_bytree": 1.0,
+        "reg_lambda": 1.0,
+        "learning_rate": 0.05
+      },
+      "mean": {
+        "log_loss": 0.35190241966565106,
+        "roc_auc": 0.6652919047567739,
+        "pr_auc": 0.20574793342530814,
+        "brier": 0.1030629777178148
+      },
+      "std": {
+        "log_loss_std": 0.02552686820091173,
+        "roc_auc_std": 0.01207928583519916,
+        "pr_auc_std": 0.006671720333571474,
+        "brier_std": 0.009227818881297027
+      },
+      "best_iters": [
+        60,
+        56,
+        68
+      ]
+    },
+    {
+      "family": "lightgbm",
+      "config": {
+        "num_leaves": 31,
+        "max_depth": -1,
+        "min_child_samples": 200,
+        "subsample": 1.0,
+        "colsample_bytree": 0.8,
+        "reg_lambda": 1.0,
+        "learning_rate": 0.1
+      },
+      "mean": {
+        "log_loss": 0.35256947380153175,
+        "roc_auc": 0.6641601925167385,
+        "pr_auc": 0.2023982418838797,
+        "brier": 0.10324371899809127
+      },
+      "std": {
+        "log_loss_std": 0.025170400975356704,
+        "roc_auc_std": 0.011819564843720253,
+        "pr_auc_std": 0.009140282875619434,
+        "brier_std": 0.009129683435753143
+      },
+      "best_iters": [
+        40,
+        24,
+        46
+      ]
+    },
+    {
+      "family": "lightgbm",
+      "config": {
+        "num_leaves": 63,
+        "max_depth": 4,
+        "min_child_samples": 50,
+        "subsample": 0.6,
+        "colsample_bytree": 0.6,
+        "reg_lambda": 5.0,
+        "learning_rate": 0.1
+      },
+      "mean": {
+        "log_loss": 0.3519956522222513,
+        "roc_auc": 0.6657325538034673,
+        "pr_auc": 0.20530026422414216,
+        "brier": 0.10308005853426028
+      },
+      "std": {
+        "log_loss_std": 0.025488288431860365,
+        "roc_auc_std": 0.012437178791359782,
+        "pr_auc_std": 0.0057180011263483635,
+        "brier_std": 0.00926281399772383
+      },
+      "best_iters": [
+        78,
+        39,
+        69
+      ]
+    },
+    {
+      "family": "lightgbm",
+      "config": {
+        "num_leaves": 15,
+        "max_depth": 8,
+        "min_child_samples": 200,
+        "subsample": 0.6,
+        "colsample_bytree": 0.8,
+        "reg_lambda": 0.0,
+        "learning_rate": 0.1
+      },
+      "mean": {
+        "log_loss": 0.3524274887249453,
+        "roc_auc": 0.6652608006075392,
+        "pr_auc": 0.20412412022918092,
+        "brier": 0.10319859699158263
+      },
+      "std": {
+        "log_loss_std": 0.024956291915769,
+        "roc_auc_std": 0.011727164555397143,
+        "pr_auc_std": 0.009364524832271947,
+        "brier_std": 0.009092720864349186
+      },
+      "best_iters": [
+        60,
+        32,
+        82
+      ]
+    },
+    {
+      "family": "lightgbm",
+      "config": {
+        "num_leaves": 63,
+        "max_depth": 4,
+        "min_child_samples": 20,
+        "subsample": 1.0,
+        "colsample_bytree": 0.8,
+        "reg_lambda": 20.0,
+        "learning_rate": 0.1
+      },
+      "mean": {
+        "log_loss": 0.3523440407367063,
+        "roc_auc": 0.665038450448948,
+        "pr_auc": 0.20476967124350254,
+        "brier": 0.10316386725960565
+      },
+      "std": {
+        "log_loss_std": 0.025608445521059082,
+        "roc_auc_std": 0.012521276471627579,
+        "pr_auc_std": 0.006681483944571745,
+        "brier_std": 0.009266159083239954
+      },
+      "best_iters": [
+        119,
+        56,
+        105
+      ]
+    },
+    {
+      "family": "lightgbm",
+      "config": {
+        "num_leaves": 127,
+        "max_depth": 8,
+        "min_child_samples": 20,
+        "subsample": 0.8,
+        "colsample_bytree": 0.8,
+        "reg_lambda": 1.0,
+        "learning_rate": 0.03
+      },
+      "mean": {
+        "log_loss": 0.3524358085943846,
+        "roc_auc": 0.6639244558422862,
+        "pr_auc": 0.20295951673551627,
+        "brier": 0.10319686377248304
+      },
+      "std": {
+        "log_loss_std": 0.025592355752562142,
+        "roc_auc_std": 0.012944560497452453,
+        "pr_auc_std": 0.005582084216285395,
+        "brier_std": 0.009272594007863014
+      },
+      "best_iters": [
+        114,
+        77,
+        132
+      ]
+    },
+    {
+      "family": "lightgbm",
+      "config": {
+        "num_leaves": 63,
+        "max_depth": -1,
+        "min_child_samples": 100,
+        "subsample": 1.0,
+        "colsample_bytree": 1.0,
+        "reg_lambda": 5.0,
+        "learning_rate": 0.05
+      },
+      "mean": {
+        "log_loss": 0.3527735367036722,
+        "roc_auc": 0.6625212366471297,
+        "pr_auc": 0.20316409340774277,
+        "brier": 0.10324533117750533
+      },
+      "std": {
+        "log_loss_std": 0.025420288131022217,
+        "roc_auc_std": 0.012890235162793513,
+        "pr_auc_std": 0.006957928358674702,
+        "brier_std": 0.009226191743967629
+      },
+      "best_iters": [
+        61,
+        43,
+        75
+      ]
+    },
+    {
+      "family": "lightgbm",
+      "config": {
+        "num_leaves": 127,
+        "max_depth": 4,
+        "min_child_samples": 50,
+        "subsample": 1.0,
+        "colsample_bytree": 0.8,
+        "reg_lambda": 0.0,
+        "learning_rate": 0.05
+      },
+      "mean": {
+        "log_loss": 0.3524510767112145,
+        "roc_auc": 0.6634018818880816,
+        "pr_auc": 0.20365288719093363,
+        "brier": 0.10320036929501948
+      },
+      "std": {
+        "log_loss_std": 0.02515549844765956,
+        "roc_auc_std": 0.010449209110833814,
+        "pr_auc_std": 0.008331554050925637,
+        "brier_std": 0.009165688865545784
+      },
+      "best_iters": [
+        123,
+        103,
+        250
+      ]
+    },
+    {
+      "family": "lightgbm",
+      "config": {
+        "num_leaves": 127,
+        "max_depth": -1,
+        "min_child_samples": 50,
+        "subsample": 0.6,
+        "colsample_bytree": 1.0,
+        "reg_lambda": 1.0,
+        "learning_rate": 0.03
+      },
+      "mean": {
+        "log_loss": 0.3528832487645257,
+        "roc_auc": 0.661398598589645,
+        "pr_auc": 0.202454748439627,
+        "brier": 0.10328091905214169
+      },
+      "std": {
+        "log_loss_std": 0.025612410090972815,
+        "roc_auc_std": 0.012479830256631252,
+        "pr_auc_std": 0.0052265388689145525,
+        "brier_std": 0.009302480877428524
+      },
+      "best_iters": [
+        66,
+        54,
+        108
+      ]
+    },
+    {
+      "family": "lightgbm",
+      "config": {
+        "num_leaves": 15,
+        "max_depth": 6,
+        "min_child_samples": 100,
+        "subsample": 1.0,
+        "colsample_bytree": 0.8,
+        "reg_lambda": 0.0,
+        "learning_rate": 0.1
+      },
+      "mean": {
+        "log_loss": 0.35243592340226804,
+        "roc_auc": 0.6640008009666487,
+        "pr_auc": 0.2045282457553931,
+        "brier": 0.1031731029531416
+      },
+      "std": {
+        "log_loss_std": 0.025453489031234452,
+        "roc_auc_std": 0.011541264413116387,
+        "pr_auc_std": 0.007483216991988742,
+        "brier_std": 0.009227760968691004
+      },
+      "best_iters": [
+        44,
+        38,
+        71
+      ]
+    },
+    {
+      "family": "lightgbm",
+      "config": {
+        "num_leaves": 63,
+        "max_depth": 6,
+        "min_child_samples": 20,
+        "subsample": 0.6,
+        "colsample_bytree": 1.0,
+        "reg_lambda": 20.0,
+        "learning_rate": 0.05
+      },
+      "mean": {
+        "log_loss": 0.3517228887926898,
+        "roc_auc": 0.6669306106126621,
+        "pr_auc": 0.20673534670426172,
+        "brier": 0.10301833664844846
+      },
+      "std": {
+        "log_loss_std": 0.02552855818709214,
+        "roc_auc_std": 0.012626796364929107,
+        "pr_auc_std": 0.007197003745348339,
+        "brier_std": 0.009232617630118638
+      },
+      "best_iters": [
+        116,
+        72,
+        153
+      ]
+    },
+    {
+      "family": "lightgbm",
+      "config": {
+        "num_leaves": 127,
+        "max_depth": 8,
+        "min_child_samples": 50,
+        "subsample": 1.0,
+        "colsample_bytree": 0.6,
+        "reg_lambda": 0.0,
+        "learning_rate": 0.1
+      },
+      "mean": {
+        "log_loss": 0.353284327217221,
+        "roc_auc": 0.6587755138936191,
+        "pr_auc": 0.20160725772560162,
+        "brier": 0.10335318556016308
+      },
+      "std": {
+        "log_loss_std": 0.02524699465418261,
+        "roc_auc_std": 0.010282737542628985,
+        "pr_auc_std": 0.004879004124566109,
+        "brier_std": 0.00927702498649544
+      },
+      "best_iters": [
+        24,
+        23,
+        35
+      ]
+    },
+    {
+      "family": "lightgbm",
+      "config": {
+        "num_leaves": 63,
+        "max_depth": -1,
+        "min_child_samples": 200,
+        "subsample": 0.6,
+        "colsample_bytree": 1.0,
+        "reg_lambda": 0.0,
+        "learning_rate": 0.1
+      },
+      "mean": {
+        "log_loss": 0.3529920005842439,
+        "roc_auc": 0.6600856248128489,
+        "pr_auc": 0.2019750781096413,
+        "brier": 0.1033092316193986
+      },
+      "std": {
+        "log_loss_std": 0.024857219803337955,
+        "roc_auc_std": 0.010803225570727269,
+        "pr_auc_std": 0.00977788369021612,
+        "brier_std": 0.009070420911530987
+      },
+      "best_iters": [
+        28,
+        19,
+        35
+      ]
+    },
+    {
+      "family": "lightgbm",
+      "config": {
+        "num_leaves": 127,
+        "max_depth": 8,
+        "min_child_samples": 100,
+        "subsample": 0.8,
+        "colsample_bytree": 1.0,
+        "reg_lambda": 1.0,
+        "learning_rate": 0.1
+      },
+      "mean": {
+        "log_loss": 0.353056415844678,
+        "roc_auc": 0.660480399826917,
+        "pr_auc": 0.20131154372869633,
+        "brier": 0.1033361562191134
+      },
+      "std": {
+        "log_loss_std": 0.02547942628574441,
+        "roc_auc_std": 0.012147539370190566,
+        "pr_auc_std": 0.007614459379779534,
+        "brier_std": 0.009235150619697438
+      },
+      "best_iters": [
+        29,
+        19,
+        31
+      ]
+    },
+    {
+      "family": "lightgbm",
+      "config": {
+        "num_leaves": 63,
+        "max_depth": 4,
+        "min_child_samples": 100,
+        "subsample": 0.8,
+        "colsample_bytree": 0.6,
+        "reg_lambda": 0.0,
+        "learning_rate": 0.03,
+        "n_estimators": 275
+      },
+      "mean": {
+        "log_loss": 0.3517156598011948,
+        "roc_auc": 0.6672490798427898,
+        "pr_auc": 0.2078733219929212,
+        "brier": 0.10299877238459149
+      },
+      "std": {
+        "log_loss_std": 0.02564310759073978,
+        "roc_auc_std": 0.011975551391186794,
+        "pr_auc_std": 0.00521614415250913,
+        "brier_std": 0.00929719747016214
+      },
+      "best_iters": [
+        325,
+        195,
+        275
+      ]
+    },
+    {
+      "family": "lightgbm",
+      "config": {
+        "num_leaves": 15,
+        "max_depth": 4,
+        "min_child_samples": 100,
+        "subsample": 0.8,
+        "colsample_bytree": 0.8,
+        "reg_lambda": 20.0,
+        "learning_rate": 0.05
+      },
+      "mean": {
+        "log_loss": 0.35189095031982004,
+        "roc_auc": 0.6665837627691021,
+        "pr_auc": 0.20704905759618472,
+        "brier": 0.10304819768612457
+      },
+      "std": {
+        "log_loss_std": 0.025608790606059872,
+        "roc_auc_std": 0.012318035258639089,
+        "pr_auc_std": 0.006296967232018608,
+        "brier_std": 0.00927631456567142
+      },
+      "best_iters": [
+        198,
+        124,
+        248
+      ]
+    },
+    {
+      "family": "lightgbm",
+      "config": {
+        "num_leaves": 15,
+        "max_depth": 8,
+        "min_child_samples": 100,
+        "subsample": 0.8,
+        "colsample_bytree": 0.8,
+        "reg_lambda": 5.0,
+        "learning_rate": 0.03
+      },
+      "mean": {
+        "log_loss": 0.35175859580959296,
+        "roc_auc": 0.6668526800829154,
+        "pr_auc": 0.20758967368324735,
+        "brier": 0.10300977429566939
+      },
+      "std": {
+        "log_loss_std": 0.025422235493305963,
+        "roc_auc_std": 0.011673800714026699,
+        "pr_auc_std": 0.006194583527931068,
+        "brier_std": 0.00923630335324604
+      },
+      "best_iters": [
+        211,
+        142,
+        411
+      ]
+    },
+    {
+      "family": "lightgbm",
+      "config": {
+        "num_leaves": 63,
+        "max_depth": 8,
+        "min_child_samples": 50,
+        "subsample": 0.8,
+        "colsample_bytree": 0.6,
+        "reg_lambda": 1.0,
+        "learning_rate": 0.05
+      },
+      "mean": {
+        "log_loss": 0.35246513014048403,
+        "roc_auc": 0.6627310315740971,
+        "pr_auc": 0.20394304377863978,
+        "brier": 0.10319505071813456
+      },
+      "std": {
+        "log_loss_std": 0.025424660132372854,
+        "roc_auc_std": 0.011474966427592609,
+        "pr_auc_std": 0.005881459129628822,
+        "brier_std": 0.009254287337127343
+      },
+      "best_iters": [
+        53,
+        53,
+        92
+      ]
+    }
+  ],
+  "selected": [
+    {
+      "family": "grade_prior",
+      "config": {},
+      "cv": {
+        "log_loss": 0.36015397568167123,
+        "roc_auc": 0.6232194912294688,
+        "pr_auc": 0.1663388002845504,
+        "brier": 0.10473007011063858
+      },
+      "cv_std": {
+        "log_loss_std": 0.024112646856542266,
+        "roc_auc_std": 0.011316683735636858,
+        "pr_auc_std": 0.012482361388121267,
+        "brier_std": 0.009082865124550596
+      }
+    },
+    {
+      "family": "logistic_regression",
+      "config": {
+        "C": 0.01,
+        "class_weight": null
+      },
+      "cv": {
+        "log_loss": 0.35344840000584504,
+        "roc_auc": 0.6617664626138777,
+        "pr_auc": 0.20482477248742892,
+        "brier": 0.1033099626635781
+      },
+      "cv_std": {
+        "log_loss_std": 0.025384290935203876,
+        "roc_auc_std": 0.010897884274593716,
+        "pr_auc_std": 0.006859439918801976,
+        "brier_std": 0.00924973838228643
+      }
+    },
+    {
+      "family": "lightgbm",
+      "config": {
+        "num_leaves": 63,
+        "max_depth": 4,
+        "min_child_samples": 100,
+        "subsample": 0.8,
+        "colsample_bytree": 0.6,
+        "reg_lambda": 0.0,
+        "learning_rate": 0.03,
+        "n_estimators": 275
+      },
+      "cv": {
+        "log_loss": 0.3517156598011948,
+        "roc_auc": 0.6672490798427898,
+        "pr_auc": 0.2078733219929212,
+        "brier": 0.10299877238459149
+      },
+      "cv_std": {
+        "log_loss_std": 0.02564310759073978,
+        "roc_auc_std": 0.011975551391186794,
+        "pr_auc_std": 0.00521614415250913,
+        "brier_std": 0.00929719747016214
+      }
+    }
+  ]
+}

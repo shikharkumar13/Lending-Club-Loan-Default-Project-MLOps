@@ -61,6 +61,10 @@ deleted, so the history stays readable.
 | [D-041](#d-041-missing-indicators-are-built-unconditionally) | Missing indicators built unconditionally | Features | Accepted | 2026-09-23 |
 | [D-042](#d-042-every-config-key-must-do-something) | Every config key must do something (or be deleted) | Structure | Accepted | 2026-09-23 |
 | [D-043](#d-043-audit-confirmations-and-known-limitations) | Audit confirmations and known limitations | Evaluation | Accepted | 2026-09-23 |
+| [D-044](#d-044-early-stopping-inside-folds-median-trees-for-the-final-fit) | Early stopping inside folds; median tree count for the final fit | Modeling | Accepted | 2026-09-23 |
+| [D-045](#d-045-the-probabilistic-baseline-is-lending-clubs-own-grade) | Probabilistic baseline = Lending Club's own grade | Evaluation | Accepted | 2026-09-23 |
+| [D-046](#d-046-class_weightbalanced-rejected-on-evidence) | `class_weight="balanced"` rejected on evidence | Modeling | Accepted | 2026-09-23 |
+| [D-047](#d-047-mlflow-tracks-to-sqlite-not-the-mlruns-folder) | MLflow tracks to SQLite, not the `mlruns/` folder | Tooling | Accepted | 2026-09-23 |
 
 ---
 
@@ -513,6 +517,53 @@ deleted, so the history stays readable.
     validation) because Lending Club changed how loans were listed. It is
     known at listing time, so it stays, but it is a platform artifact rather
     than a borrower trait.
+
+### D-044: Early stopping inside folds, median trees for the final fit
+- **Decision:** During cross-validation, each fold's validation set decides
+  when LightGBM stops adding trees. The final model, trained on all of
+  2007-2013, uses the **median stopping point across the three folds**
+  (325, 195, 275 -> 275 trees).
+- **Why:** Early stopping needs a held-out set, and there is none once we
+  train on everything. Taking the median means no single fold dictates the
+  final model.
+- **Caveat, stated honestly:** the fold scores are slightly optimistic,
+  because the stopping point was chosen on the same rows that produced the
+  score. The numbers that matter for the final claim come from the 2015 test
+  set in Phase 4, which nothing has touched.
+
+### D-045: The probabilistic baseline is Lending Club's own grade
+- **Decision:** `GradePriorClassifier` predicts the historical default rate of
+  the loan's grade, measured on the training rows of each fold. The fund-all
+  and grade A-B rules stay as **policy** baselines for Phase 4.
+- **Why:** Phase 3 compares probabilities, and "fund everything" produces no
+  probability. The grade prior is the honest zero-effort benchmark: the grade
+  is assigned before the listing appears, so an investor gets it for free.
+- **Result:** grade alone scores log loss 0.36015 / ROC-AUC 0.6232. Logistic
+  regression reaches 0.35345 / 0.6618 and LightGBM 0.35172 / 0.6672, so the
+  extra columns do add information beyond Lending Club's grading — modestly.
+
+### D-046: `class_weight="balanced"` rejected on evidence
+- **Decision:** Keep the natural class balance. `class_weight="balanced"` was
+  included in the search and lost decisively.
+- **Why:** The numbers are a textbook illustration of D-021. With C=0.01:
+  | setting | ROC-AUC | log loss | Brier |
+  |---|---|---|---|
+  | `class_weight=None` | 0.6618 | **0.35345** | **0.10331** |
+  | `class_weight="balanced"` | 0.6626 | 0.63249 | 0.22138 |
+
+  Ranking quality is unchanged (ROC-AUC is the same to three decimals), but
+  log loss and Brier score nearly double: re-weighting makes the model behave
+  as if half of all loans default, so every probability is inflated. For a
+  decision rule that multiplies by the probability, that is fatal — which is
+  exactly why the plan ruled out resampling from the start.
+
+### D-047: MLflow tracks to SQLite, not the `mlruns/` folder
+- **Decision:** `tracking_uri: sqlite:///mlflow.db`.
+- **Why:** MLflow 3 put the file-based store into maintenance mode and refuses
+  to use it without an opt-out flag. A database backend is also what a real
+  tracking server uses, so this is closer to production anyway. The database
+  file is git-ignored; `reports/cv_results.json` is the committed, reviewable
+  record of the search.
 
 ---
 

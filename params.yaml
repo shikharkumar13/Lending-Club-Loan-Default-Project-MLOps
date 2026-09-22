@@ -10,6 +10,7 @@ paths:
   raw_parquet: data/interim/accepted_raw.parquet      # allowlisted columns only
   prepared: data/interim/prepared.parquet             # cleaned + labeled
   processed_dir: data/processed
+  models_dir: models
   reports_dir: reports
   figures_dir: reports/figures
 
@@ -165,14 +166,41 @@ profit:
   lgd_fallback: 0.365
   threshold_grid: {start: 0.02, stop: 0.60, step: 0.005}
 
+mlflow:
+  # SQLite rather than the ./mlruns folder: MLflow 3 put the file-based store
+  # in maintenance mode, and a database backend is what a real tracking server
+  # uses anyway.
+  tracking_uri: sqlite:///mlflow.db
+  experiment: lending-club-default
+
 model:
+  # Tuning metric: log loss. The funding decision multiplies by the predicted
+  # probability, so we need probabilities that are accurate in value, not just
+  # correctly ranked (D-025).
+  tuning_metric: log_loss
+
   logistic_regression:
-    C: [0.01, 0.1, 1.0]
-    class_weight: [null, balanced]
+    grid:
+      C: [0.01, 0.1, 1.0]
+      class_weight: [null, balanced]
+    fixed:
+      solver: lbfgs
+      max_iter: 2000
+
   lightgbm:
-    n_iter: 25                # randomized search budget
+    n_iter: 20                # randomized search budget
+    search:
+      num_leaves: [15, 31, 63, 127]
+      max_depth: [-1, 4, 6, 8]
+      min_child_samples: [20, 50, 100, 200]
+      subsample: [0.6, 0.8, 1.0]
+      colsample_bytree: [0.6, 0.8, 1.0]
+      reg_lambda: [0.0, 1.0, 5.0, 20.0]
+      learning_rate: [0.03, 0.05, 0.1]
     fixed:
       objective: binary
-      n_estimators: 2000
-      learning_rate: 0.05
-      early_stopping_rounds: 100
+      n_estimators: 2000        # upper bound; early stopping picks the real number
+      subsample_freq: 1
+      n_jobs: -1
+      verbose: -1
+    early_stopping_rounds: 100

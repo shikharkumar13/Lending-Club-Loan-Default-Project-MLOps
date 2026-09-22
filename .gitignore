@@ -23,8 +23,10 @@ __pycache__/
 # MLflow / DVC local state
 mlruns/
 mlartifacts/
+mlflow.db
 /.dvc/cache
 /.dvc/tmp
 
 # OS
 .DS_Store
+/models

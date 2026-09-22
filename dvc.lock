@@ -160,3 +160,142 @@ stages:
       md5: 6d8c0a392d8acd0867d28c058dc0db44.dir
       size: 33593025
       nfiles: 3
+  train:
+    cmd: python -m lending_club.models.train
+    deps:
+    - path: data/processed
+      hash: md5
+      md5: 6d8c0a392d8acd0867d28c058dc0db44.dir
+      size: 33593025
+      nfiles: 3
+    - path: src/lending_club/features/pipeline.py
+      hash: md5
+      md5: 57e858809b3bc9cb6a6d2e4fb81fcbb9
+      size: 7016
+    - path: src/lending_club/models/baselines.py
+      hash: md5
+      md5: b71d950bf6af1bbc181cc3030b861e24
+      size: 1884
+    - path: src/lending_club/models/train.py
+      hash: md5
+      md5: 6f4015ada9153d2c4802e3ea07cd8f23
+      size: 11041
+    params:
+      params.yaml:
+        features.cap_percentile: 0.995
+        features.groups:
+          skewed_amount:
+          - annual_inc
+          - revol_bal
+          numeric:
+          - loan_amnt
+          - int_rate
+          - installment
+          - dti
+          - delinq_2yrs
+          - inq_last_6mths
+          - open_acc
+          - pub_rec
+          - total_acc
+          - acc_now_delinq
+          - collections_12_mths_ex_med
+          - fico_mid
+          - credit_history_months
+          - loan_to_income
+          - installment_to_income
+          numeric_with_indicator:
+          - emp_length_years
+          - pub_rec_bankruptcies
+          - revol_util
+          structural_missing:
+          - mths_since_last_delinq
+          - mths_since_last_record
+          ordinal:
+            grade:
+            - A
+            - B
+            - C
+            - D
+            - E
+            - F
+            - G
+            sub_grade:
+          nominal:
+          - home_ownership
+          - verification_status
+          - purpose
+          - addr_state
+          - initial_list_status
+          boolean:
+          - not_credit_policy
+        features.rare_category_min_frequency: 0.01
+        mlflow:
+          tracking_uri: sqlite:///mlflow.db
+          experiment: lending-club-default
+        model:
+          tuning_metric: log_loss
+          logistic_regression:
+            grid:
+              C:
+              - 0.01
+              - 0.1
+              - 1.0
+              class_weight:
+              -
+              - balanced
+            fixed:
+              solver: lbfgs
+              max_iter: 2000
+          lightgbm:
+            n_iter: 20
+            search:
+              num_leaves:
+              - 15
+              - 31
+              - 63
+              - 127
+              max_depth:
+              - -1
+              - 4
+              - 6
+              - 8
+              min_child_samples:
+              - 20
+              - 50
+              - 100
+              - 200
+              subsample:
+              - 0.6
+              - 0.8
+              - 1.0
+              colsample_bytree:
+              - 0.6
+              - 0.8
+              - 1.0
+              reg_lambda:
+              - 0.0
+              - 1.0
+              - 5.0
+              - 20.0
+              learning_rate:
+              - 0.03
+              - 0.05
+              - 0.1
+            fixed:
+              objective: binary
+              n_estimators: 2000
+              subsample_freq: 1
+              n_jobs: -1
+              verbose: -1
+            early_stopping_rounds: 100
+        seed: 42
+    outs:
+    - path: models
+      hash: md5
+      md5: e17748340564c4b62f82b30eea4fc6e0.dir
+      size: 532078
+      nfiles: 3
+    - path: reports/cv_results.json
+      hash: md5
+      md5: 9c6466f903ebdc553c44da16f9f183a0
+      size: 19627

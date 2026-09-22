@@ -39,3 +39,23 @@ stages:
       - split
     outs:
       - data/processed
+
+  train:
+    cmd: python -m lending_club.models.train
+    deps:
+      - data/processed
+      - src/lending_club/models/train.py
+      - src/lending_club/models/baselines.py
+      - src/lending_club/features/pipeline.py
+    params:
+      - seed
+      - model
+      - mlflow
+      - features.groups
+      - features.cap_percentile
+      - features.rare_category_min_frequency
+    outs:
+      - models
+    metrics:
+      - reports/cv_results.json:
+          cache: false
