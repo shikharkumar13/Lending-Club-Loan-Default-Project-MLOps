@@ -249,15 +249,13 @@ def train() -> dict[str, Any]:
 
     reports = path_of("reports_dir")
     reports.mkdir(parents=True, exist_ok=True)
-    (reports / "cv_results.json").write_text(
-        json.dumps(
-            {
-                "candidates": [{k: v for k, v in c.items() if k != "per_fold"} for c in candidates],
-                "selected": summary,
-            },
-            indent=2,
-        )
-    )
+    payload = {
+        "candidates": [{k: v for k, v in c.items() if k != "per_fold"} for c in candidates],
+        "selected": summary,
+    }
+    # Trailing newline so the end-of-file pre-commit hook does not rewrite the
+    # file after every training run.
+    (reports / "cv_results.json").write_text(json.dumps(payload, indent=2) + "\n")
     return {"selected": summary}
 
 

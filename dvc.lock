@@ -178,8 +178,8 @@ stages:
       size: 1884
     - path: src/lending_club/models/train.py
       hash: md5
-      md5: 6f4015ada9153d2c4802e3ea07cd8f23
-      size: 11041
+      md5: 323d9ad0c4517c3333df628fb2e9f528
+      size: 11468
     params:
       params.yaml:
         features.cap_percentile: 0.995
@@ -297,5 +297,5 @@ stages:
       nfiles: 3
     - path: reports/cv_results.json
       hash: md5
-      md5: 9c6466f903ebdc553c44da16f9f183a0
-      size: 19627
+      md5: a0b379071a43d2f2039abfab0a1cfbc1
+      size: 19628
