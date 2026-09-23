@@ -82,26 +82,58 @@ calculation depends on.
 |---|---|---|---|---|
 | Fund everything | 100% | +0.0655 | $65.5M | 14.9% |
 | Lending Club grade A–B | 57.2% | +0.0718 | $71.8M | 9.1% |
-| Logistic regression | 69.9% | +0.0722 | $72.2M | — |
-| **LightGBM (threshold 0.14)** | **66.3%** | **+0.0735** | **$73.5M** | **10.0%** |
+| Logistic regression (tuned threshold) | 69.9% | +0.0722 | $72.2M | 10.9% |
+| **LightGBM (tuned threshold)** | **66.3%** | **+0.0735** | **$73.5M** | **10.0%** |
+| Logistic regression at A–B's selectivity | 59.8% | +0.0732 | $73.2M | 9.4% |
 | LightGBM at A–B's selectivity | 58.0% | +0.0738 | $73.8M | 9.0% |
+
+The rows to compare are the last two: the tuned-threshold rows fund different
+shares of the book, and *any* policy looks better by being pickier.
 
 Returns are over the ~3-year term. The model earns **12% more than funding
 everything** and **2.4% more than Lending Club's own grade rule** while
 deploying *more* capital than that rule.
 
-Every gap is significant on a 1,000-draw bootstrap: at equal selectivity,
-LightGBM beats the grade rule by +0.0021 per dollar (95% CI [+0.0015, +0.0027]).
-That measures sampling noise **within one test year** — it says nothing about a
-different credit cycle, which is the larger risk.
+On a 1,000-draw bootstrap of the test loans, at equal selectivity:
+
+| Comparison | Difference per dollar | 95% CI |
+|---|---|---|
+| LightGBM vs. fund everything | +0.0080 | [+0.0072, +0.0087] |
+| LightGBM vs. grade A–B | +0.0021 | [+0.0015, +0.0027] |
+| Logistic regression vs. grade A–B | +0.0015 | [+0.0008, +0.0022] |
+| **LightGBM vs. logistic regression** | **+0.0006** | **[+0.0001, +0.0011]** |
+
+**Read that last row honestly.** LightGBM's edge over a plain logistic
+regression is +0.0006 per dollar with a confidence interval that nearly touches
+zero. The gap that matters — model versus no model — is four times larger. And
+all of this measures sampling noise **within one test year**; it says nothing
+about a different credit cycle, which is the larger risk.
 
 ### Cross-validation (expanding windows inside 2007–2013)
 
-| Model | Log loss | ROC-AUC | PR-AUC | Brier |
+| Model | Log loss | ROC-AUC | PR-AUC | Brier | Configs searched |
+|---|---|---|---|---|---|
+| Lending Club grade (baseline) | 0.36015 | 0.6232 | 0.1663 | 0.10473 | 1 |
+| Logistic regression | 0.35345 | 0.6618 | 0.2048 | 0.10331 | 3 |
+| **LightGBM** | **0.35172** | **0.6672** | **0.2079** | **0.10300** | 20 |
+
+**These averages are not the whole story, and on their own they would be
+misleading.** The gap between LightGBM and logistic regression is 0.00173 log
+loss; the spread *between folds* is 0.026 — fifteen times larger, because 2011,
+2012 and 2013 are genuinely different years. Since that spread is common to
+both models, the honest test is paired:
+
+| Fold (validation year) | 2011 | 2012 | 2013 | Verdict |
 |---|---|---|---|---|
-| Lending Club grade (baseline) | 0.36015 | 0.6232 | 0.1663 | 0.10473 |
-| Logistic regression | 0.35345 | 0.6618 | 0.2048 | 0.10331 |
-| **LightGBM** | **0.35172** | **0.6672** | **0.2079** | **0.10300** |
+| LightGBM | 0.31888 | 0.38146 | 0.35481 | |
+| Logistic regression | 0.32006 | 0.38156 | 0.35873 | |
+| **Difference** | +0.00118 | +0.00010 | +0.00392 | **wins 3/3**, mean +0.00173 ± 0.00197 |
+
+LightGBM wins every fold, but by a margin whose variation across folds is as
+large as the margin itself — and it got 20 hyperparameter draws to logistic
+regression's 3, which biases the comparison in its favour. The fair summary is
+"consistently ahead, by a little." Per-fold scores are kept in
+`reports/cv_results.json` so this can be checked rather than taken on trust.
 
 ### The finding that shaped the design
 
@@ -191,7 +223,7 @@ src/lending_club/
 
 flows/retrain.py       Prefect: ingest → … → evaluate → promotion gate
 notebooks/01_eda.ipynb Phase 1 exploration (calls into src/, holds no logic)
-tests/                 103 tests
+tests/                 118 tests
 params.yaml            single source of configuration
 dvc.yaml               the pipeline as a dependency graph
 ```
@@ -207,8 +239,12 @@ free disk. Docker is optional.
 # 1. install (the train extra carries MLflow, DVC, Evidently, SHAP)
 uv sync --extra train --extra dev        # or: pip install -r requirements.txt
 
+# optional: a DVC remote so derived artifacts can be pushed and restored.
+# A local directory is configured by default; point it at S3/GCS for real use.
+#   uv run dvc remote modify localstore url s3://your-bucket/lending-club
+
 # 2. check the install — no data needed, ~10s
-uv run pytest                            # 103 tests
+uv run pytest                            # 118 tests
 
 # 3. get the data
 #    Download accepted_2007_to_2018Q4.csv from the Kaggle dataset
@@ -245,9 +281,17 @@ curl localhost:8001/health
 ```bash
 curl -X POST localhost:8001/predict -H 'content-type: application/json' \
   -d @.github/fixtures/application.json
-# {"decision":"fund","probability_of_default":0.103234,"expected_return_usd":1291.29,
-#  "risk_score":0.100542,"threshold":0.14,"model_version":"2026-09-23T05:12:06+00:00"}
+# {"decision":"fund","decision_basis":"score_below_threshold",
+#  "probability_of_default":0.1032,"expected_return_usd":1291.29,
+#  "risk_score":0.1005,"threshold":0.14,"model_version":"..."}
 ```
+
+The request is validated as a *loan*, not just as a set of fields: an unknown
+`home_ownership`, a FICO band whose high is below its low, or an `installment`
+that does not amortize from the amount, rate and term all return **422** rather
+than a confident score. `decision_basis` names the rule that decided, because
+funding requires both a risk score below the threshold **and** a positive
+expected return.
 
 **Retrain and monitor:**
 

@@ -15,7 +15,7 @@ from lending_club.config import load_params, path_of
 from lending_club.features.pipeline import feature_columns
 from lending_club.serving.app import app
 from lending_club.serving.bundle import LoanDecisionModel, default_bundle_path
-from lending_club.serving.schema import LoanApplication, to_model_frame
+from lending_club.serving.schema import LoanApplication, expected_installment, to_model_frame
 
 pytestmark = pytest.mark.skipif(
     not default_bundle_path().exists(), reason="bundle not built (run: dvc repro package)"
@@ -86,6 +86,12 @@ def test_a_riskier_borrower_is_scored_higher(client):
         "grade": "G",
         "sub_grade": "G5",
         "int_rate": 28.0,
+        # The installment has to move with the rate, or the request is
+        # internally inconsistent and is rejected before it reaches the model
+        # (D-073) — which is exactly what this fixture used to be.
+        "installment": round(
+            expected_installment(APPLICATION["loan_amnt"], 28.0, APPLICATION["term_months"]), 2
+        ),
         "annual_inc": 20_000,
         "dti": 35.0,
         "fico_range_low": 660,
@@ -190,3 +196,123 @@ def test_api_matches_offline_scoring(client):
         atol=1e-6,
     )
     assert [row["decision"] for row in served] == list(offline["decision"])
+
+
+# --- input validation: the audit's C2 and M2 -------------------------------
+
+
+def test_an_unknown_category_is_rejected_not_silently_scored(client):
+    """The classic silent production failure: an upstream rename shifts every
+    prediction while the service keeps returning 200s (D-072)."""
+    response = client.post("/predict", json=APPLICATION | {"home_ownership": "MORGAGE"})
+    assert response.status_code == 422
+
+
+def test_an_unknown_purpose_is_rejected(client):
+    assert (
+        client.post("/predict", json=APPLICATION | {"purpose": "wedding_cake"}).status_code == 422
+    )
+
+
+def test_a_valid_but_unseen_state_is_accepted(client):
+    """North Dakota never appears in training, but it is a real state (D-072).
+
+    Rejecting it would turn a genuine business event into a client error. The
+    drift monitor reports it instead.
+    """
+    response = client.post("/predict", json=APPLICATION | {"addr_state": "ND"})
+    assert response.status_code == 200
+    assert response.json()["decision"] in {"fund", "decline"}
+
+
+def test_a_state_that_does_not_exist_is_rejected(client):
+    assert client.post("/predict", json=APPLICATION | {"addr_state": "ZZ"}).status_code == 422
+
+
+def test_an_inverted_fico_band_is_rejected(client):
+    """Each field is individually valid; the combination is impossible (D-073)."""
+    bad = APPLICATION | {"fico_range_low": 800, "fico_range_high": 400}
+    assert client.post("/predict", json=bad).status_code == 422
+
+
+def test_an_installment_that_contradicts_the_loan_is_rejected(client):
+    """The source data really contains these, and one produced a 'fund'
+    decision next to an expected return of -$13,066 (D-073)."""
+    response = client.post("/predict", json=APPLICATION | {"installment": 14.77})
+    assert response.status_code == 422
+    assert "amortizes" in response.json()["detail"][0]["msg"]
+
+
+def test_a_consistent_installment_is_accepted(client):
+    """The tolerance must not reject legitimate rounding."""
+    exact = expected_installment(APPLICATION["loan_amnt"], APPLICATION["int_rate"], 36)
+    response = client.post("/predict", json=APPLICATION | {"installment": round(exact, 2)})
+    assert response.status_code == 200
+
+
+# --- the decision contract: the audit's C1 ---------------------------------
+
+
+def test_the_response_says_which_rule_decided(client):
+    body = client.post("/predict", json=APPLICATION).json()
+    assert body["decision"] == "fund"
+    assert body["decision_basis"] == "score_below_threshold"
+
+
+def test_a_funded_loan_never_carries_a_negative_expected_return(client):
+    """The two numbers in the response cannot contradict each other (D-074)."""
+    params = load_params()
+    test = pl.read_parquet(path_of("processed_dir") / "test.parquet").head(2_000)
+    bundle = LoanDecisionModel.load()
+    from lending_club.serving.bundle import prepare_for_decision
+
+    decisions = bundle.decide(prepare_for_decision(test, params))
+    funded = decisions["decision"] == "fund"
+    assert (decisions.loc[funded, "expected_return_usd"] > 0).all()
+
+
+def test_decision_basis_explains_every_decline(client):
+    params = load_params()
+    test = pl.read_parquet(path_of("processed_dir") / "test.parquet").head(5_000)
+    bundle = LoanDecisionModel.load()
+    from lending_club.serving.bundle import prepare_for_decision
+
+    decisions = bundle.decide(prepare_for_decision(test, params))
+    declined = decisions[decisions["decision"] == "decline"]
+    assert set(declined["decision_basis"]) <= {
+        "score_above_threshold",
+        "negative_expected_return",
+    }
+    funded = decisions[decisions["decision"] == "fund"]
+    assert set(funded["decision_basis"]) == {"score_below_threshold"}
+
+
+# --- readiness: the audit's M3 ---------------------------------------------
+
+
+def test_requests_before_the_model_loads_return_503_not_500():
+    """503 means 'retry'; 500 means 'page someone'. A startup race is the
+    former, and a KeyError would have reported the latter (D-075)."""
+    from lending_club.serving import app as app_module
+
+    saved = dict(app_module.state)
+    app_module.state.clear()
+    try:
+        with TestClient(app_module.app, raise_server_exceptions=False) as _:
+            pass
+        # Exercise the handlers directly: the lifespan would repopulate state.
+        app_module.state.clear()
+        for call in (app_module.health, app_module.model_metadata):
+            with pytest.raises(Exception) as excinfo:
+                call()
+            assert getattr(excinfo.value, "status_code", None) == 503
+    finally:
+        app_module.state.update(saved)
+
+
+def test_the_bundle_records_what_categories_it_was_trained_on():
+    """The schema's accepted values are checked against this at startup (D-072)."""
+    vocabulary = LoanDecisionModel.load().metadata.categorical_vocabulary
+    assert "MORTGAGE" in vocabulary["home_ownership"]
+    assert "debt_consolidation" in vocabulary["purpose"]
+    assert "MORGAGE" not in vocabulary["home_ownership"]

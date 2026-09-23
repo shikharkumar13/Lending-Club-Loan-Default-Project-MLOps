@@ -65,8 +65,8 @@ stages:
       size: 79016287
     - path: src/lending_club/data/prepare.py
       hash: md5
-      md5: 66e19368d5f574471c3da55aa0cb4798
-      size: 6433
+      md5: 282c9b5b99083e1745ce1caeb69b5d31
+      size: 6696
     params:
       params.yaml:
         data:
@@ -147,6 +147,7 @@ stages:
           test:
             start: '2015-01-01'
             end: '2015-12-31'
+          calibration_end: '2014-07-01'
           cv_folds:
           - train_end: '2010-12-31'
             validate_year: 2011
@@ -178,8 +179,8 @@ stages:
       size: 1884
     - path: src/lending_club/models/train.py
       hash: md5
-      md5: 323d9ad0c4517c3333df628fb2e9f528
-      size: 11468
+      md5: a382e49fcfde793f0284c22d2290a966
+      size: 14416
     params:
       params.yaml:
         features.cap_percentile: 0.995
@@ -242,7 +243,6 @@ stages:
               - 1.0
               class_weight:
               - 
-              - balanced
             fixed:
               solver: lbfgs
               max_iter: 2000
@@ -287,18 +287,20 @@ stages:
               subsample_freq: 1
               n_jobs: -1
               verbose: -1
+              deterministic: true
+              force_row_wise: true
             early_stopping_rounds: 100
         seed: 42
     outs:
     - path: models
       hash: md5
-      md5: e17748340564c4b62f82b30eea4fc6e0.dir
-      size: 532078
+      md5: fe15ae346954ee38d16e2f42ecd927f5.dir
+      size: 532158
       nfiles: 3
     - path: reports/cv_results.json
       hash: md5
-      md5: a0b379071a43d2f2039abfab0a1cfbc1
-      size: 19628
+      md5: d8755e640b1280a29d1fb10630185720
+      size: 33341
   evaluate:
     cmd: python -m lending_club.evaluate
     deps:
@@ -309,17 +311,21 @@ stages:
       nfiles: 3
     - path: models
       hash: md5
-      md5: e17748340564c4b62f82b30eea4fc6e0.dir
-      size: 532078
+      md5: fe15ae346954ee38d16e2f42ecd927f5.dir
+      size: 532158
       nfiles: 3
     - path: src/lending_club/evaluate.py
       hash: md5
-      md5: bbc403a2018e8b20ab36c9a3802430e2
-      size: 12244
+      md5: c85561bd4a1f7389db0dc2d190bbf8bd
+      size: 10961
     - path: src/lending_club/policy/profit.py
       hash: md5
       md5: a348faf271bd274e21d73aacc22481f2
       size: 6784
+    - path: src/lending_club/reporting.py
+      hash: md5
+      md5: 2c9d67e329b38b21568209a1604093bf
+      size: 3905
     params:
       params.yaml:
         profit:
@@ -331,54 +337,55 @@ stages:
           min_share_funded: 0.1
           bootstrap_draws: 1000
         seed: 42
+        split.calibration_end: '2014-07-01'
     outs:
     - path: artifacts/calibrators
       hash: md5
-      md5: 8580ee4b34befe5d720478f47153132a.dir
-      size: 540732
+      md5: 883a1a80a86a26f177cee4131057c50f.dir
+      size: 540796
       nfiles: 3
     - path: reports/metrics.json
       hash: md5
-      md5: 44c69490335adc04aac70af463f8ae7b
-      size: 42037
+      md5: 75ab625a3e21d2b44bd16964f68ce9d8
+      size: 42033
   package:
     cmd: python -m lending_club.serving
     deps:
     - path: artifacts/calibrators
       hash: md5
-      md5: 8580ee4b34befe5d720478f47153132a.dir
-      size: 540732
+      md5: 883a1a80a86a26f177cee4131057c50f.dir
+      size: 540796
       nfiles: 3
     - path: models
       hash: md5
-      md5: e17748340564c4b62f82b30eea4fc6e0.dir
-      size: 532078
+      md5: fe15ae346954ee38d16e2f42ecd927f5.dir
+      size: 532158
       nfiles: 3
     - path: reports/cv_results.json
       hash: md5
-      md5: a0b379071a43d2f2039abfab0a1cfbc1
-      size: 19628
+      md5: d8755e640b1280a29d1fb10630185720
+      size: 33341
     - path: reports/metrics.json
       hash: md5
-      md5: 44c69490335adc04aac70af463f8ae7b
-      size: 42037
+      md5: 75ab625a3e21d2b44bd16964f68ce9d8
+      size: 42033
     - path: src/lending_club/serving/bundle.py
       hash: md5
-      md5: 247f010fe5f26d190e6a90b4e2f10d9f
-      size: 6189
+      md5: 7725cf90aa5b173ecb6a72a682829e96
+      size: 8368
     outs:
     - path: artifacts/bundle
       hash: md5
-      md5: f1869fb5936a58cdeb55d67327626838.dir
-      size: 1038727
+      md5: 63b48ce1a3095aa215d2f929c4981e63.dir
+      size: 1040694
       nfiles: 2
   monitor_batches:
     cmd: python -m lending_club.monitoring.batches
     deps:
     - path: artifacts/bundle
       hash: md5
-      md5: f1869fb5936a58cdeb55d67327626838.dir
-      size: 1038727
+      md5: 63b48ce1a3095aa215d2f929c4981e63.dir
+      size: 1040694
       nfiles: 2
     - path: data/interim/accepted_raw.parquet
       hash: md5
@@ -397,21 +404,21 @@ stages:
     outs:
     - path: data/monitoring
       hash: md5
-      md5: de93c85d32c71ab435045aca09b05342.dir
-      size: 57259538
+      md5: 6f7f38be7a09d52f6e8e12d920c0bb18.dir
+      size: 57259537
       nfiles: 36
   drift:
     cmd: python -m lending_club.monitoring.drift
     deps:
     - path: artifacts/bundle
       hash: md5
-      md5: f1869fb5936a58cdeb55d67327626838.dir
-      size: 1038727
+      md5: 63b48ce1a3095aa215d2f929c4981e63.dir
+      size: 1040694
       nfiles: 2
     - path: data/monitoring
       hash: md5
-      md5: de93c85d32c71ab435045aca09b05342.dir
-      size: 57259538
+      md5: 6f7f38be7a09d52f6e8e12d920c0bb18.dir
+      size: 57259537
       nfiles: 36
     - path: data/processed
       hash: md5
@@ -493,15 +500,15 @@ stages:
     outs:
     - path: reports/monitoring/drift.json
       hash: md5
-      md5: dd7bc874089e2abcd94122b7432c354b
+      md5: fdc7b7a848c074568d7a6241c6503eeb
       size: 35461
   fairness:
     cmd: python -m lending_club.fairness
     deps:
     - path: artifacts/bundle
       hash: md5
-      md5: f1869fb5936a58cdeb55d67327626838.dir
-      size: 1038727
+      md5: 63b48ce1a3095aa215d2f929c4981e63.dir
+      size: 1040694
       nfiles: 2
     - path: data/processed
       hash: md5
@@ -510,10 +517,19 @@ stages:
       nfiles: 3
     - path: src/lending_club/fairness.py
       hash: md5
-      md5: a1a3cfd997cc8f14493c84117adc07b9
-      size: 5063
+      md5: 58d870b90d39fce62b0c425dd4a11902
+      size: 5098
+    params:
+      params.yaml:
+        fairness:
+          min_group_size: 1000
+          min_funded_for_error: 800
+          columns:
+          - addr_state
+          - home_ownership
+          - purpose
     outs:
     - path: reports/fairness.json
       hash: md5
-      md5: 43bf54006a9c0381da2a2d6c12d3953d
-      size: 16779
+      md5: 0872226c04d075292bced77dd044f76a
+      size: 16782

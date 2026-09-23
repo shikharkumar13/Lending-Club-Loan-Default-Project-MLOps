@@ -29,20 +29,20 @@
           "default_rate_funded": 0.14887279151943464
         },
         "threshold": {
-          "loans_funded": 239266,
-          "share_funded": 0.8453852296255467,
-          "capital_invested": 3083942775.0,
-          "total_profit": 215448634.51582426,
-          "return_per_dollar": 0.06986142423340662,
-          "default_rate_funded": 0.12439711450853862
+          "loans_funded": 239249,
+          "share_funded": 0.8453251644725219,
+          "capital_invested": 3083756975.0,
+          "total_profit": 215426352.0245183,
+          "return_per_dollar": 0.06985840770559369,
+          "default_rate_funded": 0.12440177388411237
         },
         "matched_to_grade_AB": {
-          "loans_funded": 161843,
-          "share_funded": 0.5718308565290822,
-          "capital_invested": 2163114975.0,
-          "total_profit": 155211536.13262284,
-          "return_per_dollar": 0.07175371532556786,
-          "default_rate_funded": 0.09090909090909091
+          "loans_funded": 161838,
+          "share_funded": 0.5718131903076042,
+          "capital_invested": 2163038975.0,
+          "total_profit": 155203444.23824814,
+          "return_per_dollar": 0.07175249546219949,
+          "default_rate_funded": 0.09091189955387487
         }
       }
     },
@@ -70,20 +70,20 @@
           "default_rate_funded": 0.14876322339763534
         },
         "threshold": {
-          "loans_funded": 197804,
-          "share_funded": 0.6988898546423297,
-          "capital_invested": 2636574400.0,
-          "total_profit": 190484612.62157035,
-          "return_per_dollar": 0.07224700832321301,
-          "default_rate_funded": 0.10583709126205738
+          "loans_funded": 197792,
+          "share_funded": 0.6988474557107828,
+          "capital_invested": 2636424150.0,
+          "total_profit": 190461915.79266793,
+          "return_per_dollar": 0.07224251674096822,
+          "default_rate_funded": 0.10584351237663808
         },
         "matched_to_grade_AB": {
-          "loans_funded": 169198,
-          "share_funded": 0.5978178683230516,
-          "capital_invested": 2296963200.0,
-          "total_profit": 168203975.156981,
-          "return_per_dollar": 0.07322885066551392,
-          "default_rate_funded": 0.09436281752739394
+          "loans_funded": 169187,
+          "share_funded": 0.5977790026358002,
+          "capital_invested": 2296827600.0,
+          "total_profit": 168185244.36975485,
+          "return_per_dollar": 0.07322501887810598,
+          "default_rate_funded": 0.09436895269731126
         }
       }
     },
@@ -111,20 +111,20 @@
           "default_rate_funded": 0.1486157590508062
         },
         "threshold": {
-          "loans_funded": 187752,
-          "share_funded": 0.6633736829831888,
-          "capital_invested": 2545113575.0,
-          "total_profit": 187026703.3543211,
-          "return_per_dollar": 0.07348461977942226,
-          "default_rate_funded": 0.09969534279262005
+          "loans_funded": 187742,
+          "share_funded": 0.663338350540233,
+          "capital_invested": 2544983975.0,
+          "total_profit": 187009139.71945888,
+          "return_per_dollar": 0.07348146061291363,
+          "default_rate_funded": 0.09970065302383058
         },
         "matched_to_grade_AB": {
-          "loans_funded": 164127,
-          "share_funded": 0.5799007865001802,
-          "capital_invested": 2266704375.0,
-          "total_profit": 167320939.19096762,
-          "return_per_dollar": 0.07381683338876849,
-          "default_rate_funded": 0.09007658703321209
+          "loans_funded": 164118,
+          "share_funded": 0.57986898730152,
+          "capital_invested": 2266583775.0,
+          "total_profit": 167304778.2527597,
+          "return_per_dollar": 0.07381363093572824,
+          "default_rate_funded": 0.09008152670639417
         }
       }
     },
@@ -148,33 +148,33 @@
     },
     "significance": {
       "lightgbm_threshold_vs_fund_all": {
-        "mean_difference": 0.007954374190719453,
-        "ci_low": 0.007182661942654632,
-        "ci_high": 0.008698384088483339,
+        "mean_difference": 0.007951326029859054,
+        "ci_low": 0.007179051471673577,
+        "ci_high": 0.008695419393341442,
         "prob_better": 1.0
       },
       "lightgbm_threshold_vs_grade_AB": {
-        "mean_difference": 0.0017248140163149434,
-        "ci_low": 0.0010758537576382224,
-        "ci_high": 0.0023609783012366837,
+        "mean_difference": 0.001721765855454544,
+        "ci_low": 0.001072529231011348,
+        "ci_high": 0.0023567114359150363,
         "prob_better": 1.0
       },
       "lightgbm_matched_vs_grade_AB": {
-        "mean_difference": 0.002065678221423511,
-        "ci_low": 0.0014838446301410843,
-        "ci_high": 0.0026767505301954512,
+        "mean_difference": 0.0020626096080768605,
+        "ci_low": 0.0014813602593713043,
+        "ci_high": 0.0026749675810634997,
         "prob_better": 1.0
       },
       "logreg_matched_vs_grade_AB": {
-        "mean_difference": 0.0014707476532567366,
-        "ci_low": 0.0007707876261400459,
-        "ci_high": 0.0021783930028354184,
+        "mean_difference": 0.0014670223079129609,
+        "ci_low": 0.0007670511554657554,
+        "ci_high": 0.002174109890292414,
         "prob_better": 1.0
       },
       "lightgbm_vs_logreg_matched": {
-        "mean_difference": 0.0005949305681667748,
-        "ci_low": 0.00012828192903964337,
-        "ci_high": 0.0010749491452689782,
+        "mean_difference": 0.0005955873001638996,
+        "ci_low": 0.00012919110081462161,
+        "ci_high": 0.0010756098056254472,
         "prob_better": 0.994
       }
     }

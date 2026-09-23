@@ -12,12 +12,70 @@ from typing import Annotated, Literal
 
 import pandas as pd
 import polars as pl
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from lending_club.data.prepare import derive_features
 
 Money = Annotated[float, Field(ge=0)]
 Count = Annotated[float, Field(ge=0)]
+
+# Closed sets, taken from the training vocabulary (D-072). A value outside
+# them is a bug in the caller, not a new kind of borrower, so it is rejected
+# rather than quietly mapped to "infrequent" and scored with confidence.
+# `app.py` asserts at startup that these still match the loaded model.
+HomeOwnership = Literal["MORTGAGE", "RENT", "OWN", "OTHER", "NONE"]
+VerificationStatus = Literal["Verified", "Source Verified", "Not Verified"]
+Purpose = Literal[
+    "car",
+    "credit_card",
+    "debt_consolidation",
+    "educational",
+    "home_improvement",
+    "house",
+    "major_purchase",
+    "medical",
+    "moving",
+    "other",
+    "renewable_energy",
+    "small_business",
+    "vacation",
+    "wedding",
+]
+EmpLength = Literal[
+    "< 1 year",
+    "1 year",
+    "2 years",
+    "3 years",
+    "4 years",
+    "5 years",
+    "6 years",
+    "7 years",
+    "8 years",
+    "9 years",
+    "10+ years",
+]
+
+# `addr_state` is validated against the 51 real USPS codes, NOT against the
+# training vocabulary, which happens to contain only 50 (North Dakota never
+# appears before 2016). A valid state the model has not seen is a genuine
+# business event that the drift monitor should report — not a client error to
+# reject with a 422 (D-072).
+US_STATES = frozenset(
+    "AK AL AR AZ CA CO CT DC DE FL GA HI IA ID IL IN KS KY LA MA MD ME MI MN MO MS "
+    "MT NC ND NE NH NJ NM NV NY OH OK OR PA RI SC SD TN TX UT VA VT WA WI WV WY".split()
+)
+
+# How far the stated installment may sit from the amortization formula before
+# the listing is treated as corrupt (D-073).
+INSTALLMENT_TOLERANCE = 0.05
+
+
+def expected_installment(principal: float, annual_rate_pct: float, term_months: int) -> float:
+    """The scheduled monthly payment implied by amount, rate and term."""
+    monthly = annual_rate_pct / 1200.0
+    if monthly == 0:
+        return principal / term_months
+    return principal * monthly / (1 - (1 + monthly) ** -term_months)
 
 
 class LoanApplication(BaseModel):
@@ -30,15 +88,15 @@ class LoanApplication(BaseModel):
     installment: Annotated[float, Field(gt=0)]
     grade: Literal["A", "B", "C", "D", "E", "F", "G"]
     sub_grade: Annotated[str, Field(pattern=r"^[A-G][1-5]$")]
-    purpose: str
+    purpose: Purpose
     initial_list_status: Literal["f", "w"]
     application_date: Annotated[str, Field(pattern=r"^[A-Z][a-z]{2}-\d{4}$")]  # e.g. "Jun-2015"
 
     # --- the borrower ---
     annual_inc: Money
-    emp_length: str | None = None  # e.g. "10+ years", "< 1 year", null = unknown
-    home_ownership: str
-    verification_status: str
+    emp_length: EmpLength | None = None  # null = not supplied by the borrower
+    home_ownership: HomeOwnership
+    verification_status: VerificationStatus
     addr_state: Annotated[str, Field(pattern=r"^[A-Z]{2}$")]
     dti: float | None = None
 
@@ -62,6 +120,35 @@ class LoanApplication(BaseModel):
 
     # Lending Club's own flag; modern listings meet its credit policy (D-026).
     not_credit_policy: bool = False
+
+    @model_validator(mode="after")
+    def _consistent(self):
+        """Reject listings whose fields contradict each other (D-073).
+
+        Every field above is individually plausible; these checks look at
+        combinations, which is where real corruption shows up. The source data
+        contains 1,015 loans (0.16%) whose stated installment disagrees with
+        the amortization formula by more than 1% — one lists $14.77 a month on
+        $6,000 at 6.89%, which implies a payment of $185. Scored as-is, that
+        loan produced a "fund" decision alongside an expected return of
+        -$13,066.
+        """
+        if self.fico_range_high < self.fico_range_low:
+            raise ValueError(
+                f"fico_range_high ({self.fico_range_high}) is below "
+                f"fico_range_low ({self.fico_range_low})"
+            )
+        if self.addr_state not in US_STATES:
+            raise ValueError(f"addr_state {self.addr_state!r} is not a US state code")
+
+        scheduled = expected_installment(self.loan_amnt, self.int_rate, self.term_months)
+        if abs(self.installment / scheduled - 1) > INSTALLMENT_TOLERANCE:
+            raise ValueError(
+                f"installment {self.installment:.2f} is inconsistent with "
+                f"{self.loan_amnt:.0f} at {self.int_rate}% over {self.term_months} "
+                f"months, which amortizes to {scheduled:.2f}"
+            )
+        return self
 
     model_config = {
         "json_schema_extra": {
@@ -100,10 +187,24 @@ class LoanApplication(BaseModel):
 
 
 class LoanDecision(BaseModel):
+    """The funding decision, and every number behind it.
+
+    `decision` is **not** a simple function of `expected_return_usd`, and the
+    `decision_basis` field says which rule applied (D-074). Funding requires
+    both a risk score below the tuned threshold and a positive expected
+    return; the threshold is what binds in practice, because at Lending Club's
+    interest rates almost every loan has positive expected value.
+    """
+
     decision: Literal["fund", "decline"]
-    probability_of_default: float
-    expected_return_usd: float
-    risk_score: float
+    decision_basis: Literal[
+        "score_below_threshold",
+        "score_above_threshold",
+        "negative_expected_return",
+    ]
+    probability_of_default: float = Field(description="Calibrated, for a human to read")
+    expected_return_usd: float = Field(description="At the listed amount, over the full term")
+    risk_score: float = Field(description="Uncalibrated model output; this is what the rule uses")
     threshold: float
     model_version: str
 

@@ -1,6 +1,6 @@
 {
   "test_loans": 283026,
-  "overall_fund_rate": 0.6634,
+  "overall_fund_rate": 0.6633,
   "overall_default_if_funded": 0.0997,
   "columns": {
     "addr_state": {
@@ -13,9 +13,9 @@
         },
         "fund_rate_max": {
           "group": "MA",
-          "value": 0.7403
+          "value": 0.7402
         },
-        "fund_rate_spread": 0.262,
+        "fund_rate_spread": 0.2618,
         "default_if_funded_min": 0.0577,
         "default_if_funded_max": 0.143,
         "score_vs_outcome_correlation": 0.506
@@ -141,20 +141,20 @@
         {
           "addr_state": "OH",
           "n": 9168,
-          "fund_rate": 0.6378708551483421,
+          "fund_rate": 0.6377617801047121,
           "mean_score": 0.12307172888587357,
           "default_rate": 0.156304537521815,
-          "default_if_funded": 0.09849521203830369,
-          "n_funded": 5848
+          "default_if_funded": 0.09851205746536686,
+          "n_funded": 5847
         },
         {
           "addr_state": "SC",
           "n": 3182,
-          "fund_rate": 0.6414204902576995,
+          "fund_rate": 0.6411062225015713,
           "mean_score": 0.12303338399052403,
           "default_rate": 0.11627906976744186,
-          "default_if_funded": 0.06859382655561,
-          "n_funded": 2041
+          "default_if_funded": 0.06862745098039216,
+          "n_funded": 2040
         },
         {
           "addr_state": "OK",
@@ -222,11 +222,11 @@
         {
           "addr_state": "GA",
           "n": 9383,
-          "fund_rate": 0.6623681125439624,
+          "fund_rate": 0.662261536821912,
           "mean_score": 0.11884608721175248,
           "default_rate": 0.12853032079292337,
-          "default_if_funded": 0.07932421560740145,
-          "n_funded": 6215
+          "default_if_funded": 0.07933698101062117,
+          "n_funded": 6214
         },
         {
           "addr_state": "NJ",
@@ -285,11 +285,11 @@
         {
           "addr_state": "CA",
           "n": 41377,
-          "fund_rate": 0.6741426396307127,
+          "fund_rate": 0.67407013558257,
           "mean_score": 0.11720949090194417,
           "default_rate": 0.1525968533243106,
-          "default_if_funded": 0.10213666021366602,
-          "n_funded": 27894
+          "default_if_funded": 0.10214764619411279,
+          "n_funded": 27891
         },
         {
           "addr_state": "CT",
@@ -303,11 +303,11 @@
         {
           "addr_state": "IL",
           "n": 11609,
-          "fund_rate": 0.7018692393832372,
+          "fund_rate": 0.7017830993194935,
           "mean_score": 0.11232693185293802,
           "default_rate": 0.1309328968903437,
-          "default_if_funded": 0.09167893961708394,
-          "n_funded": 8148
+          "default_if_funded": 0.09169019270897263,
+          "n_funded": 8147
         },
         {
           "addr_state": "CO",
@@ -339,11 +339,11 @@
         {
           "addr_state": "MD",
           "n": 6467,
-          "fund_rate": 0.7165610020102057,
+          "fund_rate": 0.7164063708056285,
           "mean_score": 0.11022201066501953,
           "default_rate": 0.15153858048554197,
-          "default_if_funded": 0.10509279240397065,
-          "n_funded": 4634
+          "default_if_funded": 0.1051154759335204,
+          "n_funded": 4633
         },
         {
           "addr_state": "NH",
@@ -357,20 +357,20 @@
         {
           "addr_state": "TX",
           "n": 23530,
-          "fund_rate": 0.7336166595835104,
+          "fund_rate": 0.7335741606459838,
           "mean_score": 0.10643446079881372,
           "default_rate": 0.14938376540586484,
-          "default_if_funded": 0.11035801181786584,
-          "n_funded": 17262
+          "default_if_funded": 0.11036440530676091,
+          "n_funded": 17261
         },
         {
           "addr_state": "MA",
           "n": 6370,
-          "fund_rate": 0.7403453689167975,
+          "fund_rate": 0.7401883830455259,
           "mean_score": 0.10460409945444521,
           "default_rate": 0.130298273155416,
-          "default_if_funded": 0.09181509754028838,
-          "n_funded": 4716
+          "default_if_funded": 0.09183457051961824,
+          "n_funded": 4715
         }
       ]
     },
@@ -380,7 +380,7 @@
         "groups": 3,
         "fund_rate_min": {
           "group": "RENT",
-          "value": 0.5807
+          "value": 0.5806
         },
         "fund_rate_max": {
           "group": "MORTGAGE",
@@ -395,11 +395,11 @@
         {
           "home_ownership": "RENT",
           "n": 121463,
-          "fund_rate": 0.5806871228275278,
+          "fund_rate": 0.5806212591488766,
           "mean_score": 0.13478576082305507,
           "default_rate": 0.17654759062430533,
-          "default_if_funded": 0.1154794986672716,
-          "n_funded": 70532
+          "default_if_funded": 0.11549259826442063,
+          "n_funded": 70524
         },
         {
           "home_ownership": "OWN",
@@ -413,11 +413,11 @@
         {
           "home_ownership": "MORTGAGE",
           "n": 129762,
-          "fund_rate": 0.751876512384211,
+          "fund_rate": 0.7518610995514866,
           "mean_score": 0.10280258267735284,
           "default_rate": 0.12062853531850619,
-          "default_if_funded": 0.08658842822733562,
-          "n_funded": 97565
+          "default_if_funded": 0.0865902032532825,
+          "n_funded": 97563
         }
       ]
     },
@@ -431,10 +431,10 @@
         },
         "fund_rate_max": {
           "group": "credit_card",
-          "value": 0.82
+          "value": 0.8199
         },
         "fund_rate_spread": 0.6777,
-        "default_if_funded_min": 0.0847,
+        "default_if_funded_min": 0.0848,
         "default_if_funded_max": 0.1195,
         "score_vs_outcome_correlation": 0.938
       },
@@ -496,20 +496,20 @@
         {
           "purpose": "debt_consolidation",
           "n": 160983,
-          "fund_rate": 0.624289521253797,
+          "fund_rate": 0.6242522502376028,
           "mean_score": 0.1261348696557068,
           "default_rate": 0.15732717119198922,
-          "default_if_funded": 0.10298507462686567,
-          "n_funded": 100500
+          "default_if_funded": 0.10299122335661831,
+          "n_funded": 100494
         },
         {
           "purpose": "car",
           "n": 2768,
-          "fund_rate": 0.6864161849710982,
+          "fund_rate": 0.6860549132947977,
           "mean_score": 0.1165167607598532,
           "default_rate": 0.1329479768786127,
-          "default_if_funded": 0.08473684210526315,
-          "n_funded": 1900
+          "default_if_funded": 0.08478146392838336,
+          "n_funded": 1899
         },
         {
           "purpose": "major_purchase",
@@ -532,11 +532,11 @@
         {
           "purpose": "credit_card",
           "n": 70650,
-          "fund_rate": 0.8199716914366596,
+          "fund_rate": 0.819929228591649,
           "mean_score": 0.09224738815734124,
           "default_rate": 0.12232130219391366,
-          "default_if_funded": 0.09423279418618702,
-          "n_funded": 57931
+          "default_if_funded": 0.09423767435437094,
+          "n_funded": 57928
         }
       ]
     }

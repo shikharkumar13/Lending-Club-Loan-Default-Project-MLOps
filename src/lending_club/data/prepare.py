@@ -18,6 +18,11 @@ from lending_club.config import load_params, path_of
 
 CREDIT_POLICY_PREFIX = "Does not meet the credit policy. Status:"
 
+# Mean length of a month in days (365.25 / 12). Credit history is reported in
+# months, so the day count is converted with the average rather than 30 or 31,
+# which would drift by weeks over the 10-20 year histories in this data.
+DAYS_PER_MONTH = 30.44
+
 
 def _emp_length_to_years(col: str = "emp_length") -> pl.Expr:
     """'10+ years' -> 10, '< 1 year' -> 0, '3 years' -> 3, missing stays missing.
@@ -59,9 +64,9 @@ def derive_features(frame: pl.DataFrame) -> pl.DataFrame:
         ((pl.col("fico_range_low") + pl.col("fico_range_high")) / 2).alias("fico_mid"),
         # How long the borrower has had credit, at the time of THIS loan.
         # Using issue_date (not today) keeps the feature point-in-time correct.
-        ((pl.col("issue_date") - pl.col("earliest_cr_date")).dt.total_days() / 30.44).alias(
-            "credit_history_months"
-        ),
+        (
+            (pl.col("issue_date") - pl.col("earliest_cr_date")).dt.total_days() / DAYS_PER_MONTH
+        ).alias("credit_history_months"),
         # Debt burden relative to income. annual_inc == 0 would divide by zero,
         # so those loans become missing and get imputed downstream.
         pl.when(pl.col("annual_inc") > 0)

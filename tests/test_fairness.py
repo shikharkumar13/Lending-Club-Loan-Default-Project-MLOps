@@ -37,13 +37,15 @@ def test_group_table_reports_funding_and_realized_error():
 
 def test_small_groups_are_dropped():
     """A rate measured on a handful of loans is noise, not a disparity."""
-    table = by_group(frame({"big": (2_000, 0.7, 0.1), "tiny": (40, 0.1, 0.9)}), "group")
+    table = by_group(frame({"big": (2_000, 0.7, 0.1), "tiny": (40, 0.1, 0.9)}), "group", 1_000)
     assert table["group"].to_list() == ["big"]
 
 
 def test_the_summary_names_the_extremes():
-    table = by_group(frame({"low": (2_000, 0.40, 0.14), "high": (2_000, 0.80, 0.06)}), "group")
-    summary = disparity(table, "group")
+    table = by_group(
+        frame({"low": (2_000, 0.40, 0.14), "high": (2_000, 0.80, 0.06)}), "group", 1_000
+    )
+    summary = disparity(table, "group", 800)
     assert summary["fund_rate_min"]["group"] == "low"
     assert summary["fund_rate_max"]["group"] == "high"
     assert np.isclose(summary["fund_rate_spread"], 0.40)
@@ -51,13 +53,15 @@ def test_the_summary_names_the_extremes():
 
 def test_equal_error_across_groups_is_visible_as_a_zero_spread():
     """The point of the audit: same bar everywhere means same realized error."""
-    table = by_group(frame({"a": (2_000, 0.50, 0.10), "b": (2_000, 0.90, 0.10)}), "group")
-    summary = disparity(table, "group")
+    table = by_group(frame({"a": (2_000, 0.50, 0.10), "b": (2_000, 0.90, 0.10)}), "group", 1_000)
+    summary = disparity(table, "group", 800)
     assert np.isclose(summary["default_if_funded_min"], summary["default_if_funded_max"])
 
 
 def test_scores_that_track_outcomes_correlate_perfectly():
     """A funding gap fully explained by a real risk gap is not a fairness problem."""
-    table = by_group(frame({"risky": (2_000, 0.30, 0.20), "safe": (2_000, 0.90, 0.05)}), "group")
+    table = by_group(
+        frame({"risky": (2_000, 0.30, 0.20), "safe": (2_000, 0.90, 0.05)}), "group", 1_000
+    )
     # risky has the higher mean score AND the higher default rate.
-    assert disparity(table, "group")["score_vs_outcome_correlation"] == 1.0
+    assert disparity(table, "group", 800)["score_vs_outcome_correlation"] == 1.0

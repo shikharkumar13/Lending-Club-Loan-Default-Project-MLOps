@@ -36,6 +36,9 @@ split:                             # by issue date (D-005)
   train: {start: "2007-06-01", end: "2013-12-31"}
   validation: {start: "2014-01-01", end: "2014-12-31"}
   test: {start: "2015-01-01", end: "2015-12-31"}
+  # The validation year is used twice and must not be reused: the calibrator is
+  # fitted before this date, the funding threshold is tuned after it (D-076).
+  calibration_end: "2014-07-01"
   # Expanding-window CV inside the training period (D-022).
   cv_folds:
     - {train_end: "2010-12-31", validate_year: 2011}
@@ -163,6 +166,10 @@ features:
   # data (D-031). mths_since_last_record is 90% missing and still kept.
   max_missing_fraction: 0.5
 
+serving:
+  # Request-size limit for /predict/batch.
+  max_batch: 1000
+
 profit:
   # Expected return per loan (D-009). LGD is re-estimated from TRAIN data in
   # Phase 4; this fallback is the Phase 1 measurement (D-032): charged-off loans
@@ -207,6 +214,20 @@ monitoring:
     # needs an engineer, not a retraining run (D-068).
     max_missing_increase: 0.20
 
+promotion:
+  # A candidate must beat the champion by more than this (return per dollar) to
+  # replace it. Below the margin the difference is noise, and every swap carries
+  # risk (D-060).
+  margin: 0.0005
+
+fairness:
+  # Groups smaller than this are not reported: a rate measured on a handful of
+  # loans is noise, and publishing it as a disparity is worse than silence.
+  min_group_size: 1000
+  # The realized-error comparison needs enough FUNDED loans to be meaningful.
+  min_funded_for_error: 800
+  columns: [addr_state, home_ownership, purpose]
+
 mlflow:
   # SQLite rather than the ./mlruns folder: MLflow 3 put the file-based store
   # in maintenance mode, and a database backend is what a real tracking server
@@ -223,7 +244,11 @@ model:
   logistic_regression:
     grid:
       C: [0.01, 0.1, 1.0]
-      class_weight: [null, balanced]
+      # `balanced` was measured at log loss 0.632 vs 0.353 — it optimises the
+      # wrong thing and destroys the calibration the profit rule depends on. It
+      # is removed rather than searched, so it cannot be silently selected if
+      # the tuning metric ever changes (D-078).
+      class_weight: [null]
     fixed:
       solver: lbfgs
       max_iter: 2000
@@ -244,4 +269,9 @@ model:
       subsample_freq: 1
       n_jobs: -1
       verbose: -1
+      # Without these, LightGBM's multithreaded histogram building can differ
+      # between machines and thread counts. The project reports log loss to five
+      # decimals and promotes on a 0.0005 margin, so that mattered (D-077).
+      deterministic: true
+      force_row_wise: true
     early_stopping_rounds: 100

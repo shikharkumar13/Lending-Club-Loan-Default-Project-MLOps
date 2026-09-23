@@ -27,10 +27,8 @@ import polars as pl
 from lending_club.config import load_params, path_of
 from lending_club.serving.bundle import LoanDecisionModel, prepare_for_decision
 
-MIN_GROUP_SIZE = 1_000
 
-
-def by_group(frame: pl.DataFrame, column: str, min_count: int = MIN_GROUP_SIZE) -> pl.DataFrame:
+def by_group(frame: pl.DataFrame, column: str, min_count: int) -> pl.DataFrame:
     """Per-group funding rate, predicted risk and realized outcome.
 
     `frame` must already carry `funded` and `risk_score`. Groups smaller than
@@ -53,10 +51,10 @@ def by_group(frame: pl.DataFrame, column: str, min_count: int = MIN_GROUP_SIZE) 
     )
 
 
-def disparity(groups: pl.DataFrame, column: str) -> dict:
+def disparity(groups: pl.DataFrame, column: str, min_funded: int) -> dict:
     """Reduce a group table to the few numbers a model card should state."""
     fund = groups["fund_rate"]
-    funded_default = groups.filter(pl.col("n_funded") >= 800)["default_if_funded"]
+    funded_default = groups.filter(pl.col("n_funded") >= min_funded)["default_if_funded"]
     # How much of the between-group difference in score is justified by a real
     # between-group difference in default rate? 1.0 would mean "entirely".
     correlation = float(np.corrcoef(groups["mean_score"], groups["default_rate"])[0, 1])
@@ -103,10 +101,11 @@ def audit() -> dict:
         ),
         "columns": {},
     }
-    for column in ("addr_state", "home_ownership", "purpose"):
-        groups = by_group(frame, column)
+    cfg = params["fairness"]
+    for column in cfg["columns"]:
+        groups = by_group(frame, column, cfg["min_group_size"])
         payload["columns"][column] = {
-            "summary": disparity(groups, column),
+            "summary": disparity(groups, column, cfg["min_funded_for_error"]),
             "groups": groups.to_dicts(),
         }
         summary = payload["columns"][column]["summary"]

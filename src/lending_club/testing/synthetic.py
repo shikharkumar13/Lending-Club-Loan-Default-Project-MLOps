@@ -95,7 +95,12 @@ def build_demo_bundle(path=None, force: bool = False):
     from lending_club.data.split import assign_split
     from lending_club.features.pipeline import build_preprocessor, feature_columns, to_model_frame
     from lending_club.policy.profit import fit_profit_model
-    from lending_club.serving.bundle import BundleMetadata, LoanDecisionModel, default_bundle_path
+    from lending_club.serving.bundle import (
+        BundleMetadata,
+        LoanDecisionModel,
+        categorical_vocabulary,
+        default_bundle_path,
+    )
 
     params = load_params()
     frame = assign_split(transform(synthetic_raw(), params), params)
@@ -123,6 +128,7 @@ def build_demo_bundle(path=None, force: bool = False):
             lgd=0.37,
             prepay_factor=0.83,
             feature_columns=feature_columns(params),
+            categorical_vocabulary=categorical_vocabulary(model, params),
             train_window=params["split"]["train"],
             cv_log_loss=0.0,
             test_return_per_dollar=0.0,

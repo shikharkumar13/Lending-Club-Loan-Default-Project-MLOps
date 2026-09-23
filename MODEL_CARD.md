@@ -59,8 +59,19 @@ Both sides are measured on training loans only:
 loans. At these interest rates almost every loan has positive expected value, so
 "reject negative-EV loans" is not where the money is. The model's value is
 **ranking under a capital constraint**. The deployed policy is therefore a
-threshold tuned for return per dollar: fund when the raw risk score < **0.14**,
-which corresponds to a calibrated default risk of **14.6%**.
+threshold tuned for return per dollar.
+
+**The deployed rule has two conditions:**
+
+```
+fund  ⟺  risk_score < 0.14  AND  expected_return_usd > 0
+```
+
+The threshold (a calibrated default risk of ~14.6%) is what binds in practice.
+The expected-value floor removed 10 of 187,752 funded loans on the test year —
+all corrupt listings whose stated installment contradicts the amount and rate —
+and exists so the service can never return a funding decision next to a
+negative expected return (D-074).
 
 ---
 
@@ -101,11 +112,16 @@ punished; ranking alone is not enough. Accuracy is meaningless here — predicti
 
 **Cross-validated** (expanding-window folds inside 2007–2013):
 
-| Model | Log loss | ROC-AUC | PR-AUC | Brier |
-|---|---|---|---|---|
-| Lending Club grade (baseline) | 0.36015 | 0.6232 | 0.1663 | 0.10473 |
-| Logistic regression | 0.35345 | 0.6618 | 0.2048 | 0.10331 |
-| **LightGBM** | **0.35172** | **0.6672** | **0.2079** | **0.10300** |
+| Model | Log loss | ROC-AUC | PR-AUC | Brier | Configs searched |
+|---|---|---|---|---|---|
+| Lending Club grade (baseline) | 0.36015 | 0.6232 | 0.1663 | 0.10473 | 1 |
+| Logistic regression | 0.35345 | 0.6618 | 0.2048 | 0.10331 | 3 |
+| **LightGBM** | **0.35172** | **0.6672** | **0.2079** | **0.10300** | 20 |
+
+Paired across folds, LightGBM wins 3 of 3 (mean +0.00173 ± 0.00197) — but the
+between-fold spread is 0.026, fifteen times the gap, and LightGBM received
+nearly seven times the search budget. It is consistently ahead by a little, not
+decisively better (D-079).
 
 **2015 test year, scored once:** log loss 0.3992, ROC-AUC 0.6834, Brier 0.1206.
 
@@ -119,9 +135,11 @@ punished; ranking alone is not enough. Accuracy is meaningless here — predicti
 | This model, matched to A–B selectivity | 58.0% | +0.0738 | 9.0% |
 
 At equal selectivity the model beats the grade rule by **+0.0021 per dollar**
-(1,000-draw bootstrap, 95% CI [+0.0015, +0.0027]). That interval measures
-sampling noise *within one test year*. It says nothing about a different credit
-cycle, which is the larger risk.
+(1,000-draw bootstrap, 95% CI [+0.0015, +0.0027]). Against a plain logistic
+regression its edge is only **+0.0006** [+0.0001, +0.0011] — the gap that
+matters is model versus no model, not LightGBM versus logistic regression.
+Those intervals measure sampling noise *within one test year*. They say nothing
+about a different credit cycle, which is the larger risk.
 
 **Most important features** (mean |SHAP|): `sub_grade`, `log_annual_inc`,
 `int_rate`, `grade`, `dti`, `fico_mid`, `inq_last_6mths`,
@@ -210,13 +228,18 @@ circumstance. None were tested for disparate impact.
    loans is probably overstated.
 5. **Selection bias is unfixable here.** Only funded loans have outcomes. The
    model cannot learn about applicants Lending Club rejected.
-6. **Calibration is stepwise.** The isotonic calibrator produces 255 distinct
+6. **The source data contains internally inconsistent loans.** 1,015 (0.16%)
+   have an `installment` that disagrees with the amortization of their amount,
+   rate and term by more than 1%. The API now rejects such listings (D-073),
+   but they remain in the training data, where they are a small amount of
+   label-independent noise.
+7. **Calibration is stepwise.** The isotonic calibrator produces 255 distinct
    values, with one block containing 39,792 loans. It is fine for reading a
    probability, but ranking policies use the raw score, because ties inside a
    block would decide who gets funded arbitrarily.
-7. **No fairness constraint is implemented.** The policy maximizes return per
+8. **No fairness constraint is implemented.** The policy maximizes return per
    dollar, full stop.
-8. **Returns are nominal**, not discounted, and ignore platform fees, taxes and
+9. **Returns are nominal**, not discounted, and ignore platform fees, taxes and
    the cost of capital.
 
 ---

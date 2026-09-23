@@ -66,10 +66,12 @@ stages:
       - data/processed
       - models
       - src/lending_club/evaluate.py
+      - src/lending_club/reporting.py
       - src/lending_club/policy/profit.py
     params:
       - profit
       - seed
+      - split.calibration_end
     outs:
       - artifacts/calibrators
     metrics:
@@ -95,6 +97,8 @@ stages:
       - data/processed
       - artifacts/bundle
       - src/lending_club/fairness.py
+    params:
+      - fairness
     metrics:
       - reports/fairness.json:
           cache: false

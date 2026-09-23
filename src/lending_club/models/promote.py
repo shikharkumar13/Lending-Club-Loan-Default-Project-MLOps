@@ -46,13 +46,14 @@ def should_promote(
     champion: LoanDecisionModel | None,
     frame: pl.DataFrame,
     params: dict,
-    margin: float = 0.0005,
+    margin: float | None = None,
 ) -> PromotionDecision:
     """Promote only on a clear improvement, measured in return per dollar.
 
     The margin stops churn: swapping the production model for a 0.00001
     improvement is noise, and every swap carries real risk.
     """
+    margin = params["promotion"]["margin"] if margin is None else margin
     candidate_return = policy_return(candidate, frame, params)
 
     if champion is None:

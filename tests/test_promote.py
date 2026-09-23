@@ -40,7 +40,7 @@ def params(monkeypatch):
         "lending_club.models.promote.prepare_for_decision",
         lambda frame, params: pd.DataFrame(index=range(frame.height)),
     )
-    return {}
+    return {"promotion": {"margin": 0.0005}}
 
 
 def test_first_model_is_always_promoted(loans, params):

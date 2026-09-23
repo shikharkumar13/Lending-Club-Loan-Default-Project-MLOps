@@ -6,7 +6,7 @@ import pytest
 
 from lending_club.config import load_params
 from lending_club.models.baselines import GradePriorClassifier
-from lending_club.models.train import run_cv, sample_configs, score
+from lending_club.models.train import paired_comparison, run_cv, sample_configs, score
 
 PARAMS = load_params()
 
@@ -112,3 +112,48 @@ def test_cv_returns_the_expected_metrics():
     folds = [(np.arange(0, 20), np.arange(20, 40))]
     result = run_cv(SpyEstimator, "tree", X, y, folds, PARAMS, preprocess=False)
     assert set(result["mean"]) == {"log_loss", "roc_auc", "pr_auc", "brier"}
+
+
+# --- the audit's C3: a winner must be shown to win consistently ------------
+
+
+def _candidate(family: str, folds: list[float]) -> dict:
+    return {
+        "family": family,
+        "config": {},
+        "mean": {"log_loss": sum(folds) / len(folds)},
+        "std": {"log_loss_std": 0.0},
+        "per_fold": [{"log_loss": f} for f in folds],
+        "best_iters": [],
+    }
+
+
+def test_paired_comparison_reports_a_consistent_winner():
+    """LightGBM better in every fold: a result worth stating."""
+    candidates = [
+        _candidate("lightgbm", [0.30, 0.38, 0.35]),
+        _candidate("logistic_regression", [0.31, 0.39, 0.36]),
+    ]
+    pair = paired_comparison(candidates)["pairs"]["lightgbm_vs_logistic_regression"]
+    assert pair["folds_won"] == 3 and pair["consistent"]
+    assert pair["mean_difference"] > 0
+
+
+def test_paired_comparison_flags_an_inconsistent_winner():
+    """Better on average, worse in one fold: a coin toss, and reported as one.
+
+    This is the case averages hide, and the reason per-fold scores are now kept
+    in the report instead of being stripped (D-079).
+    """
+    candidates = [
+        _candidate("lightgbm", [0.30, 0.40, 0.33]),
+        _candidate("logistic_regression", [0.31, 0.39, 0.36]),
+    ]
+    pair = paired_comparison(candidates)["pairs"]["lightgbm_vs_logistic_regression"]
+    assert pair["mean_difference"] > 0  # wins on average
+    assert pair["folds_won"] == 2 and not pair["consistent"]  # but not everywhere
+
+
+def test_paired_comparison_keeps_the_per_fold_scores():
+    candidates = [_candidate("lightgbm", [0.30, 0.38, 0.35])]
+    assert paired_comparison(candidates)["per_fold_log_loss"]["lightgbm"] == [0.30, 0.38, 0.35]

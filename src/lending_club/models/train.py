@@ -124,6 +124,52 @@ def sample_configs(search: dict[str, list], n_iter: int, seed: int) -> list[dict
     return configs
 
 
+def paired_comparison(candidates: list[dict]) -> dict[str, Any]:
+    """Compare the best of each family FOLD BY FOLD (D-079).
+
+    Averages hide the thing that matters. Here the gap between LightGBM and
+    logistic regression (~0.0017 log loss) is an order of magnitude smaller than
+    the spread between folds (~0.026), because 2011, 2012 and 2013 are genuinely
+    different years. That spread is common to both models, so the honest test is
+    paired: does the same model win in every fold, and by how much relative to
+    the variation in that difference?
+
+    A winner that takes 3 folds out of 3 by a consistent margin is a result. A
+    winner that takes 2 of 3 is a coin toss, and should be reported as one.
+    """
+    best = {}
+    for family in ("grade_prior", "logistic_regression", "lightgbm"):
+        family_candidates = [c for c in candidates if c["family"] == family]
+        if family_candidates:
+            best[family] = min(family_candidates, key=lambda c: c["mean"]["log_loss"])
+
+    per_fold = {
+        family: [fold["log_loss"] for fold in candidate["per_fold"]]
+        for family, candidate in best.items()
+    }
+    pairs = [
+        ("lightgbm", "logistic_regression"),
+        ("lightgbm", "grade_prior"),
+        ("logistic_regression", "grade_prior"),
+    ]
+    comparisons = {}
+    for a, b in pairs:
+        if a not in per_fold or b not in per_fold:
+            continue
+        # Lower log loss is better, so b - a > 0 means `a` won that fold.
+        differences = [y - x for x, y in zip(per_fold[a], per_fold[b], strict=True)]
+        wins = sum(d > 0 for d in differences)
+        comparisons[f"{a}_vs_{b}"] = {
+            "per_fold_difference": [round(d, 5) for d in differences],
+            "folds_won": wins,
+            "folds": len(differences),
+            "mean_difference": round(float(np.mean(differences)), 5),
+            "std_difference": round(float(np.std(differences, ddof=1)), 5),
+            "consistent": wins == len(differences),
+        }
+    return {"per_fold_log_loss": per_fold, "pairs": comparisons}
+
+
 def train() -> dict[str, Any]:
     params = load_params()
     seed = params["seed"]
@@ -249,14 +295,33 @@ def train() -> dict[str, Any]:
 
     reports = path_of("reports_dir")
     reports.mkdir(parents=True, exist_ok=True)
+    comparison = paired_comparison(candidates)
     payload = {
-        "candidates": [{k: v for k, v in c.items() if k != "per_fold"} for c in candidates],
+        # per_fold is KEPT (D-079). Averages alone cannot tell you whether a
+        # winner won consistently or won one fold by luck, and stripping them
+        # made that impossible to check after the fact.
+        "candidates": candidates,
         "selected": summary,
+        "comparison": comparison,
+        "search_budget": {
+            "grade_prior": 1,
+            "logistic_regression": len(lr_cfg["grid"]["C"]) * len(lr_cfg["grid"]["class_weight"]),
+            "lightgbm": len(configs),
+        },
     }
     # Trailing newline so the end-of-file pre-commit hook does not rewrite the
     # file after every training run.
     (reports / "cv_results.json").write_text(json.dumps(payload, indent=2) + "\n")
-    return {"selected": summary}
+
+    print("\npaired comparison across folds (positive = first model wins):")
+    for name, stats in comparison["pairs"].items():
+        verdict = "consistent" if stats["consistent"] else "NOT consistent"
+        print(
+            f"  {name:42s} {stats['mean_difference']:+.5f} "
+            f"+/- {stats['std_difference']:.5f}  "
+            f"{stats['folds_won']}/{stats['folds']} folds  {verdict}"
+        )
+    return {"selected": summary, "comparison": comparison}
 
 
 if __name__ == "__main__":

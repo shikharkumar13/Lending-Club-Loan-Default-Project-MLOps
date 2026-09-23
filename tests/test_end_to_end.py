@@ -25,7 +25,12 @@ from lending_club.features.pipeline import build_preprocessor, feature_columns, 
 from lending_club.features.schema import validate
 from lending_club.models.promote import should_promote
 from lending_club.policy.profit import choose_threshold, fit_profit_model
-from lending_club.serving.bundle import BundleMetadata, LoanDecisionModel, prepare_for_decision
+from lending_club.serving.bundle import (
+    BundleMetadata,
+    LoanDecisionModel,
+    categorical_vocabulary,
+    prepare_for_decision,
+)
 from lending_club.testing.synthetic import synthetic_raw
 
 
@@ -110,6 +115,7 @@ def test_full_decision_path_including_the_api(pipeline_outputs):
             lgd=profit.lgd,
             prepay_factor=profit.prepay_factor,
             feature_columns=feature_columns(params),
+            categorical_vocabulary=categorical_vocabulary(model, params),
             train_window=params["split"]["train"],
             cv_log_loss=0.0,
             test_return_per_dollar=0.0,
@@ -149,6 +155,7 @@ def test_served_api_agrees_with_the_bundle(tmp_path, pipeline_outputs, monkeypat
             lgd=0.37,
             prepay_factor=0.83,
             feature_columns=feature_columns(params),
+            categorical_vocabulary=categorical_vocabulary(model, params),
             train_window=params["split"]["train"],
             cv_log_loss=0.0,
             test_return_per_dollar=0.0,

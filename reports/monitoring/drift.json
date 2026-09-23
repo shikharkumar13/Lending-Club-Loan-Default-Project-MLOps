@@ -107,7 +107,7 @@
         "revol_util",
         "verification_status"
       ],
-      "fund_rate": 0.6567,
+      "fund_rate": 0.6566,
       "mean_probability": 0.1258,
       "outcome_known": 0.8718,
       "missing_increase": {
@@ -182,7 +182,7 @@
         "revol_util",
         "verification_status"
       ],
-      "fund_rate": 0.6348,
+      "fund_rate": 0.6346,
       "mean_probability": 0.131,
       "outcome_known": 0.6716,
       "missing_increase": {
@@ -252,7 +252,7 @@
         "revol_util",
         "verification_status"
       ],
-      "fund_rate": 0.6456,
+      "fund_rate": 0.6455,
       "mean_probability": 0.132,
       "outcome_known": 0.6537,
       "missing_increase": {
@@ -288,7 +288,7 @@
         "revol_util",
         "verification_status"
       ],
-      "fund_rate": 0.6603,
+      "fund_rate": 0.6602,
       "mean_probability": 0.1305,
       "outcome_known": 0.6385,
       "missing_increase": {
@@ -327,7 +327,7 @@
         "revol_util",
         "verification_status"
       ],
-      "fund_rate": 0.6362,
+      "fund_rate": 0.6361,
       "mean_probability": 0.1322,
       "outcome_known": 0.6198,
       "missing_increase": {
@@ -540,7 +540,7 @@
         "revol_util",
         "verification_status"
       ],
-      "fund_rate": 0.6596,
+      "fund_rate": 0.6595,
       "mean_probability": 0.1268,
       "outcome_known": 0.5092,
       "missing_increase": {
@@ -870,7 +870,7 @@
         "pub_rec_bankruptcies",
         "revol_util"
       ],
-      "fund_rate": 0.6806,
+      "fund_rate": 0.6805,
       "mean_probability": 0.1225,
       "outcome_known": 0.3285,
       "missing_increase": {
@@ -913,7 +913,7 @@
         "revol_util",
         "total_acc"
       ],
-      "fund_rate": 0.6959,
+      "fund_rate": 0.6958,
       "mean_probability": 0.1191,
       "outcome_known": 0.3008,
       "missing_increase": {
@@ -953,7 +953,7 @@
         "revol_util",
         "total_acc"
       ],
-      "fund_rate": 0.7074,
+      "fund_rate": 0.7073,
       "mean_probability": 0.117,
       "outcome_known": 0.2729,
       "missing_increase": {
@@ -1159,7 +1159,7 @@
         "total_acc",
         "verification_status"
       ],
-      "fund_rate": 0.7095,
+      "fund_rate": 0.7094,
       "mean_probability": 0.1156,
       "outcome_known": 0.1487,
       "missing_increase": {

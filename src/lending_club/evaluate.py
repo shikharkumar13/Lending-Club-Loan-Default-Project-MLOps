@@ -16,12 +16,13 @@ investor could follow with no model at all (D-010).
 from __future__ import annotations
 
 import json
+from typing import Any
 
 import joblib
-import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import polars as pl
-from sklearn.calibration import CalibratedClassifierCV, calibration_curve
+from sklearn.calibration import CalibratedClassifierCV
 from sklearn.frozen import FrozenEstimator
 from sklearn.metrics import brier_score_loss, log_loss, roc_auc_score
 
@@ -34,6 +35,7 @@ from lending_club.policy.profit import (
     fit_profit_model,
     threshold_for_share,
 )
+from lending_club.reporting import explain, figures
 
 FAMILIES = ("grade_prior", "logistic_regression", "lightgbm")
 
@@ -54,6 +56,63 @@ def quality(y: np.ndarray, p: np.ndarray) -> dict[str, float]:
     }
 
 
+def tune_policy(
+    model,
+    X: dict[str, pd.DataFrame],
+    y: dict[str, np.ndarray],
+    calib: pl.DataFrame,
+    tune: pl.DataFrame,
+    grid: np.ndarray,
+    params: dict,
+) -> tuple[Any, dict[str, Any]]:
+    """Fit the calibrator and choose the funding thresholds (D-080).
+
+    This function is where every choice that shapes the deployed policy is
+    made, and it is deliberately given no way to reach the test year: it
+    receives `X["calib"]` and `X["tune"]` by name and never the test frame.
+    Previously the whole thing lived in one scope alongside `raw_test`, so
+    "the test set is scored once" was a property of careful reading rather
+    than of the code. Now a leak would have to be added on purpose.
+    """
+    # Isotonic regression: a flexible, monotone map from predicted score to
+    # observed frequency. Fitted on held-out 2014 H1 loans.
+    calibrator = CalibratedClassifierCV(FrozenEstimator(model), method="isotonic").fit(
+        X["calib"], y["calib"]
+    )
+
+    raw_tune = model.predict_proba(X["tune"])[:, 1]
+    p_tune = calibrator.predict_proba(X["tune"])[:, 1]
+
+    # Ranking policies use the RAW score, not the calibrated probability.
+    # Isotonic regression is a step function: it maps 283k loans onto only ~255
+    # distinct values, one of which covers 39,792 loans. A cut-off landing
+    # inside such a block moves 14% of the portfolio at once. The raw score is
+    # continuous, so the policy degrades smoothly (D-053).
+    threshold, curve = choose_threshold(
+        tune,
+        raw_tune,
+        grid,
+        objective="return_per_dollar",
+        min_share_funded=params["profit"]["min_share_funded"],
+    )
+
+    # The raw score has no natural meaning, so report the calibrated risk level
+    # it corresponds to: "this cut-off funds loans up to about X% risk".
+    funded_on_tune = raw_tune < threshold
+    risk_at_threshold = float(p_tune[funded_on_tune].max()) if funded_on_tune.any() else 0.0
+
+    # Same selectivity as the grade A-B rule, so the comparison is not "more
+    # selective wins". The share to match is measured on the tuning rows.
+    grade_ab_share = float(tune["grade"].is_in(["A", "B"]).mean())
+
+    return calibrator, {
+        "threshold": float(threshold),
+        "matched_threshold": threshold_for_share(raw_tune, grade_ab_share),
+        "calibrated_risk_at_threshold": risk_at_threshold,
+        "curve": curve,
+    }
+
+
 def evaluate() -> dict:
     params = load_params()
     splits = load_splits(params)
@@ -66,7 +125,7 @@ def evaluate() -> dict:
     )
 
     # --- 2. split the validation year: calibrate on H1, tune the policy on H2 -
-    mid = pl.date(2014, 7, 1)
+    mid = pl.lit(params["split"]["calibration_end"]).str.to_date()
     calib = validation.filter(pl.col("issue_date") < mid)
     tune = validation.filter(pl.col("issue_date") >= mid)
     print(f"calibration rows: {calib.height:,}   policy-tuning rows: {tune.height:,}")
@@ -87,13 +146,7 @@ def evaluate() -> dict:
 
     for family in FAMILIES:
         model = joblib.load(path_of("models_dir") / f"{family}.joblib")
-
-        raw_test = model.predict_proba(X["test"])[:, 1]
-        # Isotonic regression: a flexible, monotone map from predicted score to
-        # observed frequency. Fitted on held-out 2014 loans, never on test.
-        calibrator = CalibratedClassifierCV(FrozenEstimator(model), method="isotonic").fit(
-            X["calib"], y["calib"]
-        )
+        calibrator, tuned = tune_policy(model, X, y, calib, tune, grid, params)
 
         # Calibrators belong to the evaluate stage, not the train stage: two
         # DVC stages must never write into the same output directory.
@@ -101,49 +154,35 @@ def evaluate() -> dict:
         calibrators.mkdir(parents=True, exist_ok=True)
         joblib.dump(calibrator, calibrators / f"{family}.joblib")
 
-        p_tune = calibrator.predict_proba(X["tune"])[:, 1]
+        threshold = tuned["threshold"]
+        matched_threshold = tuned["matched_threshold"]
+        risk_at_threshold = tuned["calibrated_risk_at_threshold"]
+        curves[family] = tuned["curve"]
+
+        # Only now is the test year touched (D-080).
+        raw_test = model.predict_proba(X["test"])[:, 1]
         p_test = calibrator.predict_proba(X["test"])[:, 1]
-        raw_tune = model.predict_proba(X["tune"])[:, 1]
 
-        # Ranking policies use the RAW score, not the calibrated probability.
-        # Isotonic regression is a step function: it maps 283k test loans onto
-        # only ~255 distinct values, one of which covers 39,792 loans. A cut-off
-        # landing inside such a block moves 14% of the portfolio at once. The raw
-        # score is continuous, so the policy degrades smoothly (D-053).
-        threshold, curve = choose_threshold(
-            tune,
-            raw_tune,
-            grid,
-            objective="return_per_dollar",
-            min_share_funded=params["profit"]["min_share_funded"],
-        )
-        curves[family] = curve
-        # The raw score has no natural meaning, so report the calibrated risk
-        # level it corresponds to: "this cut-off funds loans up to about X%
-        # predicted default risk".
-        funded_on_tune = raw_tune < threshold
-        risk_at_threshold = float(p_tune[funded_on_tune].max()) if funded_on_tune.any() else 0.0
-
-        # Same selectivity as the grade A-B rule, so the comparison is not
-        # "more selective wins". The share to match is measured on the tuning
-        # rows, never on test.
-        grade_ab_share = float(tune["grade"].is_in(["A", "B"]).mean())
-        matched_threshold = threshold_for_share(raw_tune, grade_ab_share)
-
+        # The deployed rule needs BOTH conditions, and so must the offline
+        # measurement of it, or the container and this report would describe
+        # different policies (D-074). On the test year the floor removes 10 of
+        # 187,752 funded loans — all corrupt listings whose stated installment
+        # contradicts the amount and rate.
+        positive_value = profit_model.expected_return(test, p_test) > 0
         policies = {
             # Fund when expected value is positive: no tuning at all.
-            "expected_value": profit_model.expected_return(test, p_test) > 0,
+            "expected_value": positive_value,
             # Fund when predicted risk is below the threshold tuned on 2014 H2.
-            "threshold": raw_test < threshold,
+            "threshold": (raw_test < threshold) & positive_value,
             # Fund the same share of loans the grade A-B rule would.
-            "matched_to_grade_AB": raw_test < matched_threshold,
+            "matched_to_grade_AB": (raw_test < matched_threshold) & positive_value,
         }
 
         policy_masks[family] = policies
         results[family] = {
             "quality_test_uncalibrated": quality(y["test"], raw_test),
             "quality_test_calibrated": quality(y["test"], p_test),
-            "threshold": float(threshold),
+            "threshold": threshold,
             "matched_threshold": matched_threshold,
             "calibrated_risk_at_threshold": risk_at_threshold,
             "policies": {name: evaluate_policy(test, mask) for name, mask in policies.items()},
@@ -209,8 +248,8 @@ def evaluate() -> dict:
             f"profit ${metrics['total_profit']:,.0f}"
         )
 
-    _figures(params, test, y["test"], curves, threshold_family="lightgbm")
-    top_features = _explain(params, test, family="lightgbm")
+    figures(params, test, y["test"], curves, threshold_family="lightgbm")
+    top_features = explain(params, test, family="lightgbm")
 
     payload = {
         "profit_model": {"lgd": profit_model.lgd, "prepay_factor": profit_model.prepay_factor},
@@ -223,67 +262,6 @@ def evaluate() -> dict:
     reports.mkdir(parents=True, exist_ok=True)
     (reports / "metrics.json").write_text(json.dumps(payload, indent=2) + "\n")
     return payload
-
-
-def _figures(params, test, y_test, curves, threshold_family: str) -> None:
-    """Calibration curve and profit curve: the two plots that explain the policy."""
-    figures = path_of("figures_dir")
-    figures.mkdir(parents=True, exist_ok=True)
-
-    model = joblib.load(path_of("models_dir") / f"{threshold_family}.joblib")
-    X_test = to_model_frame(test, params)
-    raw = model.predict_proba(X_test)[:, 1]
-
-    calibrator = joblib.load(path_of("calibrators_dir") / f"{threshold_family}.joblib")
-    calibrated = calibrator.predict_proba(X_test)[:, 1]
-
-    fig, axes = plt.subplots(1, 2, figsize=(13, 4.5))
-    for label, probabilities in [("uncalibrated", raw), ("calibrated", calibrated)]:
-        true, predicted = calibration_curve(y_test, probabilities, n_bins=15, strategy="quantile")
-        axes[0].plot(predicted, true, "o-", label=label)
-    axes[0].plot([0, 0.6], [0, 0.6], "--", color="grey", label="perfect")
-    axes[0].set_xlabel("predicted default probability")
-    axes[0].set_ylabel("observed default rate")
-    axes[0].set_title("Calibration on the 2015 test year")
-    axes[0].legend()
-
-    curve = curves[threshold_family]
-    thresholds = [row["threshold"] for row in curve]
-    axes[1].plot(thresholds, [row["return_per_dollar"] for row in curve], color="#2a9d8f")
-    axes[1].set_xlabel("fund when predicted probability < t")
-    axes[1].set_ylabel("return per dollar", color="#2a9d8f")
-    twin = axes[1].twinx()
-    twin.plot(thresholds, [row["share_funded"] for row in curve], color="#e76f51")
-    twin.set_ylabel("share of loans funded", color="#e76f51")
-    axes[1].set_title("Profit curve on 2014 H2 (policy tuning)")
-    plt.tight_layout()
-    plt.savefig(figures / "policy.png", dpi=120)
-
-
-def _explain(params, test, family: str, sample: int = 3000) -> list[dict]:
-    """SHAP: which columns drive the predictions, and in which direction.
-
-    Credit decisions have to be explainable — "the model said no" is not an
-    acceptable answer to a rejected borrower, or to a regulator.
-    """
-    import shap
-
-    model = joblib.load(path_of("models_dir") / f"{family}.joblib")
-    rows = to_model_frame(test.sample(sample, seed=params["seed"]), params)
-    matrix = model.named_steps["preprocess"].transform(rows)
-    names = list(model.named_steps["preprocess"].get_feature_names_out())
-
-    values = shap.TreeExplainer(model.named_steps["model"]).shap_values(matrix)
-    importance = np.abs(values).mean(axis=0)
-    order = np.argsort(-importance)[:15]
-
-    plt.figure(figsize=(8, 6))
-    shap.summary_plot(values, matrix, feature_names=names, max_display=15, show=False)
-    plt.tight_layout()
-    plt.savefig(path_of("figures_dir") / "shap_summary.png", dpi=120)
-    plt.close()
-
-    return [{"feature": names[i], "mean_abs_shap": float(importance[i])} for i in order]
 
 
 if __name__ == "__main__":

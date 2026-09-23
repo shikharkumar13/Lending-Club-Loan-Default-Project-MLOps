@@ -42,6 +42,10 @@ class BundleMetadata:
     lgd: float
     prepay_factor: float
     feature_columns: list[str]
+    # What each categorical column was actually trained on, read back off the
+    # fitted encoder. The API checks its request schema against this at startup,
+    # so an accepted-but-never-trained category cannot reach the model (D-072).
+    categorical_vocabulary: dict[str, list[str]]
     train_window: dict[str, str]
     cv_log_loss: float
     test_return_per_dollar: float
@@ -76,12 +80,29 @@ class LoanDecisionModel:
         loss = self.profit.lgd * amount
         expected_return = (1 - probability) * gain - probability * loss
 
+        # Two conditions, not one (D-074). The threshold is what binds in
+        # practice — at these interest rates almost every loan has positive
+        # expected value — but without the second condition the service can
+        # return "fund" next to an expected return of -$13,066, which is what
+        # it did for 10 of the 283,026 test loans. Those are corrupt listings
+        # whose stated installment contradicts the amount and rate; the API now
+        # rejects them at the schema (D-073), and this floor means the two
+        # numbers in the response can never contradict each other, whatever
+        # reaches the model.
+        above_threshold = score >= self.metadata.threshold
+        negative_value = expected_return <= 0
+
         return pd.DataFrame(
             {
                 "risk_score": score,
                 "probability_of_default": probability,
                 "expected_return_usd": expected_return,
-                "decision": np.where(score < self.metadata.threshold, "fund", "decline"),
+                "decision": np.where(above_threshold | negative_value, "decline", "fund"),
+                "decision_basis": np.select(
+                    [above_threshold, negative_value],
+                    ["score_above_threshold", "negative_expected_return"],
+                    default="score_below_threshold",
+                ),
             }
         )
 
@@ -109,6 +130,26 @@ def prepare_for_decision(frame, params: dict) -> pd.DataFrame:
     return applications
 
 
+def categorical_vocabulary(pipeline, params: dict) -> dict[str, list[str]]:
+    """The categories the fitted one-hot encoder actually saw, per column.
+
+    Read off the artifact rather than recomputed from the training data: the
+    point is to describe *this* model, so the two cannot disagree.
+    """
+    columns = params["features"]["groups"]["nominal"]
+    try:
+        encoder = (
+            pipeline.named_steps["preprocess"].named_steps["columns"].named_transformers_["nominal"]
+        )
+    except (AttributeError, KeyError):  # e.g. the preprocessing-free baseline
+        return {}
+    categories = encoder.named_steps["encode"].categories_
+    return {
+        column: sorted(str(v) for v in values)
+        for column, values in zip(columns, categories, strict=True)
+    }
+
+
 def default_bundle_path() -> Path:
     return path_of("bundle_dir") / BUNDLE_FILENAME
 
@@ -122,8 +163,9 @@ def build_bundle(family: str = "lightgbm") -> LoanDecisionModel:
     result = metrics["results"][family]
     selected = next(row for row in cv["selected"] if row["family"] == family)
 
+    pipeline = joblib.load(path_of("models_dir") / f"{family}.joblib")
     bundle = LoanDecisionModel(
-        pipeline=joblib.load(path_of("models_dir") / f"{family}.joblib"),
+        pipeline=pipeline,
         calibrator=joblib.load(path_of("calibrators_dir") / f"{family}.joblib"),
         profit=ProfitModel(
             lgd=metrics["profit_model"]["lgd"],
@@ -136,6 +178,7 @@ def build_bundle(family: str = "lightgbm") -> LoanDecisionModel:
             lgd=metrics["profit_model"]["lgd"],
             prepay_factor=metrics["profit_model"]["prepay_factor"],
             feature_columns=feature_columns(params),
+            categorical_vocabulary=categorical_vocabulary(pipeline, params),
             train_window=params["split"]["train"],
             cv_log_loss=selected["cv"]["log_loss"],
             test_return_per_dollar=result["policies"]["threshold"]["return_per_dollar"],

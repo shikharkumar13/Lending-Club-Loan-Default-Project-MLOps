@@ -89,6 +89,15 @@ deleted, so the history stays readable.
 | [D-069](#d-069-the-html-report-is-written-for-three-months-not-thirty-six) | The HTML report is written for three months, not thirty-six | Monitoring | Accepted | 2026-09-23 |
 | [D-070](#d-070-documentation-that-can-be-re-run) | Documentation that can be re-run, not prose | Docs | Accepted | 2026-09-23 |
 | [D-071](#d-071-addr_state-is-a-proxy-that-earns-nothing) | `addr_state` is a proxy that earns nothing | Fairness | **Open** | 2026-09-23 |
+| [D-072](#d-072-closed-category-sets-are-rejected-valid-but-unseen-values-are-not) | Closed category sets are rejected; valid-but-unseen values are not | Serving | Accepted | 2026-09-23 |
+| [D-073](#d-073-cross-field-validation-catches-what-per-field-checks-cannot) | Cross-field validation catches what per-field checks cannot | Serving | Accepted | 2026-09-23 |
+| [D-074](#d-074-funding-requires-both-a-low-score-and-a-positive-expected-return) | Funding requires both a low score and a positive expected return | Business | Accepted | 2026-09-23 |
+| [D-075](#d-075-a-missing-model-is-503-not-500) | A missing model is 503, not 500 | Serving | Accepted | 2026-09-23 |
+| [D-076](#d-076-the-calibration-split-date-belongs-in-paramsyaml) | The calibration split date belongs in params.yaml | Tooling | Accepted | 2026-09-23 |
+| [D-077](#d-077-lightgbm-runs-in-deterministic-mode) | LightGBM runs in deterministic mode | Validation | Accepted | 2026-09-23 |
+| [D-078](#d-078-class_weightbalanced-is-removed-from-the-grid-not-searched) | `class_weight=balanced` is removed from the grid, not searched | Modeling | Accepted | 2026-09-23 |
+| [D-079](#d-079-per-fold-scores-are-kept-and-compared-in-pairs) | Per-fold scores are kept, and compared in pairs | Validation | Accepted | 2026-09-23 |
+| [D-080](#d-080-policy-tuning-cannot-reach-the-test-year) | Policy tuning cannot reach the test year | Validation | Accepted | 2026-09-23 |
 
 ---
 
@@ -936,6 +945,117 @@ deleted, so the history stays readable.
   so it is the owner's call rather than something to slip into a docs phase.
 - **Revisit if:** the model is ever used for anything resembling an approval
   decision — at that point this stops being a recommendation.
+
+### D-072: Closed category sets are rejected; valid-but-unseen values are not
+- **Decision:** `home_ownership`, `verification_status`, `purpose` and
+  `emp_length` are Pydantic `Literal`s built from the training vocabulary, so
+  an unknown value returns 422. `addr_state` is validated against the 51 real
+  USPS codes instead. The bundle records what the fitted encoder actually saw,
+  and the API compares its schema against that at startup.
+- **Why:** before this, `home_ownership="MORGAGE"` returned **HTTP 200** with a
+  confident decision. The `OneHotEncoder(handle_unknown="infrequent_if_exist")`
+  that stops this crashing (D-018) is exactly what removes the error signal: an
+  upstream rename would shift every prediction with nothing to alarm on.
+- **Why `addr_state` is different:** the training data contains 50 states, not
+  51 — North Dakota never appears before 2016. Validating against the training
+  vocabulary would 422 every genuine North Dakota application. A real state the
+  model has not seen is a business event for the drift monitor to report
+  (D-068), not a client error.
+- **Why the startup check warns instead of failing:** a retraining window that
+  happened to contain no `renewable_energy` loans would otherwise take the
+  service down. The gap is logged and exposed on `/model`. Refusing to start
+  would be a worse failure than the one it prevents.
+
+### D-073: Cross-field validation catches what per-field checks cannot
+- **Decision:** reject a listing whose `fico_range_high` is below
+  `fico_range_low`, or whose `installment` differs by more than 5% from the
+  amortization formula implied by amount, rate and term.
+- **Why:** every field can be individually valid while the combination is
+  impossible. Measured on the real data: the amortization formula reproduces
+  the stated installment to within 0.01% for 99% of loans, but **1,015 loans
+  (0.16%) are off by more than 1%** — one lists a $14.77 monthly payment on
+  $6,000 at 6.89%, where the true payment is $185.
+- **Consequence:** those rows produced `decision: "fund"` alongside an expected
+  return of **-$13,066**. Garbage in, confident answer out.
+- **Found a second bug:** the test fixture for "a riskier borrower" raised
+  `int_rate` to 28% while leaving the 11.99% installment in place. It had been
+  passing for weeks against an internally impossible loan.
+
+### D-074: Funding requires both a low score and a positive expected return
+- **Decision:** `decide()` funds only when `risk_score < threshold` **and**
+  `expected_return_usd > 0`, and the response carries a `decision_basis` field
+  naming the rule that applied. The same floor is applied to the offline
+  `threshold` policy so the report and the container describe one policy.
+- **Why:** the service returned `decision` and `expected_return_usd` side by
+  side with no stated relationship, and the decision ignored the expected
+  return entirely. Any consumer would read them as consistent. They were not:
+  on the test year **10 of 187,752 funded loans had a negative expected
+  return**.
+- **Cost of the floor:** those same 10 loans, out of 283,026. Headline returns
+  are unchanged to four decimals. The threshold is what binds in practice,
+  because at these interest rates almost every loan has positive expected
+  value (the reason the pure EV rule funds 99.9%).
+- **Rejected:** deleting `expected_return_usd` from the response. It is the
+  number that makes the decision auditable in dollars; the fix is to make it
+  binding, not to hide it.
+
+### D-075: A missing model is 503, not 500
+- **Decision:** every handler reads the bundle through `_bundle()`, which
+  raises 503 when it is absent.
+- **Why:** `/health` already did this, but `/predict` and `/model` indexed the
+  state dict directly, so a request arriving before the model finished loading
+  produced a `KeyError` and a 500. Load balancers treat 503 as "not ready,
+  retry" and 500 as "broken, page someone" — the wrong code turns a recoverable
+  startup race into an incident.
+
+### D-076: The calibration split date belongs in params.yaml
+- **Decision:** the 2014 H1/H2 boundary moved from a literal in `evaluate.py`
+  to `split.calibration_end`. Also moved: the promotion margin, the API batch
+  limit, and the fairness group-size thresholds.
+- **Why:** `params.yaml` opens by declaring that anything a human might change
+  lives there. The calibration boundary is a substantive methodological choice,
+  and while it was hardcoded, **DVC could not see it** — changing it would not
+  have triggered a rerun, silently breaking the reproducibility the pipeline
+  exists to provide.
+
+### D-077: LightGBM runs in deterministic mode
+- **Decision:** `deterministic: true` and `force_row_wise: true`.
+- **Why:** `n_jobs: -1` without them lets multithreaded histogram construction
+  vary with thread count and machine. The project reports log loss to five
+  decimals and promotes on a 0.0005 margin, so results that drift in the fourth
+  decimal between machines are not good enough.
+
+### D-078: `class_weight=balanced` is removed from the grid, not searched
+- **Decision:** deleted from the logistic-regression grid.
+- **Why:** measured at **0.632 log loss against 0.353** — it optimises the
+  wrong objective and destroys the calibration the profit rule depends on.
+  Searching a known-catastrophic option every run wasted half the budget, and
+  left a trap: under a ranking metric like AUC it is *not* penalised, so a
+  future change of tuning metric would have quietly selected it.
+
+### D-079: Per-fold scores are kept, and compared in pairs
+- **Decision:** `cv_results.json` keeps `per_fold` for every candidate, records
+  the search budget per family, and adds a paired fold-by-fold comparison.
+- **Why:** the headline gap between LightGBM and logistic regression is
+  **0.00173** log loss, while the spread between folds is **0.026** — fifteen
+  times larger, because 2011, 2012 and 2013 are genuinely different years. That
+  spread is common to both models, so the honest test is paired. The old report
+  stripped `per_fold` before writing, making it impossible to check.
+- **What it shows:** LightGBM wins **3 of 3 folds**, mean +0.00173 with a
+  standard deviation of 0.00197 across folds. A consistent winner by a margin
+  comparable to its own variation — stated that way rather than as a clean win.
+- **Search budgets are unequal** (20 LightGBM configs, 3 logistic regression, 1
+  baseline) and now recorded in the report, because the winner of 20 draws is
+  optimistically biased relative to the winner of 3.
+
+### D-080: Policy tuning cannot reach the test year
+- **Decision:** calibration and threshold selection moved into `tune_policy()`,
+  which receives the calibration and tuning frames by name and is never given
+  the test frame. The test year is scored only after it returns.
+- **Why:** "the test set is scored once" was the project's most important
+  claim and the only one with no structural support — everything lived in one
+  scope alongside `raw_test`, so it held by careful reading. Now a leak would
+  have to be added deliberately.
 
 ---
 
