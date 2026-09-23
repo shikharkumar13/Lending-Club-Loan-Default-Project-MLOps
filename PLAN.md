@@ -260,7 +260,8 @@ lending-club-default/
 - Define a retraining trigger (e.g. drift share > threshold for 2 months in
   a row)
 - **Done when:** monthly drift reports are generated and the trigger logic is
-  written down and tested.
+  written down and tested. *(Done: 36 monthly batches, 988,585 loans, 18 tests;
+  D-064..D-069.)*
 
 ### Phase 8: Documentation
 - README: problem, approach, results table, architecture diagram, how to run

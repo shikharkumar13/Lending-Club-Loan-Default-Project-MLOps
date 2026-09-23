@@ -28,6 +28,7 @@ train = [
     "seaborn>=0.13",
     "dvc>=3.55",            # data + pipeline versioning
     "prefect>=3.8.6",
+    "evidently>=0.7",
 ]
 dev = [
     "pytest>=8.3",

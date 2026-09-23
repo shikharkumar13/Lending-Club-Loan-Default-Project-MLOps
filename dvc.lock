@@ -372,3 +372,126 @@ stages:
       md5: f1869fb5936a58cdeb55d67327626838.dir
       size: 1038727
       nfiles: 2
+  monitor_batches:
+    cmd: python -m lending_club.monitoring.batches
+    deps:
+    - path: artifacts/bundle
+      hash: md5
+      md5: f1869fb5936a58cdeb55d67327626838.dir
+      size: 1038727
+      nfiles: 2
+    - path: data/interim/accepted_raw.parquet
+      hash: md5
+      md5: 815d6f6858f5089add6ee16fdb5c512d
+      size: 79016287
+    - path: src/lending_club/monitoring/batches.py
+      hash: md5
+      md5: 114d3efbaf978e60fbd12415bc9344ea
+      size: 5129
+    params:
+      params.yaml:
+        data.terms_months:
+        - 36
+        monitoring.end: '2018-12-01'
+        monitoring.start: '2016-01-01'
+    outs:
+    - path: data/monitoring
+      hash: md5
+      md5: de93c85d32c71ab435045aca09b05342.dir
+      size: 57259538
+      nfiles: 36
+  drift:
+    cmd: python -m lending_club.monitoring.drift
+    deps:
+    - path: artifacts/bundle
+      hash: md5
+      md5: f1869fb5936a58cdeb55d67327626838.dir
+      size: 1038727
+      nfiles: 2
+    - path: data/monitoring
+      hash: md5
+      md5: de93c85d32c71ab435045aca09b05342.dir
+      size: 57259538
+      nfiles: 36
+    - path: data/processed
+      hash: md5
+      md5: 6d8c0a392d8acd0867d28c058dc0db44.dir
+      size: 33593025
+      nfiles: 3
+    - path: src/lending_club/monitoring/drift.py
+      hash: md5
+      md5: 94f9c1372c9cf5eaf3be122f80fc2185
+      size: 9632
+    - path: src/lending_club/monitoring/trigger.py
+      hash: md5
+      md5: af20388d4f9e76f73e558d801761988f
+      size: 5666
+    params:
+      params.yaml:
+        features.groups:
+          skewed_amount:
+          - annual_inc
+          - revol_bal
+          numeric:
+          - loan_amnt
+          - int_rate
+          - installment
+          - dti
+          - delinq_2yrs
+          - inq_last_6mths
+          - open_acc
+          - pub_rec
+          - total_acc
+          - acc_now_delinq
+          - collections_12_mths_ex_med
+          - fico_mid
+          - credit_history_months
+          - loan_to_income
+          - installment_to_income
+          numeric_with_indicator:
+          - emp_length_years
+          - pub_rec_bankruptcies
+          - revol_util
+          structural_missing:
+          - mths_since_last_delinq
+          - mths_since_last_record
+          ordinal:
+            grade:
+            - A
+            - B
+            - C
+            - D
+            - E
+            - F
+            - G
+            sub_grade:
+          nominal:
+          - home_ownership
+          - verification_status
+          - purpose
+          - addr_state
+          - initial_list_status
+          boolean:
+          - not_credit_policy
+        monitoring:
+          start: '2016-01-01'
+          end: '2018-12-01'
+          reference_split: train
+          drift:
+            num_method: wasserstein
+            cat_method: jensenshannon
+            threshold: 0.15
+          html_months:
+          - 2016-01
+          - 2017-06
+          - 2018-12
+          trigger:
+            drift_share: 0.3
+            prediction_drift: 0.15
+            consecutive_months: 2
+            max_missing_increase: 0.2
+    outs:
+    - path: reports/monitoring/drift.json
+      hash: md5
+      md5: dd7bc874089e2abcd94122b7432c354b
+      size: 35461

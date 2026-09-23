@@ -1,0 +1,1494 @@
+{
+  "reference": {
+    "split": "train",
+    "loans": 175426
+  },
+  "config": {
+    "drift_share": 0.3,
+    "prediction_drift": 0.15,
+    "consecutive_months": 2,
+    "max_missing_increase": 0.2,
+    "num_method": "wasserstein",
+    "cat_method": "jensenshannon",
+    "threshold": 0.15
+  },
+  "batches": [
+    {
+      "batch": "2016-01",
+      "loans": 22675,
+      "drift_share": 0.5667,
+      "prediction_drift": 0.2484,
+      "drifted_columns": [
+        "annual_inc",
+        "collections_12_mths_ex_med",
+        "credit_history_months",
+        "delinq_2yrs",
+        "dti",
+        "initial_list_status",
+        "inq_last_6mths",
+        "installment",
+        "int_rate",
+        "loan_amnt",
+        "mths_since_last_record",
+        "open_acc",
+        "pub_rec",
+        "pub_rec_bankruptcies",
+        "revol_bal",
+        "revol_util",
+        "total_acc"
+      ],
+      "fund_rate": 0.7352,
+      "mean_probability": 0.1139,
+      "outcome_known": 0.9937,
+      "missing_increase": {
+        "emp_length_years": 0.0267
+      },
+      "new_categories": {
+        "addr_state": [
+          "ND"
+        ]
+      }
+    },
+    {
+      "batch": "2016-02",
+      "loans": 28609,
+      "drift_share": 0.5,
+      "prediction_drift": 0.1434,
+      "drifted_columns": [
+        "annual_inc",
+        "collections_12_mths_ex_med",
+        "credit_history_months",
+        "delinq_2yrs",
+        "dti",
+        "initial_list_status",
+        "inq_last_6mths",
+        "installment",
+        "int_rate",
+        "loan_amnt",
+        "mths_since_last_record",
+        "open_acc",
+        "pub_rec",
+        "pub_rec_bankruptcies",
+        "revol_util"
+      ],
+      "fund_rate": 0.6918,
+      "mean_probability": 0.1215,
+      "outcome_known": 0.9844,
+      "missing_increase": {
+        "emp_length_years": 0.0322
+      },
+      "new_categories": {
+        "addr_state": [
+          "ND"
+        ]
+      }
+    },
+    {
+      "batch": "2016-03",
+      "loans": 44836,
+      "drift_share": 0.5667,
+      "prediction_drift": 0.1131,
+      "drifted_columns": [
+        "collections_12_mths_ex_med",
+        "credit_history_months",
+        "delinq_2yrs",
+        "dti",
+        "initial_list_status",
+        "inq_last_6mths",
+        "installment",
+        "installment_to_income",
+        "int_rate",
+        "loan_amnt",
+        "loan_to_income",
+        "mths_since_last_record",
+        "open_acc",
+        "pub_rec",
+        "pub_rec_bankruptcies",
+        "revol_util",
+        "verification_status"
+      ],
+      "fund_rate": 0.6567,
+      "mean_probability": 0.1258,
+      "outcome_known": 0.8718,
+      "missing_increase": {
+        "dti": 0.0002,
+        "loan_to_income": 0.0002,
+        "installment_to_income": 0.0002,
+        "emp_length_years": 0.0375
+      },
+      "new_categories": {
+        "addr_state": [
+          "ND"
+        ]
+      }
+    },
+    {
+      "batch": "2016-04",
+      "loans": 28106,
+      "drift_share": 0.5333,
+      "prediction_drift": 0.0936,
+      "drifted_columns": [
+        "collections_12_mths_ex_med",
+        "credit_history_months",
+        "delinq_2yrs",
+        "dti",
+        "initial_list_status",
+        "inq_last_6mths",
+        "installment_to_income",
+        "int_rate",
+        "loan_amnt",
+        "loan_to_income",
+        "mths_since_last_record",
+        "open_acc",
+        "pub_rec",
+        "pub_rec_bankruptcies",
+        "revol_util",
+        "verification_status"
+      ],
+      "fund_rate": 0.6476,
+      "mean_probability": 0.1271,
+      "outcome_known": 0.6921,
+      "missing_increase": {
+        "dti": 0.0003,
+        "loan_to_income": 0.0002,
+        "installment_to_income": 0.0002,
+        "emp_length_years": 0.0393
+      },
+      "new_categories": {
+        "addr_state": [
+          "ND"
+        ]
+      }
+    },
+    {
+      "batch": "2016-05",
+      "loans": 21831,
+      "drift_share": 0.5,
+      "prediction_drift": 0.0593,
+      "drifted_columns": [
+        "collections_12_mths_ex_med",
+        "credit_history_months",
+        "delinq_2yrs",
+        "dti",
+        "fico_mid",
+        "initial_list_status",
+        "inq_last_6mths",
+        "int_rate",
+        "loan_amnt",
+        "mths_since_last_record",
+        "open_acc",
+        "pub_rec",
+        "pub_rec_bankruptcies",
+        "revol_util",
+        "verification_status"
+      ],
+      "fund_rate": 0.6348,
+      "mean_probability": 0.131,
+      "outcome_known": 0.6716,
+      "missing_increase": {
+        "dti": 0.0002,
+        "loan_to_income": 0.0002,
+        "installment_to_income": 0.0002,
+        "emp_length_years": 0.0346
+      },
+      "new_categories": {
+        "addr_state": [
+          "ND"
+        ]
+      }
+    },
+    {
+      "batch": "2016-06",
+      "loans": 24600,
+      "drift_share": 0.5,
+      "prediction_drift": 0.2289,
+      "drifted_columns": [
+        "annual_inc",
+        "collections_12_mths_ex_med",
+        "credit_history_months",
+        "delinq_2yrs",
+        "dti",
+        "initial_list_status",
+        "inq_last_6mths",
+        "int_rate",
+        "loan_amnt",
+        "mths_since_last_record",
+        "open_acc",
+        "pub_rec",
+        "pub_rec_bankruptcies",
+        "revol_util",
+        "verification_status"
+      ],
+      "fund_rate": 0.7283,
+      "mean_probability": 0.1154,
+      "outcome_known": 0.6581,
+      "missing_increase": {
+        "dti": 0.0001,
+        "emp_length_years": 0.0165
+      },
+      "new_categories": {
+        "addr_state": [
+          "ND"
+        ]
+      }
+    },
+    {
+      "batch": "2016-07",
+      "loans": 25375,
+      "drift_share": 0.4333,
+      "prediction_drift": 0.0341,
+      "drifted_columns": [
+        "collections_12_mths_ex_med",
+        "delinq_2yrs",
+        "dti",
+        "fico_mid",
+        "initial_list_status",
+        "inq_last_6mths",
+        "int_rate",
+        "mths_since_last_record",
+        "open_acc",
+        "pub_rec",
+        "pub_rec_bankruptcies",
+        "revol_util",
+        "verification_status"
+      ],
+      "fund_rate": 0.6456,
+      "mean_probability": 0.132,
+      "outcome_known": 0.6537,
+      "missing_increase": {
+        "emp_length_years": 0.0228
+      },
+      "new_categories": {
+        "home_ownership": [
+          "ANY"
+        ],
+        "addr_state": [
+          "ND"
+        ]
+      }
+    },
+    {
+      "batch": "2016-08",
+      "loans": 27181,
+      "drift_share": 0.4667,
+      "prediction_drift": 0.0519,
+      "drifted_columns": [
+        "collections_12_mths_ex_med",
+        "credit_history_months",
+        "delinq_2yrs",
+        "dti",
+        "fico_mid",
+        "initial_list_status",
+        "inq_last_6mths",
+        "int_rate",
+        "mths_since_last_record",
+        "open_acc",
+        "pub_rec",
+        "pub_rec_bankruptcies",
+        "revol_util",
+        "verification_status"
+      ],
+      "fund_rate": 0.6603,
+      "mean_probability": 0.1305,
+      "outcome_known": 0.6385,
+      "missing_increase": {
+        "emp_length_years": 0.0224
+      },
+      "new_categories": {
+        "home_ownership": [
+          "ANY"
+        ],
+        "addr_state": [
+          "ND"
+        ]
+      }
+    },
+    {
+      "batch": "2016-09",
+      "loans": 21342,
+      "drift_share": 0.5667,
+      "prediction_drift": 0.0314,
+      "drifted_columns": [
+        "collections_12_mths_ex_med",
+        "credit_history_months",
+        "delinq_2yrs",
+        "dti",
+        "fico_mid",
+        "initial_list_status",
+        "inq_last_6mths",
+        "installment",
+        "installment_to_income",
+        "loan_amnt",
+        "loan_to_income",
+        "mths_since_last_record",
+        "open_acc",
+        "pub_rec",
+        "pub_rec_bankruptcies",
+        "revol_util",
+        "verification_status"
+      ],
+      "fund_rate": 0.6362,
+      "mean_probability": 0.1322,
+      "outcome_known": 0.6198,
+      "missing_increase": {
+        "dti": 0.0001,
+        "loan_to_income": 0.0001,
+        "installment_to_income": 0.0001,
+        "emp_length_years": 0.0231
+      },
+      "new_categories": {
+        "home_ownership": [
+          "ANY"
+        ],
+        "addr_state": [
+          "ND"
+        ]
+      }
+    },
+    {
+      "batch": "2016-10",
+      "loans": 24746,
+      "drift_share": 0.6,
+      "prediction_drift": 0.0492,
+      "drifted_columns": [
+        "annual_inc",
+        "collections_12_mths_ex_med",
+        "credit_history_months",
+        "delinq_2yrs",
+        "dti",
+        "initial_list_status",
+        "inq_last_6mths",
+        "installment",
+        "installment_to_income",
+        "int_rate",
+        "loan_amnt",
+        "loan_to_income",
+        "mths_since_last_record",
+        "open_acc",
+        "pub_rec",
+        "pub_rec_bankruptcies",
+        "revol_util",
+        "verification_status"
+      ],
+      "fund_rate": 0.6626,
+      "mean_probability": 0.1285,
+      "outcome_known": 0.599,
+      "missing_increase": {
+        "dti": 0.0002,
+        "loan_to_income": 0.0001,
+        "installment_to_income": 0.0001,
+        "emp_length_years": 0.0245
+      },
+      "new_categories": {
+        "home_ownership": [
+          "ANY"
+        ],
+        "addr_state": [
+          "ND"
+        ]
+      }
+    },
+    {
+      "batch": "2016-11",
+      "loans": 26209,
+      "drift_share": 0.6,
+      "prediction_drift": 0.0378,
+      "drifted_columns": [
+        "annual_inc",
+        "collections_12_mths_ex_med",
+        "credit_history_months",
+        "delinq_2yrs",
+        "dti",
+        "fico_mid",
+        "initial_list_status",
+        "inq_last_6mths",
+        "installment",
+        "installment_to_income",
+        "int_rate",
+        "loan_to_income",
+        "mths_since_last_record",
+        "open_acc",
+        "pub_rec",
+        "pub_rec_bankruptcies",
+        "revol_util",
+        "verification_status"
+      ],
+      "fund_rate": 0.6536,
+      "mean_probability": 0.1294,
+      "outcome_known": 0.5695,
+      "missing_increase": {
+        "dti": 0.0002,
+        "loan_to_income": 0.0001,
+        "installment_to_income": 0.0001,
+        "emp_length_years": 0.0282
+      },
+      "new_categories": {
+        "home_ownership": [
+          "ANY"
+        ],
+        "addr_state": [
+          "ND"
+        ]
+      }
+    },
+    {
+      "batch": "2016-12",
+      "loans": 27985,
+      "drift_share": 0.6,
+      "prediction_drift": 0.0324,
+      "drifted_columns": [
+        "collections_12_mths_ex_med",
+        "credit_history_months",
+        "delinq_2yrs",
+        "dti",
+        "fico_mid",
+        "initial_list_status",
+        "inq_last_6mths",
+        "installment",
+        "installment_to_income",
+        "int_rate",
+        "loan_amnt",
+        "loan_to_income",
+        "mths_since_last_record",
+        "open_acc",
+        "pub_rec",
+        "pub_rec_bankruptcies",
+        "revol_util",
+        "verification_status"
+      ],
+      "fund_rate": 0.6297,
+      "mean_probability": 0.1337,
+      "outcome_known": 0.5487,
+      "missing_increase": {
+        "dti": 0.0004,
+        "loan_to_income": 0.0002,
+        "installment_to_income": 0.0002,
+        "emp_length_years": 0.038
+      },
+      "new_categories": {
+        "home_ownership": [
+          "ANY"
+        ],
+        "addr_state": [
+          "ND"
+        ]
+      }
+    },
+    {
+      "batch": "2017-01",
+      "loans": 24152,
+      "drift_share": 0.6,
+      "prediction_drift": 0.0528,
+      "drifted_columns": [
+        "annual_inc",
+        "collections_12_mths_ex_med",
+        "credit_history_months",
+        "delinq_2yrs",
+        "dti",
+        "initial_list_status",
+        "inq_last_6mths",
+        "installment",
+        "installment_to_income",
+        "int_rate",
+        "loan_amnt",
+        "loan_to_income",
+        "mths_since_last_record",
+        "open_acc",
+        "pub_rec",
+        "pub_rec_bankruptcies",
+        "revol_util",
+        "verification_status"
+      ],
+      "fund_rate": 0.6548,
+      "mean_probability": 0.1282,
+      "outcome_known": 0.5349,
+      "missing_increase": {
+        "dti": 0.0002,
+        "loan_to_income": 0.0001,
+        "installment_to_income": 0.0001,
+        "emp_length_years": 0.0306
+      },
+      "new_categories": {
+        "home_ownership": [
+          "ANY"
+        ],
+        "addr_state": [
+          "ND"
+        ]
+      }
+    },
+    {
+      "batch": "2017-02",
+      "loans": 20453,
+      "drift_share": 0.5333,
+      "prediction_drift": 0.0706,
+      "drifted_columns": [
+        "annual_inc",
+        "collections_12_mths_ex_med",
+        "credit_history_months",
+        "delinq_2yrs",
+        "dti",
+        "initial_list_status",
+        "inq_last_6mths",
+        "installment",
+        "int_rate",
+        "loan_amnt",
+        "mths_since_last_record",
+        "open_acc",
+        "pub_rec",
+        "pub_rec_bankruptcies",
+        "revol_util",
+        "verification_status"
+      ],
+      "fund_rate": 0.6596,
+      "mean_probability": 0.1268,
+      "outcome_known": 0.5092,
+      "missing_increase": {
+        "dti": 0.0001,
+        "loan_to_income": 0.0001,
+        "installment_to_income": 0.0001,
+        "emp_length_years": 0.0402
+      },
+      "new_categories": {
+        "home_ownership": [
+          "ANY"
+        ],
+        "addr_state": [
+          "ND"
+        ]
+      }
+    },
+    {
+      "batch": "2017-03",
+      "loans": 27805,
+      "drift_share": 0.6,
+      "prediction_drift": 0.1008,
+      "drifted_columns": [
+        "annual_inc",
+        "collections_12_mths_ex_med",
+        "credit_history_months",
+        "delinq_2yrs",
+        "dti",
+        "initial_list_status",
+        "inq_last_6mths",
+        "installment",
+        "installment_to_income",
+        "int_rate",
+        "loan_amnt",
+        "loan_to_income",
+        "mths_since_last_record",
+        "open_acc",
+        "pub_rec",
+        "pub_rec_bankruptcies",
+        "revol_util",
+        "verification_status"
+      ],
+      "fund_rate": 0.6705,
+      "mean_probability": 0.1246,
+      "outcome_known": 0.4762,
+      "missing_increase": {
+        "dti": 0.0003,
+        "loan_to_income": 0.0003,
+        "installment_to_income": 0.0003,
+        "emp_length_years": 0.036
+      },
+      "new_categories": {
+        "home_ownership": [
+          "ANY"
+        ],
+        "addr_state": [
+          "ND"
+        ]
+      }
+    },
+    {
+      "batch": "2017-04",
+      "loans": 21864,
+      "drift_share": 0.5667,
+      "prediction_drift": 0.0782,
+      "drifted_columns": [
+        "annual_inc",
+        "collections_12_mths_ex_med",
+        "credit_history_months",
+        "delinq_2yrs",
+        "dti",
+        "initial_list_status",
+        "inq_last_6mths",
+        "installment",
+        "installment_to_income",
+        "int_rate",
+        "loan_amnt",
+        "loan_to_income",
+        "mths_since_last_record",
+        "open_acc",
+        "pub_rec",
+        "pub_rec_bankruptcies",
+        "revol_util"
+      ],
+      "fund_rate": 0.6626,
+      "mean_probability": 0.1262,
+      "outcome_known": 0.4605,
+      "missing_increase": {
+        "dti": 0.0009,
+        "loan_to_income": 0.0008,
+        "installment_to_income": 0.0008,
+        "emp_length_years": 0.0338
+      },
+      "new_categories": {
+        "home_ownership": [
+          "ANY"
+        ],
+        "addr_state": [
+          "ND"
+        ]
+      }
+    },
+    {
+      "batch": "2017-05",
+      "loans": 27456,
+      "drift_share": 0.5667,
+      "prediction_drift": 0.0892,
+      "drifted_columns": [
+        "collections_12_mths_ex_med",
+        "credit_history_months",
+        "delinq_2yrs",
+        "dti",
+        "initial_list_status",
+        "inq_last_6mths",
+        "installment",
+        "installment_to_income",
+        "int_rate",
+        "loan_amnt",
+        "loan_to_income",
+        "mths_since_last_record",
+        "open_acc",
+        "pub_rec",
+        "pub_rec_bankruptcies",
+        "revol_util",
+        "verification_status"
+      ],
+      "fund_rate": 0.667,
+      "mean_probability": 0.1254,
+      "outcome_known": 0.4516,
+      "missing_increase": {
+        "dti": 0.0005,
+        "loan_to_income": 0.0004,
+        "installment_to_income": 0.0004,
+        "emp_length_years": 0.0291
+      },
+      "new_categories": {
+        "addr_state": [
+          "ND"
+        ]
+      }
+    },
+    {
+      "batch": "2017-06",
+      "loans": 27785,
+      "drift_share": 0.5333,
+      "prediction_drift": 0.1293,
+      "drifted_columns": [
+        "collections_12_mths_ex_med",
+        "credit_history_months",
+        "delinq_2yrs",
+        "dti",
+        "initial_list_status",
+        "inq_last_6mths",
+        "installment",
+        "installment_to_income",
+        "int_rate",
+        "loan_amnt",
+        "loan_to_income",
+        "mths_since_last_record",
+        "open_acc",
+        "pub_rec",
+        "pub_rec_bankruptcies",
+        "revol_util"
+      ],
+      "fund_rate": 0.6875,
+      "mean_probability": 0.1225,
+      "outcome_known": 0.4194,
+      "missing_increase": {
+        "dti": 0.0008,
+        "loan_to_income": 0.0008,
+        "installment_to_income": 0.0008,
+        "emp_length_years": 0.0221
+      },
+      "new_categories": {
+        "home_ownership": [
+          "ANY"
+        ],
+        "addr_state": [
+          "ND"
+        ]
+      }
+    },
+    {
+      "batch": "2017-07",
+      "loans": 28738,
+      "drift_share": 0.5333,
+      "prediction_drift": 0.0997,
+      "drifted_columns": [
+        "collections_12_mths_ex_med",
+        "credit_history_months",
+        "delinq_2yrs",
+        "dti",
+        "initial_list_status",
+        "inq_last_6mths",
+        "installment",
+        "installment_to_income",
+        "int_rate",
+        "loan_amnt",
+        "loan_to_income",
+        "mths_since_last_record",
+        "open_acc",
+        "pub_rec",
+        "pub_rec_bankruptcies",
+        "revol_util"
+      ],
+      "fund_rate": 0.6723,
+      "mean_probability": 0.1246,
+      "outcome_known": 0.3954,
+      "missing_increase": {
+        "dti": 0.0008,
+        "loan_to_income": 0.0006,
+        "installment_to_income": 0.0006,
+        "emp_length_years": 0.0261
+      },
+      "new_categories": {
+        "home_ownership": [
+          "ANY"
+        ],
+        "addr_state": [
+          "ND"
+        ]
+      }
+    },
+    {
+      "batch": "2017-08",
+      "loans": 32595,
+      "drift_share": 0.5667,
+      "prediction_drift": 0.0825,
+      "drifted_columns": [
+        "collections_12_mths_ex_med",
+        "credit_history_months",
+        "delinq_2yrs",
+        "dti",
+        "initial_list_status",
+        "inq_last_6mths",
+        "installment",
+        "installment_to_income",
+        "int_rate",
+        "loan_amnt",
+        "loan_to_income",
+        "mths_since_last_record",
+        "open_acc",
+        "pub_rec",
+        "pub_rec_bankruptcies",
+        "revol_util",
+        "verification_status"
+      ],
+      "fund_rate": 0.6689,
+      "mean_probability": 0.1258,
+      "outcome_known": 0.3709,
+      "missing_increase": {
+        "dti": 0.0015,
+        "loan_to_income": 0.0014,
+        "installment_to_income": 0.0014,
+        "emp_length_years": 0.032,
+        "revol_util": 0.0002
+      },
+      "new_categories": {
+        "home_ownership": [
+          "ANY"
+        ],
+        "addr_state": [
+          "ND"
+        ]
+      }
+    },
+    {
+      "batch": "2017-09",
+      "loans": 26894,
+      "drift_share": 0.5,
+      "prediction_drift": 0.0701,
+      "drifted_columns": [
+        "collections_12_mths_ex_med",
+        "credit_history_months",
+        "dti",
+        "initial_list_status",
+        "inq_last_6mths",
+        "installment",
+        "installment_to_income",
+        "int_rate",
+        "loan_amnt",
+        "loan_to_income",
+        "mths_since_last_record",
+        "open_acc",
+        "pub_rec",
+        "pub_rec_bankruptcies",
+        "revol_util"
+      ],
+      "fund_rate": 0.6534,
+      "mean_probability": 0.1286,
+      "outcome_known": 0.3537,
+      "missing_increase": {
+        "dti": 0.0017,
+        "loan_to_income": 0.0014,
+        "installment_to_income": 0.0014,
+        "emp_length_years": 0.0447,
+        "revol_util": 0.0004
+      },
+      "new_categories": {
+        "home_ownership": [
+          "ANY"
+        ],
+        "addr_state": [
+          "ND"
+        ]
+      }
+    },
+    {
+      "batch": "2017-10",
+      "loans": 26889,
+      "drift_share": 0.5,
+      "prediction_drift": 0.1288,
+      "drifted_columns": [
+        "collections_12_mths_ex_med",
+        "credit_history_months",
+        "dti",
+        "initial_list_status",
+        "inq_last_6mths",
+        "installment",
+        "installment_to_income",
+        "int_rate",
+        "loan_amnt",
+        "loan_to_income",
+        "mths_since_last_record",
+        "open_acc",
+        "pub_rec",
+        "pub_rec_bankruptcies",
+        "revol_util"
+      ],
+      "fund_rate": 0.6806,
+      "mean_probability": 0.1225,
+      "outcome_known": 0.3285,
+      "missing_increase": {
+        "dti": 0.0015,
+        "loan_to_income": 0.0013,
+        "installment_to_income": 0.0013,
+        "emp_length_years": 0.0413,
+        "revol_util": 0.0002
+      },
+      "new_categories": {
+        "home_ownership": [
+          "ANY"
+        ],
+        "addr_state": [
+          "ND"
+        ]
+      }
+    },
+    {
+      "batch": "2017-11",
+      "loans": 29656,
+      "drift_share": 0.5667,
+      "prediction_drift": 0.1755,
+      "drifted_columns": [
+        "collections_12_mths_ex_med",
+        "credit_history_months",
+        "dti",
+        "fico_mid",
+        "initial_list_status",
+        "inq_last_6mths",
+        "installment",
+        "installment_to_income",
+        "int_rate",
+        "loan_amnt",
+        "loan_to_income",
+        "mths_since_last_record",
+        "open_acc",
+        "pub_rec",
+        "pub_rec_bankruptcies",
+        "revol_util",
+        "total_acc"
+      ],
+      "fund_rate": 0.6959,
+      "mean_probability": 0.1191,
+      "outcome_known": 0.3008,
+      "missing_increase": {
+        "dti": 0.002,
+        "loan_to_income": 0.0018,
+        "installment_to_income": 0.0018,
+        "emp_length_years": 0.0478,
+        "revol_util": 0.0006
+      },
+      "new_categories": {
+        "addr_state": [
+          "ND"
+        ]
+      }
+    },
+    {
+      "batch": "2017-12",
+      "loans": 26132,
+      "drift_share": 0.5667,
+      "prediction_drift": 0.2059,
+      "drifted_columns": [
+        "collections_12_mths_ex_med",
+        "credit_history_months",
+        "dti",
+        "fico_mid",
+        "initial_list_status",
+        "inq_last_6mths",
+        "installment",
+        "installment_to_income",
+        "int_rate",
+        "loan_amnt",
+        "loan_to_income",
+        "mths_since_last_record",
+        "open_acc",
+        "pub_rec",
+        "pub_rec_bankruptcies",
+        "revol_util",
+        "total_acc"
+      ],
+      "fund_rate": 0.7074,
+      "mean_probability": 0.117,
+      "outcome_known": 0.2729,
+      "missing_increase": {
+        "dti": 0.0018,
+        "loan_to_income": 0.0016,
+        "installment_to_income": 0.0016,
+        "emp_length_years": 0.0483,
+        "revol_util": 0.0011
+      },
+      "new_categories": {
+        "addr_state": [
+          "ND"
+        ]
+      }
+    },
+    {
+      "batch": "2018-01",
+      "loans": 25413,
+      "drift_share": 0.6,
+      "prediction_drift": 0.2538,
+      "drifted_columns": [
+        "annual_inc",
+        "collections_12_mths_ex_med",
+        "credit_history_months",
+        "dti",
+        "fico_mid",
+        "initial_list_status",
+        "inq_last_6mths",
+        "installment",
+        "installment_to_income",
+        "int_rate",
+        "loan_amnt",
+        "loan_to_income",
+        "mths_since_last_record",
+        "open_acc",
+        "pub_rec",
+        "pub_rec_bankruptcies",
+        "revol_util",
+        "verification_status"
+      ],
+      "fund_rate": 0.7188,
+      "mean_probability": 0.1134,
+      "outcome_known": 0.2483,
+      "missing_increase": {
+        "dti": 0.0018,
+        "loan_to_income": 0.0016,
+        "installment_to_income": 0.0016,
+        "emp_length_years": 0.0451,
+        "revol_util": 0.0004
+      },
+      "new_categories": {
+        "home_ownership": [
+          "ANY"
+        ],
+        "addr_state": [
+          "ND"
+        ]
+      }
+    },
+    {
+      "batch": "2018-02",
+      "loans": 22846,
+      "drift_share": 0.5667,
+      "prediction_drift": 0.2042,
+      "drifted_columns": [
+        "collections_12_mths_ex_med",
+        "credit_history_months",
+        "dti",
+        "fico_mid",
+        "initial_list_status",
+        "inq_last_6mths",
+        "installment",
+        "installment_to_income",
+        "int_rate",
+        "loan_amnt",
+        "loan_to_income",
+        "mths_since_last_record",
+        "open_acc",
+        "pub_rec",
+        "pub_rec_bankruptcies",
+        "revol_util",
+        "total_acc"
+      ],
+      "fund_rate": 0.7037,
+      "mean_probability": 0.1172,
+      "outcome_known": 0.2145,
+      "missing_increase": {
+        "dti": 0.0025,
+        "loan_to_income": 0.002,
+        "installment_to_income": 0.002,
+        "emp_length_years": 0.0584,
+        "revol_util": 0.0002
+      },
+      "new_categories": {
+        "home_ownership": [
+          "ANY"
+        ],
+        "addr_state": [
+          "ND"
+        ]
+      }
+    },
+    {
+      "batch": "2018-03",
+      "loans": 27153,
+      "drift_share": 0.5333,
+      "prediction_drift": 0.2172,
+      "drifted_columns": [
+        "collections_12_mths_ex_med",
+        "credit_history_months",
+        "dti",
+        "fico_mid",
+        "initial_list_status",
+        "inq_last_6mths",
+        "installment",
+        "installment_to_income",
+        "int_rate",
+        "loan_amnt",
+        "loan_to_income",
+        "mths_since_last_record",
+        "open_acc",
+        "pub_rec",
+        "revol_util",
+        "verification_status"
+      ],
+      "fund_rate": 0.711,
+      "mean_probability": 0.1161,
+      "outcome_known": 0.1922,
+      "missing_increase": {
+        "dti": 0.0022,
+        "loan_to_income": 0.002,
+        "installment_to_income": 0.002,
+        "emp_length_years": 0.0519,
+        "revol_util": 0.0004
+      },
+      "new_categories": {
+        "home_ownership": [
+          "ANY"
+        ],
+        "addr_state": [
+          "ND"
+        ]
+      }
+    },
+    {
+      "batch": "2018-04",
+      "loans": 29972,
+      "drift_share": 0.5,
+      "prediction_drift": 0.2089,
+      "drifted_columns": [
+        "collections_12_mths_ex_med",
+        "credit_history_months",
+        "dti",
+        "fico_mid",
+        "initial_list_status",
+        "inq_last_6mths",
+        "installment",
+        "installment_to_income",
+        "int_rate",
+        "loan_amnt",
+        "loan_to_income",
+        "mths_since_last_record",
+        "open_acc",
+        "revol_util",
+        "verification_status"
+      ],
+      "fund_rate": 0.7029,
+      "mean_probability": 0.1168,
+      "outcome_known": 0.1693,
+      "missing_increase": {
+        "dti": 0.0019,
+        "loan_to_income": 0.0018,
+        "installment_to_income": 0.0018,
+        "emp_length_years": 0.0426,
+        "revol_util": 0.0003
+      },
+      "new_categories": {
+        "addr_state": [
+          "ND"
+        ]
+      }
+    },
+    {
+      "batch": "2018-05",
+      "loans": 32472,
+      "drift_share": 0.5333,
+      "prediction_drift": 0.2259,
+      "drifted_columns": [
+        "collections_12_mths_ex_med",
+        "dti",
+        "fico_mid",
+        "initial_list_status",
+        "inq_last_6mths",
+        "installment",
+        "installment_to_income",
+        "int_rate",
+        "loan_amnt",
+        "loan_to_income",
+        "mths_since_last_record",
+        "open_acc",
+        "pub_rec_bankruptcies",
+        "revol_util",
+        "total_acc",
+        "verification_status"
+      ],
+      "fund_rate": 0.7095,
+      "mean_probability": 0.1156,
+      "outcome_known": 0.1487,
+      "missing_increase": {
+        "dti": 0.0022,
+        "loan_to_income": 0.002,
+        "installment_to_income": 0.002,
+        "emp_length_years": 0.0416,
+        "revol_util": 0.0002
+      },
+      "new_categories": {
+        "home_ownership": [
+          "ANY"
+        ],
+        "addr_state": [
+          "ND"
+        ]
+      }
+    },
+    {
+      "batch": "2018-06",
+      "loans": 29062,
+      "drift_share": 0.5333,
+      "prediction_drift": 0.2517,
+      "drifted_columns": [
+        "collections_12_mths_ex_med",
+        "dti",
+        "fico_mid",
+        "initial_list_status",
+        "inq_last_6mths",
+        "installment",
+        "installment_to_income",
+        "int_rate",
+        "loan_amnt",
+        "loan_to_income",
+        "mths_since_last_record",
+        "open_acc",
+        "pub_rec_bankruptcies",
+        "revol_util",
+        "total_acc",
+        "verification_status"
+      ],
+      "fund_rate": 0.7179,
+      "mean_probability": 0.1138,
+      "outcome_known": 0.1247,
+      "missing_increase": {
+        "dti": 0.0021,
+        "loan_to_income": 0.0019,
+        "installment_to_income": 0.0019,
+        "emp_length_years": 0.0412,
+        "revol_util": 0.0001
+      },
+      "new_categories": {
+        "home_ownership": [
+          "ANY"
+        ],
+        "addr_state": [
+          "ND"
+        ]
+      }
+    },
+    {
+      "batch": "2018-07",
+      "loans": 30478,
+      "drift_share": 0.4667,
+      "prediction_drift": 0.2409,
+      "drifted_columns": [
+        "annual_inc",
+        "collections_12_mths_ex_med",
+        "dti",
+        "initial_list_status",
+        "inq_last_6mths",
+        "installment",
+        "installment_to_income",
+        "int_rate",
+        "loan_amnt",
+        "loan_to_income",
+        "mths_since_last_record",
+        "open_acc",
+        "revol_util",
+        "verification_status"
+      ],
+      "fund_rate": 0.7123,
+      "mean_probability": 0.1145,
+      "outcome_known": 0.1056,
+      "missing_increase": {
+        "dti": 0.0025,
+        "loan_to_income": 0.0023,
+        "installment_to_income": 0.0023,
+        "emp_length_years": 0.0349
+      },
+      "new_categories": {
+        "home_ownership": [
+          "ANY"
+        ],
+        "addr_state": [
+          "ND"
+        ]
+      }
+    },
+    {
+      "batch": "2018-08",
+      "loans": 32329,
+      "drift_share": 0.5667,
+      "prediction_drift": 0.2546,
+      "drifted_columns": [
+        "annual_inc",
+        "collections_12_mths_ex_med",
+        "dti",
+        "fico_mid",
+        "initial_list_status",
+        "inq_last_6mths",
+        "installment",
+        "installment_to_income",
+        "int_rate",
+        "loan_amnt",
+        "loan_to_income",
+        "mths_since_last_record",
+        "open_acc",
+        "pub_rec_bankruptcies",
+        "revol_util",
+        "total_acc",
+        "verification_status"
+      ],
+      "fund_rate": 0.7167,
+      "mean_probability": 0.1135,
+      "outcome_known": 0.081,
+      "missing_increase": {
+        "dti": 0.0022,
+        "loan_to_income": 0.0021,
+        "installment_to_income": 0.0021,
+        "emp_length_years": 0.0456
+      },
+      "new_categories": {
+        "home_ownership": [
+          "ANY"
+        ],
+        "addr_state": [
+          "ND"
+        ]
+      }
+    },
+    {
+      "batch": "2018-09",
+      "loans": 26767,
+      "drift_share": 0.5667,
+      "prediction_drift": 0.2815,
+      "drifted_columns": [
+        "annual_inc",
+        "collections_12_mths_ex_med",
+        "dti",
+        "fico_mid",
+        "initial_list_status",
+        "inq_last_6mths",
+        "installment",
+        "installment_to_income",
+        "int_rate",
+        "loan_amnt",
+        "loan_to_income",
+        "mths_since_last_record",
+        "open_acc",
+        "pub_rec_bankruptcies",
+        "revol_util",
+        "sub_grade",
+        "verification_status"
+      ],
+      "fund_rate": 0.7288,
+      "mean_probability": 0.1115,
+      "outcome_known": 0.0658,
+      "missing_increase": {
+        "dti": 0.002,
+        "loan_to_income": 0.0019,
+        "installment_to_income": 0.0019,
+        "emp_length_years": 0.0503,
+        "revol_util": 0.0001
+      },
+      "new_categories": {
+        "home_ownership": [
+          "ANY"
+        ],
+        "addr_state": [
+          "ND"
+        ]
+      }
+    },
+    {
+      "batch": "2018-10",
+      "loans": 31811,
+      "drift_share": 0.6,
+      "prediction_drift": 0.2654,
+      "drifted_columns": [
+        "annual_inc",
+        "collections_12_mths_ex_med",
+        "dti",
+        "fico_mid",
+        "initial_list_status",
+        "inq_last_6mths",
+        "installment",
+        "installment_to_income",
+        "int_rate",
+        "loan_amnt",
+        "loan_to_income",
+        "mths_since_last_record",
+        "open_acc",
+        "pub_rec_bankruptcies",
+        "revol_util",
+        "sub_grade",
+        "total_acc",
+        "verification_status"
+      ],
+      "fund_rate": 0.7214,
+      "mean_probability": 0.1128,
+      "outcome_known": 0.0498,
+      "missing_increase": {
+        "dti": 0.0018,
+        "loan_to_income": 0.0015,
+        "installment_to_income": 0.0015,
+        "emp_length_years": 0.0542,
+        "revol_util": 0.0005
+      },
+      "new_categories": {
+        "home_ownership": [
+          "ANY"
+        ],
+        "addr_state": [
+          "ND"
+        ]
+      }
+    },
+    {
+      "batch": "2018-11",
+      "loans": 28827,
+      "drift_share": 0.5667,
+      "prediction_drift": 0.2226,
+      "drifted_columns": [
+        "annual_inc",
+        "collections_12_mths_ex_med",
+        "dti",
+        "initial_list_status",
+        "inq_last_6mths",
+        "installment",
+        "installment_to_income",
+        "int_rate",
+        "loan_amnt",
+        "loan_to_income",
+        "mths_since_last_record",
+        "open_acc",
+        "pub_rec_bankruptcies",
+        "revol_util",
+        "sub_grade",
+        "total_acc",
+        "verification_status"
+      ],
+      "fund_rate": 0.7108,
+      "mean_probability": 0.1159,
+      "outcome_known": 0.0416,
+      "missing_increase": {
+        "dti": 0.0013,
+        "loan_to_income": 0.0011,
+        "installment_to_income": 0.0011,
+        "emp_length_years": 0.0564,
+        "revol_util": 0.0004
+      },
+      "new_categories": {
+        "home_ownership": [
+          "ANY"
+        ],
+        "addr_state": [
+          "ND"
+        ]
+      }
+    },
+    {
+      "batch": "2018-12",
+      "loans": 27541,
+      "drift_share": 0.5333,
+      "prediction_drift": 0.235,
+      "drifted_columns": [
+        "annual_inc",
+        "collections_12_mths_ex_med",
+        "dti",
+        "initial_list_status",
+        "inq_last_6mths",
+        "installment",
+        "installment_to_income",
+        "int_rate",
+        "loan_amnt",
+        "loan_to_income",
+        "mths_since_last_record",
+        "open_acc",
+        "revol_util",
+        "sub_grade",
+        "total_acc",
+        "verification_status"
+      ],
+      "fund_rate": 0.7185,
+      "mean_probability": 0.1151,
+      "outcome_known": 0.0339,
+      "missing_increase": {
+        "dti": 0.0017,
+        "loan_to_income": 0.0016,
+        "installment_to_income": 0.0016,
+        "emp_length_years": 0.0574,
+        "revol_util": 0.0001
+      },
+      "new_categories": {
+        "home_ownership": [
+          "ANY"
+        ],
+        "addr_state": [
+          "ND"
+        ]
+      }
+    }
+  ],
+  "alerts": [
+    {
+      "kind": "investigate",
+      "batch": "2016-01",
+      "reason": "categories never seen in training: addr_state=ND"
+    },
+    {
+      "kind": "retrain",
+      "batch": "2016-02",
+      "reason": "2 consecutive months above threshold (drift share 0.50 > 0.3)"
+    },
+    {
+      "kind": "investigate",
+      "batch": "2016-07",
+      "reason": "categories never seen in training: home_ownership=ANY"
+    }
+  ]
+}

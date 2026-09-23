@@ -15,6 +15,8 @@ paths:
   bundle_dir: artifacts/bundle             # written by the package stage
   reports_dir: reports
   figures_dir: reports/figures
+  monitoring_dir: data/monitoring          # scored monthly production batches
+  monitoring_reports_dir: reports/monitoring
 
 data:
   # --- target (D-003) ---
@@ -171,6 +173,39 @@ profit:
   # not a usable strategy, and its measured return would be mostly luck.
   min_share_funded: 0.10
   bootstrap_draws: 1000
+
+monitoring:
+  # 2016-2018 loans are replayed as a stream of monthly "production" batches
+  # (D-064). They were deliberately excluded from training: a 36-month loan
+  # issued in 2016 has not finished by the 2018Q4 snapshot, so most have no
+  # label at all. That is exactly the situation monitoring exists for.
+  start: "2016-01-01"
+  end: "2018-12-01"
+  # What "normal" means. `train` = the loans the model actually learned from,
+  # so a violation invalidates its fitted medians, caps and category lists.
+  reference_split: train
+  drift:
+    # The statistical test is PINNED rather than left to Evidently's automatic
+    # choice, which depends on sample size: a big month and a small month would
+    # otherwise be measured with different tests and not be comparable (D-066).
+    num_method: wasserstein        # normed Wasserstein distance; higher = more drift
+    cat_method: jensenshannon      # Jensen-Shannon distance; higher = more drift
+    threshold: 0.15                # a column counts as drifted above this
+  # Evidently's HTML report is ~5 MB per month because it embeds the plotting
+  # library and the data. Thirty-six of them is 200 MB of artifact nobody opens.
+  # The JSON summary is the record for every month; the HTML is written only for
+  # these, and can be regenerated for any month on demand (D-069).
+  html_months: ["2016-01", "2017-06", "2018-12"]
+  trigger:
+    # Retrain when this share of monitored features has drifted...
+    drift_share: 0.30
+    # ...or when the model's own output distribution has moved this far.
+    prediction_drift: 0.15
+    # ...and only if it persists. One month is often an artifact (D-067).
+    consecutive_months: 2
+    # Data quality is a SEPARATE alert: a column that suddenly goes missing
+    # needs an engineer, not a retraining run (D-068).
+    max_missing_increase: 0.20
 
 mlflow:
   # SQLite rather than the ./mlruns folder: MLflow 3 put the file-based store

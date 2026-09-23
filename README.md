@@ -7,7 +7,8 @@ investor could see at listing time**, and fund a loan only when its
 - [`PLAN.md`](PLAN.md) — full project plan, phase by phase
 - [`DECISIONS.md`](DECISIONS.md) — every decision, with the reasoning
 
-> **Status:** Phase 6 complete. Orchestrated retraining with a promotion gate, and CI on every pull request.
+> **Status:** Phase 7 complete. Three years of loans replayed as production traffic,
+> with drift reports and a tested retraining trigger.
 > Full setup and run instructions land in Phase 8.
 
 ## Result on the 2015 test year (scored once)
@@ -46,7 +47,7 @@ still repay 63.5% of principal, so the loss given default is 0.365.
 
 ```bash
 uv sync --extra dev          # or: pip install -r requirements.txt
-uv run pytest                            # 18 tests
+uv run pytest                            # 98 tests
 uv run python -m lending_club.data.ingest   # raw CSV -> parquet (~2 min)
 uv run python -m lending_club.data.prepare  # clean + label + filter
 jupyter lab notebooks/01_eda.ipynb          # Phase 1 EDA
@@ -61,7 +62,42 @@ curl localhost:8001/health
 
 # retrain end to end, with the promotion gate (~100s)
 PREFECT_API_URL= PREFECT_SERVER_ALLOW_EPHEMERAL_MODE=true uv run python flows/retrain.py
+
+# monitoring: replay 2016-2018 as monthly production batches (~4 min)
+uv run python -m lending_club.monitoring.batches
+uv run python -m lending_club.monitoring.drift
+open reports/figures/drift.png reports/monitoring/html/2018-12.html
 ```
+
+## Monitoring
+
+The model is trained on 2007-2013 and reported on 2015. The 988,585 36-month
+loans issued 2016-2018 are replayed as 36 monthly production batches, scored by
+the deployed bundle.
+
+**Most of them have no label, and that is the point.** A 36-month loan issued in
+2018-06 has not finished by the 2018Q4 snapshot. The share of loans with a known
+outcome falls from 99% to 3% across the window, and the default rate visible on
+that shrinking subset swings from 14.3% to 20.5% and back to 12.6% purely from
+label maturity — it would look exactly like a model going bad
+([D-065](DECISIONS.md#d-065-the-labels-we-can-see-early-are-not-a-sample-we-can-score-on)).
+So monitoring watches what is visible immediately: the inputs, and the model's
+own output.
+
+| What is measured | Result |
+|---|---|
+| Share of model inputs drifted vs. training | **43-60%, every month** |
+| Prediction drift (model's own score distribution) | 0.03 → 0.28, breaching from 2017-12 |
+| Share of loans the policy funds | stable, 0.63 → 0.73 |
+| Alerts raised over 36 months | **3** (1 retrain, 2 investigate) |
+
+Thirty-six months of breaching thresholds produce three alerts, not thirty-six:
+a retrain fires once per episode, and a new category is reported once, not every
+month ([D-067](DECISIONS.md#d-067-the-retraining-trigger-needs-persistence-not-a-spike)).
+The two `investigate` alerts are real findings — `addr_state=ND` and
+`home_ownership=ANY` are values that never appear in the training window.
+
+![drift](reports/figures/drift.png)
 
 ## Data
 

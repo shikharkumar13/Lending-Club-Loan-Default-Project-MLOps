@@ -86,3 +86,34 @@ stages:
       - src/lending_club/serving/bundle.py
     outs:
       - artifacts/bundle
+
+  # --- Phase 7: monitoring ---------------------------------------------------
+  # Depends on the BUNDLE, not on the model: monitoring must measure what the
+  # service actually deploys, including the calibrator and the threshold.
+  monitor_batches:
+    cmd: python -m lending_club.monitoring.batches
+    deps:
+      - data/interim/accepted_raw.parquet
+      - artifacts/bundle
+      - src/lending_club/monitoring/batches.py
+    params:
+      - monitoring.start
+      - monitoring.end
+      - data.terms_months
+    outs:
+      - data/monitoring
+
+  drift:
+    cmd: python -m lending_club.monitoring.drift
+    deps:
+      - data/monitoring
+      - data/processed
+      - artifacts/bundle
+      - src/lending_club/monitoring/drift.py
+      - src/lending_club/monitoring/trigger.py
+    params:
+      - monitoring
+      - features.groups
+    metrics:
+      - reports/monitoring/drift.json:
+          cache: false

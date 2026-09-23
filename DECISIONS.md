@@ -81,6 +81,12 @@ deleted, so the history stays readable.
 | [D-061](#d-061-the-gate-never-looks-at-the-test-year) | The gate never looks at the test year | Validation | Accepted | 2026-09-23 |
 | [D-062](#d-062-ci-runs-the-whole-pipeline-on-synthetic-loans) | CI runs the whole pipeline on synthetic loans | Structure | Accepted | 2026-09-23 |
 | [D-063](#d-063-the-demo-bundle-refuses-to-overwrite-a-real-one) | The demo bundle refuses to overwrite a real one | Serving | Accepted | 2026-09-23 |
+| [D-064](#d-064-2016-2018-loans-are-replayed-as-monthly-production-batches) | 2016-2018 loans are replayed as monthly production batches | Monitoring | Accepted | 2026-09-23 |
+| [D-065](#d-065-the-labels-we-can-see-early-are-not-a-sample-we-can-score-on) | The labels we can see early are not a sample we can score on | Monitoring | Accepted | 2026-09-23 |
+| [D-066](#d-066-the-drift-test-is-pinned-and-run-on-raw-inputs) | The drift test is pinned, and run on raw inputs | Monitoring | Accepted | 2026-09-23 |
+| [D-067](#d-067-the-retraining-trigger-needs-persistence-not-a-spike) | The retraining trigger needs persistence, not a spike | Monitoring | Accepted | 2026-09-23 |
+| [D-068](#d-068-drift-and-breakage-are-different-alerts) | Drift and breakage are different alerts | Monitoring | Accepted | 2026-09-23 |
+| [D-069](#d-069-the-html-report-is-written-for-three-months-not-thirty-six) | The HTML report is written for three months, not thirty-six | Monitoring | Accepted | 2026-09-23 |
 
 ---
 
@@ -803,6 +809,81 @@ deleted, so the history stays readable.
   kept working and kept returning confident answers — from a toy model. CI
   starts from a clean checkout, so the guard never fires there, and locally it
   prevents a failure mode that would be very hard to notice.
+
+### D-064: 2016-2018 loans are replayed as monthly production batches
+- **Decision:** the 988,585 36-month loans issued 2016-01 to 2018-12 are scored
+  by the **deployed bundle** month by month and treated as production traffic.
+  `production_frame()` shares `derive_features` with training but deliberately
+  does not call `prepare.transform()`.
+- **Why:** `transform()` drops every loan without a final status, which is the
+  entire population we want to monitor. Scoring with the bundle (not the bare
+  model) means monitoring measures what the service actually deploys, including
+  the calibrator and the funding threshold.
+- **Result:** 36 monthly batches. Feature drift is immediate and large -
+  between 43% and 60% of model inputs are flagged in every single month.
+
+### D-065: The labels we can see early are not a sample we can score on
+- **Decision:** the share of loans with a known outcome is reported as
+  *coverage* and never used as a performance metric.
+- **Why:** a 36-month loan issued in 2018-06 can only have a final status by
+  the 2018Q4 snapshot if it ended early - paid off ahead of schedule, or
+  charged off in the first months. Coverage falls from 99% (2016-01) to 3%
+  (2018-12), and the observed default rate on that visible subset swings from
+  14.3% to 20.5% and back to 12.6% **purely from label maturity**, not because
+  the world changed. Charting it would look exactly like a model going bad.
+- **This is the reason drift monitoring exists.** The outcome of today's
+  decision arrives in three years; waiting for it is not a strategy. So we
+  watch the two things visible immediately: the inputs and the model's output.
+
+### D-066: The drift test is pinned, and run on raw inputs
+- **Decision:** Wasserstein for numeric columns, Jensen-Shannon for
+  categorical, threshold 0.15, applied to the 30 raw model inputs.
+- **Why (pinned):** left alone, Evidently chooses the statistical test based on
+  sample size - a distance test for large samples, a p-value test for small
+  ones. A 45,000-loan month and a 900-loan month would then be measured with
+  different tests, in opposite directions (high = drift vs. low = drift), and
+  the monthly series would not be comparable. Pinning makes every month one
+  bounded distance where higher always means more drift.
+- **Why (raw inputs):** a transformed column is partly an artifact of the
+  fitted preprocessor, and "feature 47 drifted" is not actionable. "Income
+  verification mix changed" is. A test asserts the monitored set equals the
+  model's input set, so a feature can never be added without being watched.
+
+### D-067: The retraining trigger needs persistence, not a spike
+- **Decision:** retrain when the drifted share exceeds 0.30 **or** prediction
+  drift exceeds 0.15, for 2 consecutive months. One alert per episode; the run
+  resets on a clean month.
+- **Why:** a single month is often an artifact - a marketing push, a holiday, a
+  product change that reverts. Requiring persistence trades a month of delay
+  for far fewer false alarms, and retraining is not free: it consumes the
+  promotion gate (D-060) and every model swap carries risk.
+- **Why one alert per episode:** the condition here persists for 36 months. An
+  alert that fires every month is a log line, not an alert. The suppression
+  assumes the first alert is acted on - after a retrain the reference window
+  moves and the clock restarts.
+
+### D-068: Drift and breakage are different alerts
+- **Decision:** missing-value jumps and never-before-seen categories raise an
+  `investigate` alert, not `retrain`. They fire immediately, without waiting
+  for persistence.
+- **Why:** retraining fixes a world that has moved. It does not fix a column
+  that suddenly arrives empty - and firing "retrain" at a broken feed would
+  train the next model on the same broken data. Different problem, different
+  owner, different urgency.
+- **Found in production data:** `addr_state=ND` (Lending Club did not lend in
+  North Dakota during the training window) and `home_ownership=ANY` (a category
+  introduced in 2016-07). Neither breaks the service - the one-hot encoder maps
+  unseen levels to "infrequent" (D-018) - but both are worth knowing about, and
+  both are handled as knowledge, reported once rather than every month.
+
+### D-069: The HTML report is written for three months, not thirty-six
+- **Decision:** `drift.json` records every month; Evidently's HTML report is
+  saved only for the months listed in `monitoring.html_months`, plus a single
+  committed PNG summarising all 36.
+- **Why:** each HTML file embeds the plotting library and the data, at ~5.6 MB.
+  Thirty-six of them came to 201 MB of artifact nobody would open. The JSON is
+  the machine-readable record; the HTML is what a human opens when something
+  fires, and any month can be regenerated on demand.
 
 ---
 
