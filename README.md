@@ -1,5 +1,7 @@
 # Lending Club Loan Default — Profit-Based Funding Decisions
 
+[![CI](https://github.com/shikharkumar13/Lending-Club-Loan-Default-Project-MLOps/actions/workflows/ci.yml/badge.svg)](https://github.com/shikharkumar13/Lending-Club-Loan-Default-Project-MLOps/actions/workflows/ci.yml)
+
 Predict whether a Lending Club loan will default, using **only information an
 investor could see at listing time**, and fund a loan only when its
 **expected profit** justifies it.
@@ -9,7 +11,7 @@ leakage-proof pipeline, a decision rule denominated in dollars, an honest test,
 a served artifact, and three years of production monitoring.
 
 > **Status:** complete through Phase 8. Reproducible from the raw CSV with
-> `dvc repro`.
+> `dvc repro`; lint, 118 tests and a container smoke test run on every push.
 
 | | |
 |---|---|
