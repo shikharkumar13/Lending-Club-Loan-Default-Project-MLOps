@@ -3,23 +3,31 @@ name = "lending-club-default"
 version = "0.1.0"
 description = "P2P loan default prediction with profit-based funding decisions (Lending Club 2007-2018)"
 requires-python = ">=3.11,<3.13"
+# Runtime dependencies: exactly what the SERVING container needs, nothing more.
+# The training tools live in the "train" extra, so the image never ships MLflow,
+# DVC, SHAP or plotting libraries it cannot use (D-059).
 dependencies = [
-    "polars>=1.0",          # fast, low-memory CSV -> parquet
+    "polars>=1.0",          # fast, low-memory data handling
     "pyarrow>=16.0",        # parquet engine
-    "pandas>=2.2",          # sklearn / shap boundary
+    "pandas>=2.2",          # sklearn boundary
     "numpy>=1.26",
     "scikit-learn>=1.5",
     "lightgbm>=4.5",
-    "pandera>=0.20",        # schema checks on processed data
-    "mlflow>=2.16",         # experiment tracking
-    "shap>=0.46",
-    "matplotlib>=3.9",
-    "seaborn>=0.13",
+    "joblib>=1.4",          # loads the deployment bundle
     "pyyaml>=6.0",          # params.yaml
-    "dvc>=3.55",            # data + pipeline versioning
+    "fastapi>=0.141.1",
+    "uvicorn[standard]>=0.53.0",
 ]
 
 [project.optional-dependencies]
+train = [
+    "pandera>=0.20",        # schema checks on processed data
+    "mlflow>=2.16",         # experiment tracking
+    "shap>=0.46",           # explanations
+    "matplotlib>=3.9",
+    "seaborn>=0.13",
+    "dvc>=3.55",            # data + pipeline versioning
+]
 dev = [
     "pytest>=8.3",
     "ruff>=0.6",
@@ -46,3 +54,8 @@ select = ["E", "W", "F", "I", "B", "UP"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+]

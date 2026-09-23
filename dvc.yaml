@@ -75,3 +75,14 @@ stages:
     metrics:
       - reports/metrics.json:
           cache: false
+
+  package:
+    cmd: python -m lending_club.serving
+    deps:
+      - models
+      - artifacts/calibrators
+      - reports/metrics.json
+      - reports/cv_results.json
+      - src/lending_club/serving/bundle.py
+    outs:
+      - artifacts/bundle

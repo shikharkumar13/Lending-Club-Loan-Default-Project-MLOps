@@ -36,6 +36,45 @@ def _emp_length_to_years(col: str = "emp_length") -> pl.Expr:
     )
 
 
+def derive_features(frame: pl.DataFrame) -> pl.DataFrame:
+    """Row-level feature derivations shared by training and serving.
+
+    The API must compute these exactly as training did — a caller cannot be
+    asked to supply `fico_mid` or `credit_history_months`. Sharing one function
+    is what makes training/serving skew impossible here rather than merely
+    unlikely (D-056).
+
+    Every expression uses only the row's own values, so it is safe to run
+    before any split (Layer A, D-016).
+    """
+    return frame.with_columns(
+        # ' 36 months' -> 36
+        pl.col("term").str.strip_chars().str.head(2).cast(pl.Int16).alias("term_months"),
+        _emp_length_to_years(),
+        pl.col("issue_d").str.to_date("%b-%Y").alias("issue_date"),
+        pl.col("earliest_cr_line").str.to_date("%b-%Y").alias("earliest_cr_date"),
+    ).with_columns(
+        # FICO is reported as a 4-5 point band; the midpoint carries the same
+        # information in one column instead of two nearly identical ones.
+        ((pl.col("fico_range_low") + pl.col("fico_range_high")) / 2).alias("fico_mid"),
+        # How long the borrower has had credit, at the time of THIS loan.
+        # Using issue_date (not today) keeps the feature point-in-time correct.
+        ((pl.col("issue_date") - pl.col("earliest_cr_date")).dt.total_days() / 30.44).alias(
+            "credit_history_months"
+        ),
+        # Debt burden relative to income. annual_inc == 0 would divide by zero,
+        # so those loans become missing and get imputed downstream.
+        pl.when(pl.col("annual_inc") > 0)
+        .then(pl.col("loan_amnt") / pl.col("annual_inc"))
+        .alias("loan_to_income"),
+        pl.when(pl.col("annual_inc") > 0)
+        .then(pl.col("installment") * 12 / pl.col("annual_inc"))
+        .alias("installment_to_income"),
+        # dti uses 999 as a "not available" sentinel in a handful of rows.
+        pl.when(pl.col("dti") >= 999).then(None).otherwise(pl.col("dti")).alias("dti"),
+    )
+
+
 def transform(frame: pl.DataFrame, params: dict) -> pl.DataFrame:
     """All the cleaning logic, as a pure function.
 
@@ -45,19 +84,13 @@ def transform(frame: pl.DataFrame, params: dict) -> pl.DataFrame:
     """
     data_cfg, feature_cfg = params["data"], params["features"]
 
-    frame = frame.with_columns(
-        # Dates arrive as 'Dec-2015'.
-        pl.col("issue_d").str.to_date("%b-%Y").alias("issue_date"),
-        pl.col("earliest_cr_line").str.to_date("%b-%Y").alias("earliest_cr_date"),
-        # ' 36 months' -> 36
-        pl.col("term").str.strip_chars().str.head(2).cast(pl.Int16).alias("term_months"),
+    frame = derive_features(frame).with_columns(
         # Loans Lending Club flags as outside its own credit policy: keep the
         # outcome, keep the flag as a feature (D-026).
         pl.col("loan_status").str.starts_with("Does not meet").alias("not_credit_policy"),
         pl.col("loan_status")
         .str.replace(CREDIT_POLICY_PREFIX, "", literal=True)
         .alias("status_clean"),
-        _emp_length_to_years(),
     )
 
     # --- label (D-003) -------------------------------------------------------
@@ -86,28 +119,9 @@ def transform(frame: pl.DataFrame, params: dict) -> pl.DataFrame:
         pl.col("issue_date") <= pl.lit(data_cfg["max_issue_date"]).str.to_date(),
     )
 
-    # --- derived features (still row-by-row) --------------------------------
+    # Realized profit: EVALUATION ONLY, never a feature (D-008).
     frame = frame.with_columns(
-        # FICO is reported as a 4-5 point band; the midpoint carries the same
-        # information in one column instead of two nearly identical ones.
-        ((pl.col("fico_range_low") + pl.col("fico_range_high")) / 2).alias("fico_mid"),
-        # How long the borrower has had credit, at the time of THIS loan.
-        # Using issue_date (not today) keeps the feature point-in-time correct.
-        ((pl.col("issue_date") - pl.col("earliest_cr_date")).dt.total_days() / 30.44).alias(
-            "credit_history_months"
-        ),
-        # Debt burden relative to income. annual_inc == 0 would divide by zero,
-        # so those (2 loans) become missing and get imputed downstream.
-        pl.when(pl.col("annual_inc") > 0)
-        .then(pl.col("loan_amnt") / pl.col("annual_inc"))
-        .alias("loan_to_income"),
-        pl.when(pl.col("annual_inc") > 0)
-        .then(pl.col("installment") * 12 / pl.col("annual_inc"))
-        .alias("installment_to_income"),
-        # dti uses 999 as a "not available" sentinel in a handful of rows.
-        pl.when(pl.col("dti") >= 999).then(None).otherwise(pl.col("dti")).alias("dti"),
-        # Realized profit: EVALUATION ONLY, never a feature (D-008).
-        (pl.col("total_pymnt") - pl.col("funded_amnt")).alias("realized_profit"),
+        (pl.col("total_pymnt") - pl.col("funded_amnt")).alias("realized_profit")
     )
 
     keep = (

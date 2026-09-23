@@ -7,7 +7,7 @@ investor could see at listing time**, and fund a loan only when its
 - [`PLAN.md`](PLAN.md) — full project plan, phase by phase
 - [`DECISIONS.md`](DECISIONS.md) — every decision, with the reasoning
 
-> **Status:** Phase 4 complete. The model is trained, calibrated and scored on a held-out year.
+> **Status:** Phase 5 complete. The model is trained, evaluated and served behind a REST API.
 > Full setup and run instructions land in Phase 8.
 
 ## Result on the 2015 test year (scored once)
@@ -52,6 +52,10 @@ uv run python -m lending_club.data.prepare  # clean + label + filter
 jupyter lab notebooks/01_eda.ipynb          # Phase 1 EDA
 dvc repro                                   # rebuild everything, end to end
 mlflow ui --backend-store-uri sqlite:///mlflow.db   # browse the experiments
+
+# serve the model
+uv run uvicorn lending_club.serving.app:app --reload    # http://localhost:8000/docs
+docker build -t lending-club-api . && docker run -p 8000:8000 lending-club-api
 ```
 
 ## Data

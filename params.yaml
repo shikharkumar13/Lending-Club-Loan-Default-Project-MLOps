@@ -12,6 +12,7 @@ paths:
   processed_dir: data/processed
   models_dir: models                 # written by the train stage
   calibrators_dir: artifacts/calibrators   # written by the evaluate stage
+  bundle_dir: artifacts/bundle             # written by the package stage
   reports_dir: reports
   figures_dir: reports/figures
 

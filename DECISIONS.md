@@ -73,6 +73,10 @@ deleted, so the history stays readable.
 | [D-053](#d-053-ranking-policies-use-the-raw-score-not-the-calibrated-probability) | Ranking policies use the raw score, not the calibrated probability | Evaluation | Accepted | 2026-09-23 |
 | [D-054](#d-054-every-headline-comparison-carries-a-confidence-interval) | Every headline comparison carries a bootstrap confidence interval | Evaluation | Accepted | 2026-09-23 |
 | [D-055](#d-055-the-threshold-is-an-interior-optimum-not-a-constraint-artifact) | The chosen threshold is an interior optimum | Validation | Accepted | 2026-09-23 |
+| [D-056](#d-056-training-and-serving-share-one-derivation-function) | Training and serving share one derivation function | Serving | Accepted | 2026-09-23 |
+| [D-057](#d-057-ship-one-bundle-not-four-artifacts) | Ship one bundle (model + calibrator + threshold + economics) | Serving | Accepted | 2026-09-23 |
+| [D-058](#d-058-never-pickle-from-__main__) | Never pickle classes defined in `__main__` | Serving | Accepted | 2026-09-23 |
+| [D-059](#d-059-serving-dependencies-are-separate-from-training-ones) | Serving dependencies separate from training ones | Tooling | Accepted | 2026-09-23 |
 
 ---
 
@@ -691,6 +695,56 @@ deleted, so the history stays readable.
   boundary, the policy would have been decided by an arbitrary constraint
   rather than by the data. The top five thresholds cluster in 0.135-0.16, so
   the choice is also stable rather than a spike on one lucky grid point.
+
+### D-056: Training and serving share one derivation function
+- **Decision:** The API accepts **raw listing fields** only, and derives
+  `fico_mid`, `credit_history_months`, `loan_to_income`,
+  `installment_to_income`, `emp_length_years` and `term_months` itself, using
+  the same `derive_features()` that the training pipeline calls.
+- **Why:** Six of the 30 model inputs are engineered. Asking callers to supply
+  them would guarantee training/serving skew eventually: someone computes
+  credit history in months from a different date, and the model quietly scores
+  nonsense while still returning plausible numbers. Sharing one function makes
+  the skew impossible rather than merely unlikely.
+- **Verified by test:** 25 real 2015 loans scored through the HTTP API match
+  the offline pipeline's probabilities to 1e-6, and every funding decision
+  agrees.
+
+### D-057: Ship one bundle, not four artifacts
+- **Decision:** `LoanDecisionModel` packages the pipeline, the calibrator, the
+  threshold and the profit economics (LGD, prepayment factor) into a single
+  file, with metadata: training window, CV score, test return, creation time.
+- **Why:** A decision needs four things fitted at four different stages. Ship
+  them separately and production drifts out of sync — someone retrains the
+  model and leaves the old threshold in place, and nothing fails loudly. The
+  bundle means the service either has a complete, consistent decision or it
+  has nothing.
+- **Also:** `/health` reports which model version is loaded, because a deploy
+  check needs to know *which* model is live, not just that something answers.
+
+### D-058: Never pickle classes defined in `__main__`
+- **Decision:** The bundle is built through `serving/__main__.py`, which
+  imports the class from `serving/bundle.py`. `bundle.py` has no
+  `if __name__ == "__main__"` block.
+- **Why:** Found by a failing test. Running `python -m lending_club.serving.bundle`
+  defines `LoanDecisionModel` in the module `__main__`, and joblib records that
+  name inside the artifact. Any other process then fails with
+  *"Can't get attribute 'LoanDecisionModel' on module '__main__'"*. The file
+  looked fine and the artifact was written successfully — it simply could not
+  be loaded anywhere else, which is exactly the kind of bug that surfaces in
+  production rather than in development.
+
+### D-059: Serving dependencies are separate from training ones
+- **Decision:** `pyproject.toml` keeps only runtime packages in
+  `dependencies`; MLflow, DVC, SHAP, matplotlib, seaborn and pandera moved to
+  a `train` extra. Two lock exports: `requirements.txt` (everything, 940
+  packages) and `requirements-serve.txt` (serving only, **104**).
+- **Why:** The container cannot use an experiment tracker or a plotting
+  library. Every package shipped is extra image size, extra build time and
+  extra attack surface. The split also documents which code is production code.
+- **Container details:** multi-stage build, non-root user, `libgomp1` for
+  LightGBM's OpenMP runtime (absent from `python:slim`), and a `HEALTHCHECK`
+  that calls `/health`.
 
 ---
 

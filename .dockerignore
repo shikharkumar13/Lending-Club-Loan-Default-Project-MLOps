@@ -1,0 +1,13 @@
+# The image needs the bundle, not the 1.6 GB dataset or the experiment history.
+data/
+artifacts/calibrators/
+models/
+mlruns/
+mlflow.db
+notebooks/
+reports/
+tests/
+.venv/
+.git/
+.dvc/cache
+**/__pycache__/

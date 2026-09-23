@@ -65,8 +65,8 @@ stages:
       size: 79016287
     - path: src/lending_club/data/prepare.py
       hash: md5
-      md5: 0383b345df799cfa172e19c2a34492b8
-      size: 5978
+      md5: 66e19368d5f574471c3da55aa0cb4798
+      size: 6433
     params:
       params.yaml:
         data:
@@ -341,3 +341,34 @@ stages:
       hash: md5
       md5: 44c69490335adc04aac70af463f8ae7b
       size: 42037
+  package:
+    cmd: python -m lending_club.serving
+    deps:
+    - path: artifacts/calibrators
+      hash: md5
+      md5: 8580ee4b34befe5d720478f47153132a.dir
+      size: 540732
+      nfiles: 3
+    - path: models
+      hash: md5
+      md5: e17748340564c4b62f82b30eea4fc6e0.dir
+      size: 532078
+      nfiles: 3
+    - path: reports/cv_results.json
+      hash: md5
+      md5: a0b379071a43d2f2039abfab0a1cfbc1
+      size: 19628
+    - path: reports/metrics.json
+      hash: md5
+      md5: 44c69490335adc04aac70af463f8ae7b
+      size: 42037
+    - path: src/lending_club/serving/bundle.py
+      hash: md5
+      md5: b10e930810493c3911175134b0e995e6
+      size: 5678
+    outs:
+    - path: artifacts/bundle
+      hash: md5
+      md5: 626c18e9e37c968ffd71c3207527064d.dir
+      size: 1038727
+      nfiles: 2
