@@ -59,3 +59,17 @@ stages:
     metrics:
       - reports/cv_results.json:
           cache: false
+
+  evaluate:
+    cmd: python -m lending_club.evaluate
+    deps:
+      - data/processed
+      - models
+      - src/lending_club/evaluate.py
+      - src/lending_club/policy/profit.py
+    params:
+      - profit
+      - seed
+    metrics:
+      - reports/metrics.json:
+          cache: false

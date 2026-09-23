@@ -7,8 +7,22 @@ investor could see at listing time**, and fund a loan only when its
 - [`PLAN.md`](PLAN.md) — full project plan, phase by phase
 - [`DECISIONS.md`](DECISIONS.md) — every decision, with the reasoning
 
-> **Status:** Phase 3 complete (model comparison). Phase 4 (calibration + profit policy) is next.
+> **Status:** Phase 4 complete. The model is trained, calibrated and scored on a held-out year.
 > Full setup and run instructions land in Phase 8.
+
+## Result on the 2015 test year (scored once)
+
+| strategy | share funded | return per dollar | profit per $1B deployed |
+|---|---|---|---|
+| fund everything | 100% | +0.0655 | $65.5M |
+| Lending Club grade A-B | 57.2% | +0.0718 | $71.8M |
+| logistic regression (tuned threshold) | 71.3% | +0.0721 | $72.1M |
+| **LightGBM (tuned threshold, p < 0.15)** | **66.9%** | **+0.0734** | **$73.4M** |
+| LightGBM at grade A-B's selectivity | 56.1% | +0.0739 | $73.9M |
+
+Returns are over the ~3-year loan term. The model earns about **12% more than
+funding everything** and **2.2% more than Lending Club's own grade rule**, while
+deploying more capital than that rule. Test ROC-AUC is 0.684.
 
 **Cross-validated results** (expanding-window folds inside 2007-2013, tuned on log loss):
 

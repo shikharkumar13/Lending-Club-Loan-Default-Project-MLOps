@@ -65,6 +65,10 @@ deleted, so the history stays readable.
 | [D-045](#d-045-the-probabilistic-baseline-is-lending-clubs-own-grade) | Probabilistic baseline = Lending Club's own grade | Evaluation | Accepted | 2026-09-23 |
 | [D-046](#d-046-class_weightbalanced-rejected-on-evidence) | `class_weight="balanced"` rejected on evidence | Modeling | Accepted | 2026-09-23 |
 | [D-047](#d-047-mlflow-tracks-to-sqlite-not-the-mlruns-folder) | MLflow tracks to SQLite, not the `mlruns/` folder | Tooling | Accepted | 2026-09-23 |
+| [D-048](#d-048-compare-policies-at-equal-selectivity) | Compare policies at equal selectivity | Evaluation | Accepted | 2026-09-23 |
+| [D-049](#d-049-calibrate-on-2014-h1-tune-the-policy-on-2014-h2) | Calibrate on 2014 H1, tune the policy on 2014 H2 | Validation | Accepted | 2026-09-23 |
+| [D-050](#d-050-the-expected-value-rule-funds-almost-everything) | Report the expected-value rule even though it funds ~everything | Business | Accepted | 2026-09-23 |
+| [D-051](#d-051-calibration-helps-brier-but-not-log-loss-here) | Calibration helps Brier but not log loss here; keep it, report both | Evaluation | Accepted | 2026-09-23 |
 
 ---
 
@@ -564,6 +568,69 @@ deleted, so the history stays readable.
   tracking server uses, so this is closer to production anyway. The database
   file is git-ignored; `reports/cv_results.json` is the committed, reviewable
   record of the search.
+
+### D-048: Compare policies at equal selectivity
+- **Decision:** Besides the tuned threshold, every model is also scored at the
+  **same share of loans funded as the grade A-B rule**, with that share
+  measured on the 2014 tuning rows, never on test.
+- **Why:** A pickier policy usually shows a higher return per dollar simply
+  because it skips more loans. Without matching selectivity, "our model beats
+  the grade rule" can just mean "our model funds fewer loans".
+- **Result on the 2015 test year (return per dollar):**
+  | strategy | share funded | return per $ |
+  |---|---|---|
+  | fund everything | 100% | +0.0655 |
+  | grade A-B rule | 57.2% | +0.0718 |
+  | logistic regression, matched | 59.5% | +0.0732 |
+  | **LightGBM, matched** | **56.1%** | **+0.0739** |
+  | LightGBM, tuned threshold (p < 0.15) | 66.9% | +0.0734 |
+
+  So the model genuinely beats Lending Club's grading at equal selectivity,
+  and its tuned policy earns nearly as much per dollar while deploying
+  **10 percentage points more capital**.
+
+### D-049: Calibrate on 2014 H1, tune the policy on 2014 H2
+- **Decision:** Split the validation year in two: fit the isotonic calibrator
+  on January-June 2014 (71,955 loans), choose the funding threshold on
+  July-December 2014 (90,615 loans).
+- **Why:** Choosing the threshold on the same rows that fitted the calibrator
+  would make both look better than they are. Splitting costs nothing here,
+  since both halves are large.
+- **Note:** the test year is scored exactly once, after both are frozen.
+
+### D-050: The expected-value rule funds almost everything
+- **Decision:** Keep reporting the "fund if expected value > 0" rule, even
+  though it funds 99.9% of loans and therefore matches the fund-all baseline.
+- **Why:** This is a real finding, not a bug. With a measured loss given
+  default of 0.373 and a prepayment factor of 0.829, a typical loan breaks
+  even at a default probability far above what any loan is predicted to have.
+  At Lending Club's interest rates, almost every loan is worth funding in
+  expectation.
+- **Consequence:** the model's value is **not** in rejecting loans with
+  negative expected value; it is in **ranking** when capital is limited. An
+  investor with $1B cannot fund the whole 2015 book ($3.62B), so which 30-60%
+  they choose is the entire game. That is why the threshold policy, not the
+  expected-value rule, is the headline.
+- **In dollars, per $1B deployed:** fund-all $65.5M, grade A-B $71.8M,
+  logistic regression $72.1M, **LightGBM $73.4M** — about +12% more profit
+  than funding everything, and +2.2% more than the grade rule.
+
+### D-051: Calibration helps Brier but not log loss here
+- **Decision:** Keep the isotonic calibration, and report the metrics before
+  and after rather than only the flattering one.
+- **What happened:** on the 2015 test year, LightGBM's Brier score improved
+  (0.12099 -> 0.12064) while its log loss got slightly worse
+  (0.39752 -> 0.39924).
+- **Why:** the calibrator learned the relationship on 2014 H1, where 13.22% of
+  loans defaulted. The test year defaults at 14.89%. Calibration therefore
+  pulls probabilities toward a world that is slightly safer than the one being
+  scored. This is prior drift, the same effect the EDA found across splits.
+- **Why it does not change the funding decision:** isotonic regression is
+  **monotone**, so it never changes the ranking of loans. Any policy of the
+  form "fund the safest X%" is unaffected. Calibration matters for the
+  expected-value rule and for anyone reading a probability as a probability.
+- **Revisit if:** a later phase adds drift-triggered recalibration, which is
+  exactly the production answer to this problem (Phase 7).
 
 ---
 

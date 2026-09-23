@@ -241,7 +241,7 @@ stages:
               - 0.1
               - 1.0
               class_weight:
-              -
+              - 
               - balanced
             fixed:
               solver: lbfgs
@@ -299,3 +299,38 @@ stages:
       hash: md5
       md5: a0b379071a43d2f2039abfab0a1cfbc1
       size: 19628
+  evaluate:
+    cmd: python -m lending_club.evaluate
+    deps:
+    - path: data/processed
+      hash: md5
+      md5: 6d8c0a392d8acd0867d28c058dc0db44.dir
+      size: 33593025
+      nfiles: 3
+    - path: models
+      hash: md5
+      md5: 450232ef09c78fcc37e1af30364c8dfc.dir
+      size: 1072810
+      nfiles: 6
+    - path: src/lending_club/evaluate.py
+      hash: md5
+      md5: 4a1358516fc5add52f6c0ada204bd549
+      size: 9366
+    - path: src/lending_club/policy/profit.py
+      hash: md5
+      md5: d77ff439151edff204009f434a0ea475
+      size: 5201
+    params:
+      params.yaml:
+        profit:
+          lgd_fallback: 0.365
+          threshold_grid:
+            start: 0.02
+            stop: 0.6
+            step: 0.005
+        seed: 42
+    outs:
+    - path: reports/metrics.json
+      hash: md5
+      md5: 41d43e8e714745a01f5a7a2c0f447001
+      size: 40772
