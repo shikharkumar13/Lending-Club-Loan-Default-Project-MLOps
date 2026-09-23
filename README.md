@@ -1,6 +1,8 @@
-# Lending Club Loan Default — Profit-Based Funding Decisions
+# Lending Club Loan Default - Profit-Based Funding Decisions
 
 [![CI](https://github.com/shikharkumar13/Lending-Club-Loan-Default-Project-MLOps/actions/workflows/ci.yml/badge.svg)](https://github.com/shikharkumar13/Lending-Club-Loan-Default-Project-MLOps/actions/workflows/ci.yml)
+
+Read the project report here: https://claude.ai/artifact/DVzSBjBUrSv9nJHk6Cbo7u
 
 Predict whether a Lending Club loan will default, using **only information an
 investor could see at listing time**, and fund a loan only when its
