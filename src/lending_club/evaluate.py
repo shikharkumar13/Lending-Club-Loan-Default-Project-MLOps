@@ -93,7 +93,11 @@ def evaluate() -> dict:
             X["calib"], y["calib"]
         )
 
-        joblib.dump(calibrator, path_of("models_dir") / f"{family}_calibrator.joblib")
+        # Calibrators belong to the evaluate stage, not the train stage: two
+        # DVC stages must never write into the same output directory.
+        calibrators = path_of("calibrators_dir")
+        calibrators.mkdir(parents=True, exist_ok=True)
+        joblib.dump(calibrator, calibrators / f"{family}.joblib")
 
         p_tune = calibrator.predict_proba(X["tune"])[:, 1]
         p_test = calibrator.predict_proba(X["test"])[:, 1]
@@ -173,7 +177,7 @@ def _figures(params, test, y_test, curves, threshold_family: str) -> None:
     X_test = to_model_frame(test, params)
     raw = model.predict_proba(X_test)[:, 1]
 
-    calibrator = joblib.load(path_of("models_dir") / f"{threshold_family}_calibrator.joblib")
+    calibrator = joblib.load(path_of("calibrators_dir") / f"{threshold_family}.joblib")
     calibrated = calibrator.predict_proba(X_test)[:, 1]
 
     fig, axes = plt.subplots(1, 2, figsize=(13, 4.5))

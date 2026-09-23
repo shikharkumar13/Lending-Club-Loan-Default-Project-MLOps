@@ -10,7 +10,8 @@ paths:
   raw_parquet: data/interim/accepted_raw.parquet      # allowlisted columns only
   prepared: data/interim/prepared.parquet             # cleaned + labeled
   processed_dir: data/processed
-  models_dir: models
+  models_dir: models                 # written by the train stage
+  calibrators_dir: artifacts/calibrators   # written by the evaluate stage
   reports_dir: reports
   figures_dir: reports/figures
 

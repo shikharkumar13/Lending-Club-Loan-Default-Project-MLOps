@@ -1,10 +1,14 @@
 # Data files are versioned by DVC, never by git.
 # The small .dvc pointer files (and DVC's own .gitignore files) MUST be
 # committed: they are how git records which data version belongs to a commit.
+artifacts/
 data/**
-!data/**/
-!data/**/*.dvc
-!data/**/.gitignore
+!artifacts/
+data/**/
+!artifacts/
+data/**/*.dvc
+!artifacts/
+data/**/.gitignore
 *.parquet
 *.csv
 !docs/*.csv

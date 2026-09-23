@@ -309,13 +309,13 @@ stages:
       nfiles: 3
     - path: models
       hash: md5
-      md5: 450232ef09c78fcc37e1af30364c8dfc.dir
-      size: 1072810
-      nfiles: 6
+      md5: e17748340564c4b62f82b30eea4fc6e0.dir
+      size: 532078
+      nfiles: 3
     - path: src/lending_club/evaluate.py
       hash: md5
-      md5: 0706cad55177f2407ed15025c1803044
-      size: 9478
+      md5: cf1dc034c2706938064d678eaf4929f9
+      size: 9702
     - path: src/lending_club/policy/profit.py
       hash: md5
       md5: de866699e17c7f53c558ba0a98ba4562
@@ -330,6 +330,11 @@ stages:
             step: 0.005
         seed: 42
     outs:
+    - path: artifacts/calibrators
+      hash: md5
+      md5: 8580ee4b34befe5d720478f47153132a.dir
+      size: 540732
+      nfiles: 3
     - path: reports/metrics.json
       hash: md5
       md5: 41d43e8e714745a01f5a7a2c0f447001

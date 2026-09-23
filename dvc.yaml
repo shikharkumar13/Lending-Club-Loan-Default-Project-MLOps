@@ -70,6 +70,8 @@ stages:
     params:
       - profit
       - seed
+    outs:
+      - artifacts/calibrators
     metrics:
       - reports/metrics.json:
           cache: false
