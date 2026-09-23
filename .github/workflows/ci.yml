@@ -67,6 +67,13 @@ jobs:
       - name: Build a demo bundle
         run: uv run python -m lending_club.testing
 
+      # Required before any build that exports a cache. The default buildx
+      # driver is `docker`, which cannot export one, so `cache-to: type=gha`
+      # fails with a bare "buildx failed" and a link to the cache-backend docs.
+      # This switches to the docker-container driver, which supports it.
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Build image
         uses: docker/build-push-action@v6
         with:
