@@ -1,7 +1,7 @@
 {
   "profit_model": {
-    "lgd": 0.3731939293173839,
-    "prepay_factor": 0.8292515378266087
+    "lgd": 0.36565851131213056,
+    "prepay_factor": 0.8288434404325212
   },
   "test_loans": 283026,
   "results": {
@@ -16,8 +16,9 @@
         "roc_auc": 0.6675305338550637,
         "brier": 0.1215209723233027
       },
-      "threshold": 0.17000000000000004,
-      "matched_threshold": 0.13269936262058893,
+      "threshold": 0.16000000000000003,
+      "matched_threshold": 0.13075520899473653,
+      "calibrated_risk_at_threshold": 0.1652698282910875,
       "policies": {
         "expected_value": {
           "loans_funded": 283000,
@@ -56,32 +57,33 @@
         "roc_auc": 0.6782604537350404,
         "brier": 0.12131647966568038
       },
-      "threshold": 0.14500000000000002,
-      "matched_threshold": 0.12015888778550148,
+      "threshold": 0.135,
+      "matched_threshold": 0.11559592157917158,
+      "calibrated_risk_at_threshold": 0.1426465167711021,
       "policies": {
         "expected_value": {
-          "loans_funded": 282788,
-          "share_funded": 0.9991590878576526,
-          "capital_invested": 3622188375.0,
-          "total_profit": 237424132.79728323,
-          "return_per_dollar": 0.06554715222321457,
-          "default_rate_funded": 0.14873686295033736
+          "loans_funded": 282832,
+          "share_funded": 0.9993145506066581,
+          "capital_invested": 3622594000.0,
+          "total_profit": 237419678.21833074,
+          "return_per_dollar": 0.06553858318606245,
+          "default_rate_funded": 0.14876322339763534
         },
         "threshold": {
-          "loans_funded": 201806,
-          "share_funded": 0.7130298983132292,
-          "capital_invested": 2684139075.0,
-          "total_profit": 193554612.50442332,
-          "return_per_dollar": 0.0721105006469992,
-          "default_rate_funded": 0.1075389235206089
+          "loans_funded": 197804,
+          "share_funded": 0.6988898546423297,
+          "capital_invested": 2636574400.0,
+          "total_profit": 190484612.62157035,
+          "return_per_dollar": 0.07224700832321301,
+          "default_rate_funded": 0.10583709126205738
         },
         "matched_to_grade_AB": {
-          "loans_funded": 168302,
-          "share_funded": 0.5946520814342146,
-          "capital_invested": 2286247275.0,
-          "total_profit": 167395919.7879336,
-          "return_per_dollar": 0.07321864157845025,
-          "default_rate_funded": 0.09405711162077694
+          "loans_funded": 169198,
+          "share_funded": 0.5978178683230516,
+          "capital_invested": 2296963200.0,
+          "total_profit": 168203975.156981,
+          "return_per_dollar": 0.07322885066551392,
+          "default_rate_funded": 0.09436281752739394
         }
       }
     },
@@ -96,32 +98,33 @@
         "roc_auc": 0.6834120495579422,
         "brier": 0.12063637876132481
       },
-      "threshold": 0.15000000000000002,
-      "matched_threshold": 0.12373403786878034,
+      "threshold": 0.14,
+      "matched_threshold": 0.12198558823993284,
+      "calibrated_risk_at_threshold": 0.14648065948002534,
       "policies": {
         "expected_value": {
-          "loans_funded": 282653,
-          "share_funded": 0.9986820998777497,
-          "capital_invested": 3620671600.0,
-          "total_profit": 237476546.79986307,
-          "return_per_dollar": 0.065589087615641,
-          "default_rate_funded": 0.1485885520408416
+          "loans_funded": 282682,
+          "share_funded": 0.9987845639623215,
+          "capital_invested": 3620981525.0,
+          "total_profit": 237449037.11127734,
+          "return_per_dollar": 0.06557587645003998,
+          "default_rate_funded": 0.1486157590508062
         },
         "threshold": {
-          "loans_funded": 189210,
-          "share_funded": 0.6685251531661403,
-          "capital_invested": 2561555200.0,
-          "total_profit": 188105310.30121118,
-          "return_per_dollar": 0.07343402566581864,
-          "default_rate_funded": 0.10028539717773902
+          "loans_funded": 187752,
+          "share_funded": 0.6633736829831888,
+          "capital_invested": 2545113575.0,
+          "total_profit": 187026703.3543211,
+          "return_per_dollar": 0.07348461977942226,
+          "default_rate_funded": 0.09969534279262005
         },
         "matched_to_grade_AB": {
-          "loans_funded": 158638,
-          "share_funded": 0.5605068085617576,
-          "capital_invested": 2199530875.0,
-          "total_profit": 162527475.46026582,
-          "return_per_dollar": 0.07389188181332795,
-          "default_rate_funded": 0.08787932273477982
+          "loans_funded": 164127,
+          "share_funded": 0.5799007865001802,
+          "capital_invested": 2266704375.0,
+          "total_profit": 167320939.19096762,
+          "return_per_dollar": 0.07381683338876849,
+          "default_rate_funded": 0.09007658703321209
         }
       }
     },
@@ -142,683 +145,715 @@
         "return_per_dollar": 0.07175371532556786,
         "default_rate_funded": 0.09090909090909091
       }
+    },
+    "significance": {
+      "lightgbm_threshold_vs_fund_all": {
+        "mean_difference": 0.007954374190719453,
+        "ci_low": 0.007182661942654632,
+        "ci_high": 0.008698384088483339,
+        "prob_better": 1.0
+      },
+      "lightgbm_threshold_vs_grade_AB": {
+        "mean_difference": 0.0017248140163149434,
+        "ci_low": 0.0010758537576382224,
+        "ci_high": 0.0023609783012366837,
+        "prob_better": 1.0
+      },
+      "lightgbm_matched_vs_grade_AB": {
+        "mean_difference": 0.002065678221423511,
+        "ci_low": 0.0014838446301410843,
+        "ci_high": 0.0026767505301954512,
+        "prob_better": 1.0
+      },
+      "logreg_matched_vs_grade_AB": {
+        "mean_difference": 0.0014707476532567366,
+        "ci_low": 0.0007707876261400459,
+        "ci_high": 0.0021783930028354184,
+        "prob_better": 1.0
+      },
+      "lightgbm_vs_logreg_matched": {
+        "mean_difference": 0.0005949305681667748,
+        "ci_low": 0.00012828192903964337,
+        "ci_high": 0.0010749491452689782,
+        "prob_better": 0.994
+      }
     }
   },
   "threshold_curve_lightgbm": [
     {
       "threshold": 0.02,
-      "loans_funded": 2464,
-      "share_funded": 0.02719196601004249,
-      "capital_invested": 36798000.0,
-      "total_profit": 2644847.1513324156,
-      "return_per_dollar": 0.07187475274016021,
-      "default_rate_funded": 0.019074675324675324
+      "loans_funded": 574,
+      "share_funded": 0.006334492081884898,
+      "capital_invested": 7795200.0,
+      "total_profit": 523721.2087629303,
+      "return_per_dollar": 0.0671850893835861,
+      "default_rate_funded": 0.017421602787456445
     },
     {
       "threshold": 0.025,
-      "loans_funded": 3639,
-      "share_funded": 0.04015891408707168,
-      "capital_invested": 55334475.0,
-      "total_profit": 4022444.1370591084,
-      "return_per_dollar": 0.0726932737151497,
-      "default_rate_funded": 0.021984061555372355
+      "loans_funded": 1410,
+      "share_funded": 0.015560337692435026,
+      "capital_invested": 20385900.0,
+      "total_profit": 1405899.1182168229,
+      "return_per_dollar": 0.06896428993651607,
+      "default_rate_funded": 0.019148936170212766
     },
     {
       "threshold": 0.030000000000000002,
-      "loans_funded": 3639,
-      "share_funded": 0.04015891408707168,
-      "capital_invested": 55334475.0,
-      "total_profit": 4022444.1370591084,
-      "return_per_dollar": 0.0726932737151497,
-      "default_rate_funded": 0.021984061555372355
+      "loans_funded": 3175,
+      "share_funded": 0.03503834905920653,
+      "capital_invested": 47998850.0,
+      "total_profit": 3421386.215296657,
+      "return_per_dollar": 0.07128058724941654,
+      "default_rate_funded": 0.02204724409448819
     },
     {
       "threshold": 0.035,
-      "loans_funded": 6561,
-      "share_funded": 0.07240523092203277,
-      "capital_invested": 102176800.0,
-      "total_profit": 7551362.606575094,
-      "return_per_dollar": 0.07390486496518871,
-      "default_rate_funded": 0.026215515927450084
+      "loans_funded": 5562,
+      "share_funded": 0.061380566131435194,
+      "capital_invested": 86324025.0,
+      "total_profit": 6362502.265180678,
+      "return_per_dollar": 0.07370488418699983,
+      "default_rate_funded": 0.025530384753685725
     },
     {
       "threshold": 0.04000000000000001,
-      "loans_funded": 6561,
-      "share_funded": 0.07240523092203277,
-      "capital_invested": 102176800.0,
-      "total_profit": 7551362.606575094,
-      "return_per_dollar": 0.07390486496518871,
-      "default_rate_funded": 0.026215515927450084
+      "loans_funded": 7998,
+      "share_funded": 0.0882635325277272,
+      "capital_invested": 125044325.0,
+      "total_profit": 9315411.701013587,
+      "return_per_dollar": 0.07449687701551899,
+      "default_rate_funded": 0.029007251812953237
     },
     {
       "threshold": 0.045000000000000005,
-      "loans_funded": 6561,
-      "share_funded": 0.07240523092203277,
-      "capital_invested": 102176800.0,
-      "total_profit": 7551362.606575094,
-      "return_per_dollar": 0.07390486496518871,
-      "default_rate_funded": 0.026215515927450084
+      "loans_funded": 10196,
+      "share_funded": 0.1125200022071401,
+      "capital_invested": 158697475.0,
+      "total_profit": 11868026.585920706,
+      "return_per_dollar": 0.07478396607079417,
+      "default_rate_funded": 0.033444488034523344
     },
     {
       "threshold": 0.05,
-      "loans_funded": 10361,
-      "share_funded": 0.11434089278816972,
-      "capital_invested": 161382625.0,
-      "total_profit": 12114987.315533843,
-      "return_per_dollar": 0.07506996069455335,
-      "default_rate_funded": 0.03339445999420905
+      "loans_funded": 12361,
+      "share_funded": 0.13641229377034708,
+      "capital_invested": 191021750.0,
+      "total_profit": 14391408.275279693,
+      "return_per_dollar": 0.07533910811349856,
+      "default_rate_funded": 0.03786101448102904
     },
     {
       "threshold": 0.05500000000000001,
-      "loans_funded": 13968,
-      "share_funded": 0.15414666445952657,
-      "capital_invested": 214640700.0,
-      "total_profit": 16335129.710594818,
-      "return_per_dollar": 0.0761045305507987,
-      "default_rate_funded": 0.039733676975945015
+      "loans_funded": 14606,
+      "share_funded": 0.16118744137284113,
+      "capital_invested": 223673475.0,
+      "total_profit": 17092759.532462988,
+      "return_per_dollar": 0.07641835730617136,
+      "default_rate_funded": 0.04059975352594824
     },
     {
       "threshold": 0.06000000000000001,
-      "loans_funded": 14216,
-      "share_funded": 0.15688351818131657,
-      "capital_invested": 218250925.0,
-      "total_profit": 16674682.405530173,
-      "return_per_dollar": 0.07640142833543626,
-      "default_rate_funded": 0.04002532357906584
+      "loans_funded": 16957,
+      "share_funded": 0.1871323732273906,
+      "capital_invested": 257567775.0,
+      "total_profit": 20060957.852094963,
+      "return_per_dollar": 0.0778861325027751,
+      "default_rate_funded": 0.04305006781859999
     },
     {
       "threshold": 0.065,
-      "loans_funded": 18648,
-      "share_funded": 0.20579374275782156,
-      "capital_invested": 282142000.0,
-      "total_profit": 22182603.358018924,
-      "return_per_dollar": 0.07862212417158354,
-      "default_rate_funded": 0.04611754611754612
+      "loans_funded": 19481,
+      "share_funded": 0.21498648126689843,
+      "capital_invested": 294145900.0,
+      "total_profit": 23232766.13132324,
+      "return_per_dollar": 0.07898381766097451,
+      "default_rate_funded": 0.046968841435244595
     },
     {
       "threshold": 0.07,
-      "loans_funded": 18650,
-      "share_funded": 0.20581581415880373,
-      "capital_invested": 282184000.0,
-      "total_profit": 22189170.940183196,
-      "return_per_dollar": 0.07863369624139993,
-      "default_rate_funded": 0.04611260053619303
+      "loans_funded": 22057,
+      "share_funded": 0.24341444573194285,
+      "capital_invested": 329933525.0,
+      "total_profit": 26472403.839672804,
+      "return_per_dollar": 0.08023556817899243,
+      "default_rate_funded": 0.04964410391259011
     },
     {
       "threshold": 0.07500000000000001,
-      "loans_funded": 18650,
-      "share_funded": 0.20581581415880373,
-      "capital_invested": 282184000.0,
-      "total_profit": 22189170.940183196,
-      "return_per_dollar": 0.07863369624139993,
-      "default_rate_funded": 0.04611260053619303
+      "loans_funded": 24722,
+      "share_funded": 0.27282458754069416,
+      "capital_invested": 365277600.0,
+      "total_profit": 29409048.590344742,
+      "return_per_dollar": 0.08051150300578175,
+      "default_rate_funded": 0.05416228460480544
     },
     {
       "threshold": 0.08000000000000002,
-      "loans_funded": 30990,
-      "share_funded": 0.34199635821883795,
-      "capital_invested": 445483775.0,
-      "total_profit": 36981634.19852642,
-      "return_per_dollar": 0.08301454794515563,
-      "default_rate_funded": 0.06108422071636012
+      "loans_funded": 27431,
+      "share_funded": 0.30272030017105334,
+      "capital_invested": 399946800.0,
+      "total_profit": 32455739.989244822,
+      "return_per_dollar": 0.08115014294212336,
+      "default_rate_funded": 0.05789070759359848
     },
     {
       "threshold": 0.08500000000000002,
-      "loans_funded": 31111,
-      "share_funded": 0.3433316779782597,
-      "capital_invested": 447113525.0,
-      "total_profit": 37129111.075088814,
-      "return_per_dollar": 0.0830417981095267,
-      "default_rate_funded": 0.06129664748802674
+      "loans_funded": 30176,
+      "share_funded": 0.33301329801909174,
+      "capital_invested": 435114950.0,
+      "total_profit": 35898386.6666366,
+      "return_per_dollar": 0.08250322510554188,
+      "default_rate_funded": 0.060312831389183454
     },
     {
       "threshold": 0.09000000000000001,
-      "loans_funded": 35829,
-      "share_funded": 0.39539811289521604,
-      "capital_invested": 506496625.0,
-      "total_profit": 42699524.06064501,
-      "return_per_dollar": 0.08430366946797524,
-      "default_rate_funded": 0.0668452929191437
+      "loans_funded": 32824,
+      "share_funded": 0.36223583291949457,
+      "capital_invested": 468885625.0,
+      "total_profit": 39126265.8131648,
+      "return_per_dollar": 0.08344522358339478,
+      "default_rate_funded": 0.06345966366073605
     },
     {
       "threshold": 0.09500000000000001,
-      "loans_funded": 37440,
-      "share_funded": 0.4131766263863599,
-      "capital_invested": 526771975.0,
-      "total_profit": 44670761.93422621,
-      "return_per_dollar": 0.08480094624287142,
-      "default_rate_funded": 0.06907051282051282
+      "loans_funded": 35387,
+      "share_funded": 0.39052033327815483,
+      "capital_invested": 500907375.0,
+      "total_profit": 42190210.184172764,
+      "return_per_dollar": 0.0842275683886123,
+      "default_rate_funded": 0.06635205018792212
     },
     {
       "threshold": 0.10000000000000002,
-      "loans_funded": 37725,
-      "share_funded": 0.41632180102632016,
-      "capital_invested": 530416525.0,
-      "total_profit": 44972453.72647926,
-      "return_per_dollar": 0.08478705245180523,
-      "default_rate_funded": 0.069688535453943
+      "loans_funded": 38013,
+      "share_funded": 0.4195000827677537,
+      "capital_invested": 533970925.0,
+      "total_profit": 45367643.076953456,
+      "return_per_dollar": 0.0849627591183049,
+      "default_rate_funded": 0.0698708336621682
     },
     {
       "threshold": 0.10500000000000001,
-      "loans_funded": 38929,
-      "share_funded": 0.4296087844175909,
-      "capital_invested": 545732000.0,
-      "total_profit": 46500836.91931011,
-      "return_per_dollar": 0.08520819178518046,
-      "default_rate_funded": 0.07061573634051735
+      "loans_funded": 40554,
+      "share_funded": 0.44754179771561,
+      "capital_invested": 565556125.0,
+      "total_profit": 48330636.5407735,
+      "return_per_dollar": 0.0854568351474816,
+      "default_rate_funded": 0.07242195591063767
     },
     {
       "threshold": 0.11000000000000001,
-      "loans_funded": 39822,
-      "share_funded": 0.4394636649561331,
-      "capital_invested": 556726625.0,
-      "total_profit": 47447275.98340933,
-      "return_per_dollar": 0.0852254479178346,
-      "default_rate_funded": 0.07181959720757371
+      "loans_funded": 43097,
+      "share_funded": 0.47560558406444847,
+      "capital_invested": 596319750.0,
+      "total_profit": 51298828.95278643,
+      "return_per_dollar": 0.08602570844381127,
+      "default_rate_funded": 0.07557370582639163
     },
     {
       "threshold": 0.11500000000000002,
-      "loans_funded": 46912,
-      "share_funded": 0.5177067814379518,
-      "capital_invested": 643309275.0,
-      "total_profit": 55881800.785258755,
-      "return_per_dollar": 0.08686615125401193,
-      "default_rate_funded": 0.07976637107776262
+      "loans_funded": 45482,
+      "share_funded": 0.5019257297356949,
+      "capital_invested": 625397125.0,
+      "total_profit": 54151662.026603304,
+      "return_per_dollar": 0.08658764145518466,
+      "default_rate_funded": 0.07805285607493075
     },
     {
       "threshold": 0.12000000000000002,
-      "loans_funded": 46913,
-      "share_funded": 0.5177178171384429,
-      "capital_invested": 643310475.0,
-      "total_profit": 55881966.5426122,
-      "return_per_dollar": 0.08686624688120025,
-      "default_rate_funded": 0.07976467077355957
+      "loans_funded": 47827,
+      "share_funded": 0.5278044473872979,
+      "capital_invested": 654257925.0,
+      "total_profit": 56737721.46970506,
+      "return_per_dollar": 0.08672072481155664,
+      "default_rate_funded": 0.08116754134693792
     },
     {
       "threshold": 0.12500000000000003,
-      "loans_funded": 52132,
-      "share_funded": 0.5753131380014347,
-      "capital_invested": 704904700.0,
-      "total_profit": 61761564.22089864,
-      "return_per_dollar": 0.08761689944881719,
-      "default_rate_funded": 0.08582060922274228
+      "loans_funded": 50068,
+      "share_funded": 0.5525354521878276,
+      "capital_invested": 680959050.0,
+      "total_profit": 59247956.41867308,
+      "return_per_dollar": 0.08700663632956061,
+      "default_rate_funded": 0.0841655348725733
     },
     {
       "threshold": 0.13000000000000003,
-      "loans_funded": 52132,
-      "share_funded": 0.5753131380014347,
-      "capital_invested": 704904700.0,
-      "total_profit": 61761564.22089864,
-      "return_per_dollar": 0.08761689944881719,
-      "default_rate_funded": 0.08582060922274228
+      "loans_funded": 52235,
+      "share_funded": 0.5764498151520168,
+      "capital_invested": 706067300.0,
+      "total_profit": 61898331.558414064,
+      "return_per_dollar": 0.08766633373109627,
+      "default_rate_funded": 0.08593854695127788
     },
     {
       "threshold": 0.135,
-      "loans_funded": 52133,
-      "share_funded": 0.5753241737019257,
-      "capital_invested": 704905700.0,
-      "total_profit": 61761869.96422163,
-      "return_per_dollar": 0.08761720888938992,
-      "default_rate_funded": 0.08581896303684806
+      "loans_funded": 54447,
+      "share_funded": 0.600860784638305,
+      "capital_invested": 732145100.0,
+      "total_profit": 64337485.353055805,
+      "return_per_dollar": 0.08787532055197228,
+      "default_rate_funded": 0.08848972395173288
     },
     {
       "threshold": 0.14,
-      "loans_funded": 52133,
-      "share_funded": 0.5753241737019257,
-      "capital_invested": 704905700.0,
-      "total_profit": 61761869.96422163,
-      "return_per_dollar": 0.08761720888938992,
-      "default_rate_funded": 0.08581896303684806
+      "loans_funded": 56496,
+      "share_funded": 0.6234729349445456,
+      "capital_invested": 754783875.0,
+      "total_profit": 66444030.176036574,
+      "return_per_dollar": 0.08803053745158053,
+      "default_rate_funded": 0.09071438685924667
     },
     {
       "threshold": 0.14500000000000002,
-      "loans_funded": 53175,
-      "share_funded": 0.5868233736136401,
-      "capital_invested": 717014750.0,
-      "total_profit": 62872345.31166901,
-      "return_per_dollar": 0.08768626490831466,
-      "default_rate_funded": 0.08712740949694406
+      "loans_funded": 58501,
+      "share_funded": 0.6455995144291784,
+      "capital_invested": 777533175.0,
+      "total_profit": 68257091.76485491,
+      "return_per_dollar": 0.0877867259681298,
+      "default_rate_funded": 0.09375908104134972
     },
     {
       "threshold": 0.15000000000000002,
-      "loans_funded": 56968,
-      "share_funded": 0.6286817855763395,
-      "capital_invested": 760251625.0,
-      "total_profit": 66861983.37055334,
-      "return_per_dollar": 0.08794717587161137,
-      "default_rate_funded": 0.09147240556101671
+      "loans_funded": 60431,
+      "share_funded": 0.6668984163769796,
+      "capital_invested": 799221650.0,
+      "total_profit": 70095765.0888379,
+      "return_per_dollar": 0.08770503788134106,
+      "default_rate_funded": 0.09612616041435687
     },
     {
       "threshold": 0.15500000000000003,
-      "loans_funded": 56968,
-      "share_funded": 0.6286817855763395,
-      "capital_invested": 760251625.0,
-      "total_profit": 66861983.37055334,
-      "return_per_dollar": 0.08794717587161137,
-      "default_rate_funded": 0.09147240556101671
+      "loans_funded": 62249,
+      "share_funded": 0.6869613198697787,
+      "capital_invested": 819563925.0,
+      "total_profit": 71876010.20002809,
+      "return_per_dollar": 0.08770030989349378,
+      "default_rate_funded": 0.09817025173095151
     },
     {
       "threshold": 0.16000000000000003,
-      "loans_funded": 59547,
-      "share_funded": 0.6571428571428571,
-      "capital_invested": 788984925.0,
-      "total_profit": 69209086.61668563,
-      "return_per_dollar": 0.08771914953468297,
-      "default_rate_funded": 0.09496700085646632
+      "loans_funded": 64091,
+      "share_funded": 0.7072890801743641,
+      "capital_invested": 839639200.0,
+      "total_profit": 73431896.9068862,
+      "return_per_dollar": 0.08745648953370234,
+      "default_rate_funded": 0.10063815512318422
     },
     {
       "threshold": 0.16500000000000004,
-      "loans_funded": 63793,
-      "share_funded": 0.7040004414280197,
-      "capital_invested": 836369275.0,
-      "total_profit": 73122406.88383003,
-      "return_per_dollar": 0.08742837532360336,
-      "default_rate_funded": 0.10029313561049018
+      "loans_funded": 65843,
+      "share_funded": 0.7266236274347514,
+      "capital_invested": 858804075.0,
+      "total_profit": 75056364.28481549,
+      "return_per_dollar": 0.08739637650743039,
+      "default_rate_funded": 0.10318484880701062
     },
     {
       "threshold": 0.17000000000000004,
-      "loans_funded": 63793,
-      "share_funded": 0.7040004414280197,
-      "capital_invested": 836369275.0,
-      "total_profit": 73122406.88383003,
-      "return_per_dollar": 0.08742837532360336,
-      "default_rate_funded": 0.10029313561049018
+      "loans_funded": 67578,
+      "share_funded": 0.7457705677867903,
+      "capital_invested": 877292750.0,
+      "total_profit": 76697673.53843802,
+      "return_per_dollar": 0.08742540450543793,
+      "default_rate_funded": 0.10525614845067921
     },
     {
       "threshold": 0.17500000000000004,
-      "loans_funded": 63793,
-      "share_funded": 0.7040004414280197,
-      "capital_invested": 836369275.0,
-      "total_profit": 73122406.88383003,
-      "return_per_dollar": 0.08742837532360336,
-      "default_rate_funded": 0.10029313561049018
+      "loans_funded": 69236,
+      "share_funded": 0.7640677592010153,
+      "capital_invested": 894813250.0,
+      "total_profit": 78173868.63456914,
+      "return_per_dollar": 0.08736333378452894,
+      "default_rate_funded": 0.10744410422323647
     },
     {
       "threshold": 0.18000000000000002,
-      "loans_funded": 64602,
-      "share_funded": 0.7129283231253104,
-      "capital_invested": 845143025.0,
-      "total_profit": 74005932.68722278,
-      "return_per_dollar": 0.08756616394866748,
-      "default_rate_funded": 0.10125073527135382
+      "loans_funded": 70859,
+      "share_funded": 0.7819787010980522,
+      "capital_invested": 912319375.0,
+      "total_profit": 79483390.47441198,
+      "return_per_dollar": 0.08712233089910205,
+      "default_rate_funded": 0.10944269605836944
     },
     {
       "threshold": 0.18500000000000003,
-      "loans_funded": 70238,
-      "share_funded": 0.7751255310930861,
-      "capital_invested": 905514575.0,
-      "total_profit": 79027805.31054735,
-      "return_per_dollar": 0.08727391860097597,
-      "default_rate_funded": 0.10867336769270196
+      "loans_funded": 72353,
+      "share_funded": 0.7984660376317386,
+      "capital_invested": 927883050.0,
+      "total_profit": 80718317.32632664,
+      "return_per_dollar": 0.08699190843751983,
+      "default_rate_funded": 0.11134299890813097
     },
     {
       "threshold": 0.19000000000000003,
-      "loans_funded": 72730,
-      "share_funded": 0.8026264967168791,
-      "capital_invested": 931988850.0,
-      "total_profit": 80941554.12730998,
-      "return_per_dollar": 0.08684820009092381,
-      "default_rate_funded": 0.11207204729822631
+      "loans_funded": 73749,
+      "share_funded": 0.8138718755172984,
+      "capital_invested": 942534900.0,
+      "total_profit": 81729516.47724533,
+      "return_per_dollar": 0.08671245645890177,
+      "default_rate_funded": 0.11384561146591818
     },
     {
       "threshold": 0.19500000000000003,
-      "loans_funded": 72730,
-      "share_funded": 0.8026264967168791,
-      "capital_invested": 931988850.0,
-      "total_profit": 80941554.12730998,
-      "return_per_dollar": 0.08684820009092381,
-      "default_rate_funded": 0.11207204729822631
+      "loans_funded": 75106,
+      "share_funded": 0.8288473210837057,
+      "capital_invested": 957311900.0,
+      "total_profit": 82923612.53933433,
+      "return_per_dollar": 0.08662131175778169,
+      "default_rate_funded": 0.11546347828402524
     },
     {
       "threshold": 0.20000000000000004,
-      "loans_funded": 72730,
-      "share_funded": 0.8026264967168791,
-      "capital_invested": 931988850.0,
-      "total_profit": 80941554.12730998,
-      "return_per_dollar": 0.08684820009092381,
-      "default_rate_funded": 0.11207204729822631
+      "loans_funded": 76361,
+      "share_funded": 0.842697125200022,
+      "capital_invested": 970787500.0,
+      "total_profit": 83927377.646528,
+      "return_per_dollar": 0.08645288247585389,
+      "default_rate_funded": 0.11697070494100392
     },
     {
       "threshold": 0.20500000000000004,
-      "loans_funded": 72730,
-      "share_funded": 0.8026264967168791,
-      "capital_invested": 931988850.0,
-      "total_profit": 80941554.12730998,
-      "return_per_dollar": 0.08684820009092381,
-      "default_rate_funded": 0.11207204729822631
+      "loans_funded": 77506,
+      "share_funded": 0.8553330022623186,
+      "capital_invested": 983057150.0,
+      "total_profit": 84828408.35191438,
+      "return_per_dollar": 0.08629041389090591,
+      "default_rate_funded": 0.11858436766185844
     },
     {
       "threshold": 0.21000000000000005,
-      "loans_funded": 72731,
-      "share_funded": 0.8026375324173702,
-      "capital_invested": 931998850.0,
-      "total_profit": 80943582.51011367,
-      "return_per_dollar": 0.0868494446212178,
-      "default_rate_funded": 0.11207050638654768
+      "loans_funded": 78632,
+      "share_funded": 0.8677592010152845,
+      "capital_invested": 995471575.0,
+      "total_profit": 85607646.92313263,
+      "return_per_dollar": 0.08599707824217144,
+      "default_rate_funded": 0.12023094923186489
     },
     {
       "threshold": 0.21500000000000002,
-      "loans_funded": 75876,
-      "share_funded": 0.8373448104618441,
-      "capital_invested": 965712725.0,
-      "total_profit": 83568125.95341736,
-      "return_per_dollar": 0.0865351815193461,
-      "default_rate_funded": 0.11638726342980653
+      "loans_funded": 79657,
+      "share_funded": 0.8790707940186503,
+      "capital_invested": 1006470525.0,
+      "total_profit": 86394755.96171358,
+      "return_per_dollar": 0.0858393304281947,
+      "default_rate_funded": 0.12170932874700277
     },
     {
       "threshold": 0.22000000000000003,
-      "loans_funded": 75876,
-      "share_funded": 0.8373448104618441,
-      "capital_invested": 965712725.0,
-      "total_profit": 83568125.95341736,
-      "return_per_dollar": 0.0865351815193461,
-      "default_rate_funded": 0.11638726342980653
+      "loans_funded": 80615,
+      "share_funded": 0.8896429950891133,
+      "capital_invested": 1016999700.0,
+      "total_profit": 87145027.91176127,
+      "return_per_dollar": 0.0856883516403803,
+      "default_rate_funded": 0.12330211499100664
     },
     {
       "threshold": 0.22500000000000003,
-      "loans_funded": 76661,
-      "share_funded": 0.8460078353473487,
-      "capital_invested": 973978775.0,
-      "total_profit": 84177114.41387579,
-      "return_per_dollar": 0.08642602546844595,
-      "default_rate_funded": 0.11739998173778061
+      "loans_funded": 81503,
+      "share_funded": 0.8994426971252,
+      "capital_invested": 1027335150.0,
+      "total_profit": 87613967.32009615,
+      "return_per_dollar": 0.08528275054162816,
+      "default_rate_funded": 0.12459664061445591
     },
     {
       "threshold": 0.23000000000000004,
-      "loans_funded": 79823,
-      "share_funded": 0.880902720300171,
-      "capital_invested": 1008332600.0,
-      "total_profit": 86371188.5143255,
-      "return_per_dollar": 0.08565743933532001,
-      "default_rate_funded": 0.12218282951029152
+      "loans_funded": 82332,
+      "share_funded": 0.9085912928323125,
+      "capital_invested": 1036622225.0,
+      "total_profit": 88057712.03480843,
+      "return_per_dollar": 0.08494677222920667,
+      "default_rate_funded": 0.12590487295340816
     },
     {
       "threshold": 0.23500000000000004,
-      "loans_funded": 82469,
-      "share_funded": 0.9101031837995917,
-      "capital_invested": 1038375925.0,
-      "total_profit": 88148133.19307238,
-      "return_per_dollar": 0.08489038610277139,
-      "default_rate_funded": 0.12616862093635184
+      "loans_funded": 83077,
+      "share_funded": 0.9168128896981735,
+      "capital_invested": 1045197675.0,
+      "total_profit": 88675307.70359334,
+      "return_per_dollar": 0.08484070508824404,
+      "default_rate_funded": 0.12713506746753012
     },
     {
       "threshold": 0.24000000000000005,
-      "loans_funded": 82469,
-      "share_funded": 0.9101031837995917,
-      "capital_invested": 1038375925.0,
-      "total_profit": 88148133.19307238,
-      "return_per_dollar": 0.08489038610277139,
-      "default_rate_funded": 0.12616862093635184
+      "loans_funded": 83787,
+      "share_funded": 0.9246482370468465,
+      "capital_invested": 1053659625.0,
+      "total_profit": 89478370.00332627,
+      "return_per_dollar": 0.08492151343782037,
+      "default_rate_funded": 0.12788380058959026
     },
     {
       "threshold": 0.24500000000000005,
-      "loans_funded": 82470,
-      "share_funded": 0.9101142195000828,
-      "capital_invested": 1038381325.0,
-      "total_profit": 88149045.76633209,
-      "return_per_dollar": 0.08489082348079795,
-      "default_rate_funded": 0.126167091063417
+      "loans_funded": 84436,
+      "share_funded": 0.9318104066655631,
+      "capital_invested": 1061007500.0,
+      "total_profit": 89846996.40050988,
+      "return_per_dollar": 0.08468083062608876,
+      "default_rate_funded": 0.12899711023733954
     },
     {
       "threshold": 0.25000000000000006,
-      "loans_funded": 82727,
-      "share_funded": 0.9129503945262926,
-      "capital_invested": 1041350550.0,
-      "total_profit": 88433386.9980857,
-      "return_per_dollar": 0.08492182291360552,
-      "default_rate_funded": 0.12646415317852697
+      "loans_funded": 84995,
+      "share_funded": 0.9379793632400817,
+      "capital_invested": 1067332025.0,
+      "total_profit": 90158193.02360636,
+      "return_per_dollar": 0.08447061543347428,
+      "default_rate_funded": 0.13004294370257075
     },
     {
       "threshold": 0.25500000000000006,
-      "loans_funded": 82727,
-      "share_funded": 0.9129503945262926,
-      "capital_invested": 1041350550.0,
-      "total_profit": 88433386.9980857,
-      "return_per_dollar": 0.08492182291360552,
-      "default_rate_funded": 0.12646415317852697
+      "loans_funded": 85530,
+      "share_funded": 0.9438834630028141,
+      "capital_invested": 1073397450.0,
+      "total_profit": 90622481.68517917,
+      "return_per_dollar": 0.08442584029352704,
+      "default_rate_funded": 0.13076113644335322
     },
     {
       "threshold": 0.26000000000000006,
-      "loans_funded": 82728,
-      "share_funded": 0.9129614302267837,
-      "capital_invested": 1041359650.0,
-      "total_profit": 88435301.66808605,
-      "return_per_dollar": 0.08492291944294755,
-      "default_rate_funded": 0.12646262450439996
+      "loans_funded": 86037,
+      "share_funded": 0.949478563151796,
+      "capital_invested": 1079471275.0,
+      "total_profit": 91025196.2901626,
+      "return_per_dollar": 0.08432387076734635,
+      "default_rate_funded": 0.13161779234515383
     },
     {
       "threshold": 0.26500000000000007,
-      "loans_funded": 82728,
-      "share_funded": 0.9129614302267837,
-      "capital_invested": 1041359650.0,
-      "total_profit": 88435301.66808605,
-      "return_per_dollar": 0.08492291944294755,
-      "default_rate_funded": 0.12646262450439996
+      "loans_funded": 86519,
+      "share_funded": 0.9547977707885008,
+      "capital_invested": 1085308850.0,
+      "total_profit": 91382114.96734281,
+      "return_per_dollar": 0.08419917977020348,
+      "default_rate_funded": 0.1324911291161479
     },
     {
       "threshold": 0.2700000000000001,
-      "loans_funded": 82728,
-      "share_funded": 0.9129614302267837,
-      "capital_invested": 1041359650.0,
-      "total_profit": 88435301.66808605,
-      "return_per_dollar": 0.08492291944294755,
-      "default_rate_funded": 0.12646262450439996
+      "loans_funded": 86975,
+      "share_funded": 0.9598300502124373,
+      "capital_invested": 1090498775.0,
+      "total_profit": 91720173.07943135,
+      "return_per_dollar": 0.08410846044226997,
+      "default_rate_funded": 0.13325668295487209
     },
     {
       "threshold": 0.275,
-      "loans_funded": 87554,
-      "share_funded": 0.9662197207967775,
-      "capital_invested": 1097490650.0,
-      "total_profit": 92124551.17617089,
-      "return_per_dollar": 0.08394108066084288,
-      "default_rate_funded": 0.13436279324759576
+      "loans_funded": 87396,
+      "share_funded": 0.9644760801191856,
+      "capital_invested": 1095546575.0,
+      "total_profit": 92020247.41422361,
+      "return_per_dollar": 0.08399482916937932,
+      "default_rate_funded": 0.1340221520435718
     },
     {
       "threshold": 0.28,
-      "loans_funded": 87555,
-      "share_funded": 0.9662307564972686,
-      "capital_invested": 1097505225.0,
-      "total_profit": 92122435.4161709,
-      "return_per_dollar": 0.08393803812293549,
-      "default_rate_funded": 0.13437268002969563
+      "loans_funded": 87784,
+      "share_funded": 0.9687579319097279,
+      "capital_invested": 1100204675.0,
+      "total_profit": 92322714.09664333,
+      "return_per_dollar": 0.08391412633894083,
+      "default_rate_funded": 0.1347512075093411
     },
     {
       "threshold": 0.28500000000000003,
-      "loans_funded": 87556,
-      "share_funded": 0.9662417921977597,
-      "capital_invested": 1097509225.0,
-      "total_profit": 92123439.81896931,
-      "return_per_dollar": 0.08393864736669462,
-      "default_rate_funded": 0.1343711453241354
+      "loans_funded": 88131,
+      "share_funded": 0.9725873199801357,
+      "capital_invested": 1104267125.0,
+      "total_profit": 92455710.65504067,
+      "return_per_dollar": 0.08372585632759888,
+      "default_rate_funded": 0.13545744403217938
     },
     {
       "threshold": 0.29000000000000004,
-      "loans_funded": 89129,
-      "share_funded": 0.9836009490702422,
-      "capital_invested": 1115664950.0,
-      "total_profit": 92773795.69457778,
-      "return_per_dollar": 0.08315560661341721,
-      "default_rate_funded": 0.13782270641429836
+      "loans_funded": 88463,
+      "share_funded": 0.9762511725431772,
+      "capital_invested": 1108043075.0,
+      "total_profit": 92591858.26025757,
+      "return_per_dollar": 0.08356341043894668,
+      "default_rate_funded": 0.13618122831014096
     },
     {
       "threshold": 0.29500000000000004,
-      "loans_funded": 89129,
-      "share_funded": 0.9836009490702422,
-      "capital_invested": 1115664950.0,
-      "total_profit": 92773795.69457778,
-      "return_per_dollar": 0.08315560661341721,
-      "default_rate_funded": 0.13782270641429836
+      "loans_funded": 88744,
+      "share_funded": 0.9793522043811731,
+      "capital_invested": 1111327550.0,
+      "total_profit": 92616610.57685581,
+      "return_per_dollar": 0.08333871555407388,
+      "default_rate_funded": 0.13698954295501667
     },
     {
       "threshold": 0.30000000000000004,
-      "loans_funded": 89129,
-      "share_funded": 0.9836009490702422,
-      "capital_invested": 1115664950.0,
-      "total_profit": 92773795.69457778,
-      "return_per_dollar": 0.08315560661341721,
-      "default_rate_funded": 0.13782270641429836
+      "loans_funded": 88998,
+      "share_funded": 0.9821552723059096,
+      "capital_invested": 1114172675.0,
+      "total_profit": 92746490.62458208,
+      "return_per_dollar": 0.08324247462322847,
+      "default_rate_funded": 0.13749747185330008
     },
     {
       "threshold": 0.30500000000000005,
-      "loans_funded": 89129,
-      "share_funded": 0.9836009490702422,
-      "capital_invested": 1115664950.0,
-      "total_profit": 92773795.69457778,
-      "return_per_dollar": 0.08315560661341721,
-      "default_rate_funded": 0.13782270641429836
+      "loans_funded": 89202,
+      "share_funded": 0.9844065552060917,
+      "capital_invested": 1116569025.0,
+      "total_profit": 92824242.78983632,
+      "return_per_dollar": 0.08313345678726518,
+      "default_rate_funded": 0.13793412703751037
     },
     {
       "threshold": 0.31000000000000005,
-      "loans_funded": 89129,
-      "share_funded": 0.9836009490702422,
-      "capital_invested": 1115664950.0,
-      "total_profit": 92773795.69457778,
-      "return_per_dollar": 0.08315560661341721,
-      "default_rate_funded": 0.13782270641429836
+      "loans_funded": 89385,
+      "share_funded": 0.9864260883959609,
+      "capital_invested": 1118521500.0,
+      "total_profit": 92929365.25282566,
+      "return_per_dollar": 0.08308232363242518,
+      "default_rate_funded": 0.13831179728142307
     },
     {
       "threshold": 0.31500000000000006,
-      "loans_funded": 89129,
-      "share_funded": 0.9836009490702422,
-      "capital_invested": 1115664950.0,
-      "total_profit": 92773795.69457778,
-      "return_per_dollar": 0.08315560661341721,
-      "default_rate_funded": 0.13782270641429836
+      "loans_funded": 89543,
+      "share_funded": 0.9881697290735529,
+      "capital_invested": 1120359875.0,
+      "total_profit": 93001119.40708257,
+      "return_per_dollar": 0.08301004122187308,
+      "default_rate_funded": 0.13864847056721352
     },
     {
       "threshold": 0.32000000000000006,
-      "loans_funded": 89129,
-      "share_funded": 0.9836009490702422,
-      "capital_invested": 1115664950.0,
-      "total_profit": 92773795.69457778,
-      "return_per_dollar": 0.08315560661341721,
-      "default_rate_funded": 0.13782270641429836
+      "loans_funded": 89697,
+      "share_funded": 0.9898692269491806,
+      "capital_invested": 1122133350.0,
+      "total_profit": 93155608.29203317,
+      "return_per_dollar": 0.08301652231620525,
+      "default_rate_funded": 0.13897900710168679
     },
     {
       "threshold": 0.32500000000000007,
-      "loans_funded": 89268,
-      "share_funded": 0.9851349114385035,
-      "capital_invested": 1117269675.0,
-      "total_profit": 92876065.35829575,
-      "return_per_dollar": 0.0831277062615127,
-      "default_rate_funded": 0.13807859479320697
+      "loans_funded": 89817,
+      "share_funded": 0.9911935110081113,
+      "capital_invested": 1123367625.0,
+      "total_profit": 93221029.90226176,
+      "return_per_dollar": 0.08298354681733129,
+      "default_rate_funded": 0.13922754044334593
     },
     {
       "threshold": 0.33000000000000007,
-      "loans_funded": 89269,
-      "share_funded": 0.9851459471389946,
-      "capital_invested": 1117281625.0,
-      "total_profit": 92871440.37829575,
-      "return_per_dollar": 0.08312267766714211,
-      "default_rate_funded": 0.13808825012042256
+      "loans_funded": 89946,
+      "share_funded": 0.9926171163714617,
+      "capital_invested": 1124787125.0,
+      "total_profit": 93266604.35890274,
+      "return_per_dollar": 0.08291933850052093,
+      "default_rate_funded": 0.1395281613412492
     },
     {
       "threshold": 0.3350000000000001,
-      "loans_funded": 89852,
-      "share_funded": 0.9915797605252994,
-      "capital_invested": 1123761775.0,
-      "total_profit": 93221724.6094872,
-      "return_per_dollar": 0.08295505923351701,
-      "default_rate_funded": 0.13929573075724525
+      "loans_funded": 90044,
+      "share_funded": 0.9936986150195883,
+      "capital_invested": 1125777325.0,
+      "total_profit": 93288910.05035803,
+      "return_per_dollar": 0.08286621872612156,
+      "default_rate_funded": 0.13975389809426503
     },
     {
       "threshold": 0.3400000000000001,
-      "loans_funded": 89852,
-      "share_funded": 0.9915797605252994,
-      "capital_invested": 1123761775.0,
-      "total_profit": 93221724.6094872,
-      "return_per_dollar": 0.08295505923351701,
-      "default_rate_funded": 0.13929573075724525
+      "loans_funded": 90121,
+      "share_funded": 0.9945483639574022,
+      "capital_invested": 1126606725.0,
+      "total_profit": 93312637.8383501,
+      "return_per_dollar": 0.08282627448220682,
+      "default_rate_funded": 0.1398897038426116
     },
     {
       "threshold": 0.3450000000000001,
-      "loans_funded": 89852,
-      "share_funded": 0.9915797605252994,
-      "capital_invested": 1123761775.0,
-      "total_profit": 93221724.6094872,
-      "return_per_dollar": 0.08295505923351701,
-      "default_rate_funded": 0.13929573075724525
+      "loans_funded": 90192,
+      "share_funded": 0.9953318986922695,
+      "capital_invested": 1127302375.0,
+      "total_profit": 93315124.22954285,
+      "return_per_dollar": 0.08277736860932529,
+      "default_rate_funded": 0.14006785524215007
     },
     {
       "threshold": 0.3500000000000001,
-      "loans_funded": 90537,
-      "share_funded": 0.999139215361695,
-      "capital_invested": 1130833625.0,
-      "total_profit": 93357439.96079466,
-      "return_per_dollar": 0.08255629996923257,
-      "default_rate_funded": 0.1410362614179838
+      "loans_funded": 90260,
+      "share_funded": 0.9960823263256635,
+      "capital_invested": 1127951600.0,
+      "total_profit": 93325554.35725759,
+      "return_per_dollar": 0.08273897067680705,
+      "default_rate_funded": 0.1402503877686683
     },
     {
       "threshold": 0.3550000000000001,
-      "loans_funded": 90537,
-      "share_funded": 0.999139215361695,
-      "capital_invested": 1130833625.0,
-      "total_profit": 93357439.96079466,
-      "return_per_dollar": 0.08255629996923257,
-      "default_rate_funded": 0.1410362614179838
+      "loans_funded": 90314,
+      "share_funded": 0.9966782541521824,
+      "capital_invested": 1128607175.0,
+      "total_profit": 93319473.5725016,
+      "return_per_dollar": 0.08268552215477595,
+      "default_rate_funded": 0.14042119715658702
     },
     {
       "threshold": 0.36000000000000004,
-      "loans_funded": 90537,
-      "share_funded": 0.999139215361695,
-      "capital_invested": 1130833625.0,
-      "total_profit": 93357439.96079466,
-      "return_per_dollar": 0.08255629996923257,
-      "default_rate_funded": 0.1410362614179838
+      "loans_funded": 90360,
+      "share_funded": 0.9971858963747724,
+      "capital_invested": 1129083800.0,
+      "total_profit": 93339836.06460112,
+      "return_per_dollar": 0.08266865228657175,
+      "default_rate_funded": 0.14054891544931386
     },
     {
       "threshold": 0.36500000000000005,
-      "loans_funded": 90537,
-      "share_funded": 0.999139215361695,
-      "capital_invested": 1130833625.0,
-      "total_profit": 93357439.96079466,
-      "return_per_dollar": 0.08255629996923257,
-      "default_rate_funded": 0.1410362614179838
+      "loans_funded": 90399,
+      "share_funded": 0.9976162886939248,
+      "capital_invested": 1129449950.0,
+      "total_profit": 93351425.85634542,
+      "return_per_dollar": 0.08265211385094613,
+      "default_rate_funded": 0.14063208663812654
     },
     {
       "threshold": 0.37000000000000005,
-      "loans_funded": 90537,
-      "share_funded": 0.999139215361695,
-      "capital_invested": 1130833625.0,
-      "total_profit": 93357439.96079466,
-      "return_per_dollar": 0.08255629996923257,
-      "default_rate_funded": 0.1410362614179838
+      "loans_funded": 90438,
+      "share_funded": 0.9980466810130773,
+      "capital_invested": 1129823825.0,
+      "total_profit": 93337278.0842072,
+      "return_per_dollar": 0.08261224096969916,
+      "default_rate_funded": 0.14074835799110993
     },
     {
       "threshold": 0.37500000000000006,
-      "loans_funded": 90537,
-      "share_funded": 0.999139215361695,
-      "capital_invested": 1130833625.0,
-      "total_profit": 93357439.96079466,
-      "return_per_dollar": 0.08255629996923257,
-      "default_rate_funded": 0.1410362614179838
+      "loans_funded": 90461,
+      "share_funded": 0.9983005021243724,
+      "capital_invested": 1130062975.0,
+      "total_profit": 93345770.98172665,
+      "return_per_dollar": 0.08260227354296484,
+      "default_rate_funded": 0.140834171631974
     },
     {
       "threshold": 0.38000000000000006,
-      "loans_funded": 90537,
-      "share_funded": 0.999139215361695,
-      "capital_invested": 1130833625.0,
-      "total_profit": 93357439.96079466,
-      "return_per_dollar": 0.08255629996923257,
-      "default_rate_funded": 0.1410362614179838
+      "loans_funded": 90490,
+      "share_funded": 0.9986205374386139,
+      "capital_invested": 1130364825.0,
+      "total_profit": 93371862.7491616,
+      "return_per_dollar": 0.08260329823087126,
+      "default_rate_funded": 0.14089954691126091
     },
     {
       "threshold": 0.38500000000000006,
-      "loans_funded": 90537,
-      "share_funded": 0.999139215361695,
-      "capital_invested": 1130833625.0,
-      "total_profit": 93357439.96079466,
-      "return_per_dollar": 0.08255629996923257,
-      "default_rate_funded": 0.1410362614179838
+      "loans_funded": 90504,
+      "share_funded": 0.9987750372454891,
+      "capital_invested": 1130531725.0,
+      "total_profit": 93363532.5433954,
+      "return_per_dollar": 0.08258373513878649,
+      "default_rate_funded": 0.1409440466719703
     },
     {
       "threshold": 0.39000000000000007,
-      "loans_funded": 90537,
-      "share_funded": 0.999139215361695,
-      "capital_invested": 1130833625.0,
-      "total_profit": 93357439.96079466,
-      "return_per_dollar": 0.08255629996923257,
-      "default_rate_funded": 0.1410362614179838
+      "loans_funded": 90526,
+      "share_funded": 0.9990178226562931,
+      "capital_invested": 1130736750.0,
+      "total_profit": 93356695.05483404,
+      "return_per_dollar": 0.08256271413733925,
+      "default_rate_funded": 0.14099816627267303
     },
     {
       "threshold": 0.3950000000000001,
@@ -831,192 +866,192 @@
     },
     {
       "threshold": 0.4000000000000001,
-      "loans_funded": 90537,
-      "share_funded": 0.999139215361695,
-      "capital_invested": 1130833625.0,
-      "total_profit": 93357439.96079466,
-      "return_per_dollar": 0.08255629996923257,
-      "default_rate_funded": 0.1410362614179838
+      "loans_funded": 90550,
+      "share_funded": 0.9992826794680792,
+      "capital_invested": 1131007950.0,
+      "total_profit": 93354070.65068987,
+      "return_per_dollar": 0.08254059633328825,
+      "default_rate_funded": 0.14107123136388736
     },
     {
       "threshold": 0.4050000000000001,
-      "loans_funded": 90537,
-      "share_funded": 0.999139215361695,
-      "capital_invested": 1130833625.0,
-      "total_profit": 93357439.96079466,
-      "return_per_dollar": 0.08255629996923257,
-      "default_rate_funded": 0.1410362614179838
+      "loans_funded": 90559,
+      "share_funded": 0.9993820007724991,
+      "capital_invested": 1131094550.0,
+      "total_profit": 93366557.23950873,
+      "return_per_dollar": 0.08254531616256902,
+      "default_rate_funded": 0.14109033889508496
     },
     {
       "threshold": 0.4100000000000001,
-      "loans_funded": 90537,
-      "share_funded": 0.999139215361695,
-      "capital_invested": 1130833625.0,
-      "total_profit": 93357439.96079466,
-      "return_per_dollar": 0.08255629996923257,
-      "default_rate_funded": 0.1410362614179838
+      "loans_funded": 90571,
+      "share_funded": 0.9995144291783921,
+      "capital_invested": 1131227700.0,
+      "total_profit": 93356413.35771146,
+      "return_per_dollar": 0.08252663310641303,
+      "default_rate_funded": 0.14112685075796888
     },
     {
       "threshold": 0.4150000000000001,
-      "loans_funded": 90537,
-      "share_funded": 0.999139215361695,
-      "capital_invested": 1130833625.0,
-      "total_profit": 93357439.96079466,
-      "return_per_dollar": 0.08255629996923257,
-      "default_rate_funded": 0.1410362614179838
+      "loans_funded": 90579,
+      "share_funded": 0.9996027147823208,
+      "capital_invested": 1131313500.0,
+      "total_profit": 93374232.25529133,
+      "return_per_dollar": 0.08253612482772577,
+      "default_rate_funded": 0.14113646650989745
     },
     {
       "threshold": 0.4200000000000001,
-      "loans_funded": 90537,
-      "share_funded": 0.999139215361695,
-      "capital_invested": 1130833625.0,
-      "total_profit": 93357439.96079466,
-      "return_per_dollar": 0.08255629996923257,
-      "default_rate_funded": 0.1410362614179838
+      "loans_funded": 90580,
+      "share_funded": 0.9996137504828119,
+      "capital_invested": 1131327000.0,
+      "total_profit": 93378756.71559197,
+      "return_per_dollar": 0.08253913918397772,
+      "default_rate_funded": 0.14113490836829323
     },
     {
       "threshold": 0.4250000000000001,
-      "loans_funded": 90537,
-      "share_funded": 0.999139215361695,
-      "capital_invested": 1130833625.0,
-      "total_profit": 93357439.96079466,
-      "return_per_dollar": 0.08255629996923257,
-      "default_rate_funded": 0.1410362614179838
+      "loans_funded": 90589,
+      "share_funded": 0.9997130717872317,
+      "capital_invested": 1131440250.0,
+      "total_profit": 93395598.94246712,
+      "return_per_dollar": 0.08254576319206174,
+      "default_rate_funded": 0.14113192550971973
     },
     {
       "threshold": 0.4300000000000001,
-      "loans_funded": 90537,
-      "share_funded": 0.999139215361695,
-      "capital_invested": 1130833625.0,
-      "total_profit": 93357439.96079466,
-      "return_per_dollar": 0.08255629996923257,
-      "default_rate_funded": 0.1410362614179838
+      "loans_funded": 90591,
+      "share_funded": 0.9997351431882139,
+      "capital_invested": 1131452600.0,
+      "total_profit": 93395524.64246711,
+      "return_per_dollar": 0.08254479652304225,
+      "default_rate_funded": 0.14113984832930423
     },
     {
       "threshold": 0.43500000000000005,
-      "loans_funded": 90538,
-      "share_funded": 0.9991502510621861,
-      "capital_invested": 1130840825.0,
-      "total_profit": 93360003.91959213,
-      "return_per_dollar": 0.08255804164091098,
-      "default_rate_funded": 0.14103470366034151
+      "loans_funded": 90594,
+      "share_funded": 0.9997682502896872,
+      "capital_invested": 1131477300.0,
+      "total_profit": 93395224.7424671,
+      "return_per_dollar": 0.08254272952932162,
+      "default_rate_funded": 0.14114621277347286
     },
     {
       "threshold": 0.44000000000000006,
-      "loans_funded": 90538,
-      "share_funded": 0.9991502510621861,
-      "capital_invested": 1130840825.0,
-      "total_profit": 93360003.91959213,
-      "return_per_dollar": 0.08255804164091098,
-      "default_rate_funded": 0.14103470366034151
+      "loans_funded": 90599,
+      "share_funded": 0.9998234287921426,
+      "capital_invested": 1131539250.0,
+      "total_profit": 93387981.34961903,
+      "return_per_dollar": 0.08253180908184937,
+      "default_rate_funded": 0.1411715361096701
     },
     {
       "threshold": 0.44500000000000006,
-      "loans_funded": 90538,
-      "share_funded": 0.9991502510621861,
-      "capital_invested": 1130840825.0,
-      "total_profit": 93360003.91959213,
-      "return_per_dollar": 0.08255804164091098,
-      "default_rate_funded": 0.14103470366034151
+      "loans_funded": 90604,
+      "share_funded": 0.999878607294598,
+      "capital_invested": 1131610575.0,
+      "total_profit": 93401532.46042502,
+      "return_per_dollar": 0.08253858219770084,
+      "default_rate_funded": 0.14118581961061322
     },
     {
       "threshold": 0.45000000000000007,
-      "loans_funded": 90539,
-      "share_funded": 0.9991612867626772,
-      "capital_invested": 1130850600.0,
-      "total_profit": 93355350.82959212,
-      "return_per_dollar": 0.08255321333303632,
-      "default_rate_funded": 0.1410441909011586
+      "loans_funded": 90605,
+      "share_funded": 0.9998896429950891,
+      "capital_invested": 1131621750.0,
+      "total_profit": 93393665.17042503,
+      "return_per_dollar": 0.08253081488617997,
+      "default_rate_funded": 0.14119529827272226
     },
     {
       "threshold": 0.45500000000000007,
-      "loans_funded": 90539,
-      "share_funded": 0.9991612867626772,
-      "capital_invested": 1130850600.0,
-      "total_profit": 93355350.82959212,
-      "return_per_dollar": 0.08255321333303632,
-      "default_rate_funded": 0.1410441909011586
+      "loans_funded": 90611,
+      "share_funded": 0.9999558571980356,
+      "capital_invested": 1131677600.0,
+      "total_profit": 93385015.50117059,
+      "return_per_dollar": 0.08251909863831412,
+      "default_rate_funded": 0.14123009347650947
     },
     {
       "threshold": 0.4600000000000001,
-      "loans_funded": 90539,
-      "share_funded": 0.9991612867626772,
-      "capital_invested": 1130850600.0,
-      "total_profit": 93355350.82959212,
-      "return_per_dollar": 0.08255321333303632,
-      "default_rate_funded": 0.1410441909011586
+      "loans_funded": 90611,
+      "share_funded": 0.9999558571980356,
+      "capital_invested": 1131677600.0,
+      "total_profit": 93385015.50117059,
+      "return_per_dollar": 0.08251909863831412,
+      "default_rate_funded": 0.14123009347650947
     },
     {
       "threshold": 0.4650000000000001,
-      "loans_funded": 90539,
-      "share_funded": 0.9991612867626772,
-      "capital_invested": 1130850600.0,
-      "total_profit": 93355350.82959212,
-      "return_per_dollar": 0.08255321333303632,
-      "default_rate_funded": 0.1410441909011586
+      "loans_funded": 90611,
+      "share_funded": 0.9999558571980356,
+      "capital_invested": 1131677600.0,
+      "total_profit": 93385015.50117059,
+      "return_per_dollar": 0.08251909863831412,
+      "default_rate_funded": 0.14123009347650947
     },
     {
       "threshold": 0.4700000000000001,
-      "loans_funded": 90539,
-      "share_funded": 0.9991612867626772,
-      "capital_invested": 1130850600.0,
-      "total_profit": 93355350.82959212,
-      "return_per_dollar": 0.08255321333303632,
-      "default_rate_funded": 0.1410441909011586
+      "loans_funded": 90611,
+      "share_funded": 0.9999558571980356,
+      "capital_invested": 1131677600.0,
+      "total_profit": 93385015.50117059,
+      "return_per_dollar": 0.08251909863831412,
+      "default_rate_funded": 0.14123009347650947
     },
     {
       "threshold": 0.4750000000000001,
-      "loans_funded": 90539,
-      "share_funded": 0.9991612867626772,
-      "capital_invested": 1130850600.0,
-      "total_profit": 93355350.82959212,
-      "return_per_dollar": 0.08255321333303632,
-      "default_rate_funded": 0.1410441909011586
+      "loans_funded": 90613,
+      "share_funded": 0.9999779285990178,
+      "capital_invested": 1131695775.0,
+      "total_profit": 93379616.22188856,
+      "return_per_dollar": 0.08251300242053883,
+      "default_rate_funded": 0.14123801220575413
     },
     {
       "threshold": 0.4800000000000001,
-      "loans_funded": 90539,
-      "share_funded": 0.9991612867626772,
-      "capital_invested": 1130850600.0,
-      "total_profit": 93355350.82959212,
-      "return_per_dollar": 0.08255321333303632,
-      "default_rate_funded": 0.1410441909011586
+      "loans_funded": 90613,
+      "share_funded": 0.9999779285990178,
+      "capital_invested": 1131695775.0,
+      "total_profit": 93379616.22188856,
+      "return_per_dollar": 0.08251300242053883,
+      "default_rate_funded": 0.14123801220575413
     },
     {
       "threshold": 0.4850000000000001,
-      "loans_funded": 90539,
-      "share_funded": 0.9991612867626772,
-      "capital_invested": 1130850600.0,
-      "total_profit": 93355350.82959212,
-      "return_per_dollar": 0.08255321333303632,
-      "default_rate_funded": 0.1410441909011586
+      "loans_funded": 90613,
+      "share_funded": 0.9999779285990178,
+      "capital_invested": 1131695775.0,
+      "total_profit": 93379616.22188856,
+      "return_per_dollar": 0.08251300242053883,
+      "default_rate_funded": 0.14123801220575413
     },
     {
       "threshold": 0.4900000000000001,
-      "loans_funded": 90539,
-      "share_funded": 0.9991612867626772,
-      "capital_invested": 1130850600.0,
-      "total_profit": 93355350.82959212,
-      "return_per_dollar": 0.08255321333303632,
-      "default_rate_funded": 0.1410441909011586
+      "loans_funded": 90614,
+      "share_funded": 0.9999889642995089,
+      "capital_invested": 1131698975.0,
+      "total_profit": 93379311.55188856,
+      "return_per_dollar": 0.08251249989149151,
+      "default_rate_funded": 0.1412474893504315
     },
     {
       "threshold": 0.4950000000000001,
-      "loans_funded": 90539,
-      "share_funded": 0.9991612867626772,
-      "capital_invested": 1130850600.0,
-      "total_profit": 93355350.82959212,
-      "return_per_dollar": 0.08255321333303632,
-      "default_rate_funded": 0.1410441909011586
+      "loans_funded": 90614,
+      "share_funded": 0.9999889642995089,
+      "capital_invested": 1131698975.0,
+      "total_profit": 93379311.55188856,
+      "return_per_dollar": 0.08251249989149151,
+      "default_rate_funded": 0.1412474893504315
     },
     {
       "threshold": 0.5000000000000001,
-      "loans_funded": 90615,
-      "share_funded": 1.0,
-      "capital_invested": 1131702375.0,
-      "total_profit": 93376924.04188856,
-      "return_per_dollar": 0.0825101423348065,
-      "default_rate_funded": 0.141256966285935
+      "loans_funded": 90614,
+      "share_funded": 0.9999889642995089,
+      "capital_invested": 1131698975.0,
+      "total_profit": 93379311.55188856,
+      "return_per_dollar": 0.08251249989149151,
+      "default_rate_funded": 0.1412474893504315
     },
     {
       "threshold": 0.5050000000000001,

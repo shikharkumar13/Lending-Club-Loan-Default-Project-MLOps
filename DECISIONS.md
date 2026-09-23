@@ -69,6 +69,10 @@ deleted, so the history stays readable.
 | [D-049](#d-049-calibrate-on-2014-h1-tune-the-policy-on-2014-h2) | Calibrate on 2014 H1, tune the policy on 2014 H2 | Validation | Accepted | 2026-09-23 |
 | [D-050](#d-050-the-expected-value-rule-funds-almost-everything) | Report the expected-value rule even though it funds ~everything | Business | Accepted | 2026-09-23 |
 | [D-051](#d-051-calibration-helps-brier-but-not-log-loss-here) | Calibration helps Brier but not log loss here; keep it, report both | Evaluation | Accepted | 2026-09-23 |
+| [D-052](#d-052-profit-economics-are-dollar-weighted) | Profit economics are dollar-weighted, not per-loan averages | Business | Accepted | 2026-09-23 |
+| [D-053](#d-053-ranking-policies-use-the-raw-score-not-the-calibrated-probability) | Ranking policies use the raw score, not the calibrated probability | Evaluation | Accepted | 2026-09-23 |
+| [D-054](#d-054-every-headline-comparison-carries-a-confidence-interval) | Every headline comparison carries a bootstrap confidence interval | Evaluation | Accepted | 2026-09-23 |
+| [D-055](#d-055-the-threshold-is-an-interior-optimum-not-a-constraint-artifact) | The chosen threshold is an interior optimum | Validation | Accepted | 2026-09-23 |
 
 ---
 
@@ -631,6 +635,62 @@ deleted, so the history stays readable.
   expected-value rule and for anyone reading a probability as a probability.
 - **Revisit if:** a later phase adds drift-triggered recalibration, which is
   exactly the production answer to this problem (Phase 7).
+
+### D-052: Profit economics are dollar-weighted
+- **Decision:** Loss given default and the prepayment factor are computed as
+  total dollars lost / total dollars lent, not as the average of per-loan
+  ratios. LGD changes from 0.3732 to **0.3657**.
+- **Why:** A portfolio's return is decided by dollars. Averaging per-loan
+  ratios gives a $1,000 loan the same weight as a $35,000 one. The gap between
+  the two figures exists because smaller loans default somewhat more often, so
+  the per-loan average overstates the loss an investor actually takes.
+- **Also fixed:** `min_share_funded` and `bootstrap_draws` moved from
+  hard-coded defaults into `params.yaml` — the same rule as D-042.
+
+### D-053: Ranking policies use the raw score, not the calibrated probability
+- **Decision:** "Fund when the score is below t" uses the model's raw output.
+  Calibrated probabilities are still used for the expected-value rule and for
+  reporting.
+- **Why:** Isotonic regression is a **step function**. It maps the 283,026 test
+  loans onto only **255 distinct values**, and the largest single value covers
+  **39,792 loans (14% of the portfolio)**. A cut-off landing inside that block
+  moves 14% of the capital in or out at once, so a tiny change in data could
+  swing the policy wildly. The raw score is continuous (283,026 distinct
+  values), so the policy degrades smoothly.
+- **Effect on the result:** essentially none (test return per dollar 0.0735 vs.
+  0.0734), which is the point: the fix costs nothing and removes a fragility.
+- **Trade-off:** the threshold is no longer readable as "fund if risk < 15%".
+  The calibrated probability is still reported for that interpretation.
+
+### D-054: Every headline comparison carries a confidence interval
+- **Decision:** Bootstrap the test loans 1,000 times and report a 95% interval
+  for each difference in return per dollar.
+- **Why:** The gaps are small — 0.0021 per dollar between the model and the
+  grade rule. A point estimate cannot tell whether that is skill or luck on
+  one particular year's loans.
+- **Results (all on the 2015 test year):**
+  | comparison | difference | 95% CI | P(better) |
+  |---|---|---|---|
+  | LightGBM threshold vs. fund everything | +0.0080 | [+0.0072, +0.0087] | 1.000 |
+  | LightGBM matched vs. grade A-B | +0.0021 | [+0.0015, +0.0027] | 1.000 |
+  | LightGBM threshold vs. grade A-B | +0.0017 | [+0.0011, +0.0024] | 1.000 |
+  | logistic regression matched vs. grade A-B | +0.0015 | [+0.0008, +0.0022] | 1.000 |
+  | LightGBM vs. logistic regression (matched) | +0.0006 | [+0.0001, +0.0011] | 0.994 |
+
+  Every interval excludes zero, so the edge is real — including LightGBM's
+  small advantage over logistic regression.
+- **Caveat that stays in the README:** this measures sampling noise within one
+  test year. It says nothing about how the model would hold up in a different
+  credit cycle, which is a larger risk than sampling error.
+
+### D-055: The threshold is an interior optimum, not a constraint artifact
+- **Checked:** the profit curve on the tuning half of 2014 rises from +0.0719
+  at a 2.7% funding share to a peak of **+0.0879 around a score of 0.14-0.155
+  (about 63% funded)**, then falls back to +0.0825 when funding everything.
+- **Why it matters:** if the best threshold had sat at the `min_share_funded`
+  boundary, the policy would have been decided by an arbitrary constraint
+  rather than by the data. The top five thresholds cluster in 0.135-0.16, so
+  the choice is also stable rather than a spike on one lucky grid point.
 
 ---
 

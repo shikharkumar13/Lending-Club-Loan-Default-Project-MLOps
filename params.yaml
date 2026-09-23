@@ -166,6 +166,10 @@ profit:
   # repay on average 63.5% of the funded amount, so the loss is ~36.5%.
   lgd_fallback: 0.365
   threshold_grid: {start: 0.02, stop: 0.60, step: 0.005}
+  # A policy that funds a handful of loans would look great per dollar but is
+  # not a usable strategy, and its measured return would be mostly luck.
+  min_share_funded: 0.10
+  bootstrap_draws: 1000
 
 mlflow:
   # SQLite rather than the ./mlruns folder: MLflow 3 put the file-based store

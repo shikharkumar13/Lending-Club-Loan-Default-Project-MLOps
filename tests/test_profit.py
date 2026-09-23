@@ -6,6 +6,7 @@ import pytest
 
 from lending_club.policy.profit import (
     ProfitModel,
+    bootstrap_difference,
     choose_threshold,
     contractual_gain,
     evaluate_policy,
@@ -98,3 +99,39 @@ def test_threshold_for_share_funds_that_share():
 def test_threshold_for_share_rejects_impossible_shares():
     with pytest.raises(ValueError, match="share must be"):
         threshold_for_share(np.linspace(0, 1, 10), 1.5)
+
+
+def test_profit_model_is_dollar_weighted():
+    """A big loan must count more than a small one (D-052): one $100k loan
+    losing 50% and one $1k loan losing 10% is a ~49.6% dollar loss, not 30%."""
+    frame = loans(
+        2,
+        funded_amnt=[100_000.0, 1_000.0],
+        target=[1, 1],
+        realized_profit=[-50_000.0, -100.0],
+    )
+    assert fit_profit_model(frame).lgd == pytest.approx(50_100 / 101_000)
+
+
+def test_bootstrap_detects_a_real_difference():
+    frame = loans(
+        200,
+        target=[0] * 100 + [1] * 100,
+        realized_profit=[1_500.0] * 100 + [-6_000.0] * 100,
+    )
+    good = np.array([True] * 100 + [False] * 100)  # funds only the repaid loans
+    everything = np.ones(200, dtype=bool)
+
+    stats = bootstrap_difference(frame, good, everything, draws=200, seed=1)
+    assert stats["mean_difference"] > 0
+    assert stats["ci_low"] > 0
+    assert stats["prob_better"] == 1.0
+
+
+def test_bootstrap_finds_no_difference_between_identical_policies():
+    """A policy cannot beat itself; the interval must straddle zero."""
+    frame = loans(50, target=[0, 1] * 25, realized_profit=[1_500.0, -6_000.0] * 25)
+    mask = np.array([True, False] * 25)
+    stats = bootstrap_difference(frame, mask, mask, draws=200, seed=1)
+    assert stats["mean_difference"] == pytest.approx(0.0)
+    assert stats["ci_low"] <= 0 <= stats["ci_high"]

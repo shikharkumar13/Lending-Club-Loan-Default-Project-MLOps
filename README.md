@@ -16,13 +16,19 @@ investor could see at listing time**, and fund a loan only when its
 |---|---|---|---|
 | fund everything | 100% | +0.0655 | $65.5M |
 | Lending Club grade A-B | 57.2% | +0.0718 | $71.8M |
-| logistic regression (tuned threshold) | 71.3% | +0.0721 | $72.1M |
-| **LightGBM (tuned threshold, p < 0.15)** | **66.9%** | **+0.0734** | **$73.4M** |
-| LightGBM at grade A-B's selectivity | 56.1% | +0.0739 | $73.9M |
+| logistic regression (tuned threshold) | 69.9% | +0.0722 | $72.2M |
+| **LightGBM (tuned threshold, ~14.6% risk cut-off)** | **66.3%** | **+0.0735** | **$73.5M** |
+| LightGBM at grade A-B's selectivity | 58.0% | +0.0738 | $73.8M |
 
 Returns are over the ~3-year loan term. The model earns about **12% more than
-funding everything** and **2.2% more than Lending Club's own grade rule**, while
+funding everything** and **2.4% more than Lending Club's own grade rule**, while
 deploying more capital than that rule. Test ROC-AUC is 0.684.
+
+Every gap is significant on a 1,000-draw bootstrap of the test loans: LightGBM
+beats the grade rule at equal selectivity by +0.0021 per dollar
+(95% CI [+0.0015, +0.0027]). That measures sampling noise **within one test
+year**; it says nothing about a different credit cycle, which is the larger
+risk.
 
 **Cross-validated results** (expanding-window folds inside 2007-2013, tuned on log loss):
 

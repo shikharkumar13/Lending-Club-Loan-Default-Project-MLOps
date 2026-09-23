@@ -314,12 +314,12 @@ stages:
       nfiles: 3
     - path: src/lending_club/evaluate.py
       hash: md5
-      md5: cf1dc034c2706938064d678eaf4929f9
-      size: 9702
+      md5: bbc403a2018e8b20ab36c9a3802430e2
+      size: 12244
     - path: src/lending_club/policy/profit.py
       hash: md5
-      md5: de866699e17c7f53c558ba0a98ba4562
-      size: 5173
+      md5: a348faf271bd274e21d73aacc22481f2
+      size: 6784
     params:
       params.yaml:
         profit:
@@ -328,6 +328,8 @@ stages:
             start: 0.02
             stop: 0.6
             step: 0.005
+          min_share_funded: 0.1
+          bootstrap_draws: 1000
         seed: 42
     outs:
     - path: artifacts/calibrators
@@ -337,5 +339,5 @@ stages:
       nfiles: 3
     - path: reports/metrics.json
       hash: md5
-      md5: 41d43e8e714745a01f5a7a2c0f447001
-      size: 40772
+      md5: 44c69490335adc04aac70af463f8ae7b
+      size: 42037

@@ -59,17 +59,57 @@ def contractual_gain(frame: pl.DataFrame) -> np.ndarray:
 
 
 def fit_profit_model(train: pl.DataFrame) -> ProfitModel:
-    """Measure loss given default and the prepayment shortfall on training loans."""
+    """Measure loss given default and the prepayment shortfall on training loans.
+
+    Both are **dollar-weighted** (total dollars lost / total dollars lent), not
+    the average of per-loan ratios. A portfolio's return is decided by dollars,
+    so a $35,000 loan must count more than a $1,000 one. The two differ here:
+    the per-loan average puts LGD at 0.3732, the dollar-weighted figure at
+    0.3657, because smaller loans default somewhat more often (D-052).
+    """
     defaulted = train.filter(pl.col("target") == 1)
     repaid = train.filter(pl.col("target") == 0)
 
     # realized_profit is negative for a default, so -profit / funded is the loss share.
-    lgd = float(
-        (-defaulted["realized_profit"].to_numpy() / defaulted["funded_amnt"].to_numpy()).mean()
-    )
+    lgd = float(-defaulted["realized_profit"].sum() / defaulted["funded_amnt"].sum())
     # Repaid loans earn less than the contract: borrowers refinance or pay early.
-    prepay_factor = float((repaid["realized_profit"].to_numpy() / contractual_gain(repaid)).mean())
+    prepay_factor = float(repaid["realized_profit"].sum() / contractual_gain(repaid).sum())
     return ProfitModel(lgd=lgd, prepay_factor=prepay_factor)
+
+
+def bootstrap_difference(
+    frame: pl.DataFrame,
+    funded_a: np.ndarray,
+    funded_b: np.ndarray,
+    draws: int = 1000,
+    seed: int = 42,
+) -> dict[str, float]:
+    """Is policy A's return per dollar really better than B's, or is it noise?
+
+    Resamples the test loans with replacement and recomputes both returns each
+    time. A point estimate cannot answer this on its own: a gap of 0.002 per
+    dollar could easily be luck on a different set of loans.
+    """
+    profit = frame["realized_profit"].to_numpy()
+    funded_amount = frame["funded_amnt"].to_numpy()
+    rng = np.random.default_rng(seed)
+    n = frame.height
+
+    def ret(idx: np.ndarray, mask: np.ndarray) -> float:
+        selected = mask[idx]
+        invested = funded_amount[idx][selected].sum()
+        return profit[idx][selected].sum() / invested if invested else 0.0
+
+    differences = np.empty(draws)
+    for i in range(draws):
+        idx = rng.integers(0, n, n)
+        differences[i] = ret(idx, funded_a) - ret(idx, funded_b)
+    return {
+        "mean_difference": float(differences.mean()),
+        "ci_low": float(np.percentile(differences, 2.5)),
+        "ci_high": float(np.percentile(differences, 97.5)),
+        "prob_better": float((differences > 0).mean()),
+    }
 
 
 def evaluate_policy(frame: pl.DataFrame, funded: np.ndarray) -> dict[str, float]:

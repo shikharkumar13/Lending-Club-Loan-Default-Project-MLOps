@@ -28,6 +28,7 @@ from sklearn.metrics import brier_score_loss, log_loss, roc_auc_score
 from lending_club.config import load_params, path_of
 from lending_club.features.pipeline import to_model_frame
 from lending_club.policy.profit import (
+    bootstrap_difference,
     choose_threshold,
     evaluate_policy,
     fit_profit_model,
@@ -82,6 +83,7 @@ def evaluate() -> dict:
     grid = np.arange(**params["profit"]["threshold_grid"])
     results: dict[str, dict] = {}
     curves: dict[str, list] = {}
+    policy_masks: dict[str, dict[str, np.ndarray]] = {}
 
     for family in FAMILIES:
         model = joblib.load(path_of("models_dir") / f"{family}.joblib")
@@ -101,34 +103,53 @@ def evaluate() -> dict:
 
         p_tune = calibrator.predict_proba(X["tune"])[:, 1]
         p_test = calibrator.predict_proba(X["test"])[:, 1]
+        raw_tune = model.predict_proba(X["tune"])[:, 1]
 
-        threshold, curve = choose_threshold(tune, p_tune, grid, objective="return_per_dollar")
+        # Ranking policies use the RAW score, not the calibrated probability.
+        # Isotonic regression is a step function: it maps 283k test loans onto
+        # only ~255 distinct values, one of which covers 39,792 loans. A cut-off
+        # landing inside such a block moves 14% of the portfolio at once. The raw
+        # score is continuous, so the policy degrades smoothly (D-053).
+        threshold, curve = choose_threshold(
+            tune,
+            raw_tune,
+            grid,
+            objective="return_per_dollar",
+            min_share_funded=params["profit"]["min_share_funded"],
+        )
         curves[family] = curve
+        # The raw score has no natural meaning, so report the calibrated risk
+        # level it corresponds to: "this cut-off funds loans up to about X%
+        # predicted default risk".
+        funded_on_tune = raw_tune < threshold
+        risk_at_threshold = float(p_tune[funded_on_tune].max()) if funded_on_tune.any() else 0.0
 
         # Same selectivity as the grade A-B rule, so the comparison is not
         # "more selective wins". The share to match is measured on the tuning
         # rows, never on test.
         grade_ab_share = float(tune["grade"].is_in(["A", "B"]).mean())
-        matched_threshold = threshold_for_share(p_tune, grade_ab_share)
+        matched_threshold = threshold_for_share(raw_tune, grade_ab_share)
 
         policies = {
             # Fund when expected value is positive: no tuning at all.
             "expected_value": profit_model.expected_return(test, p_test) > 0,
             # Fund when predicted risk is below the threshold tuned on 2014 H2.
-            "threshold": p_test < threshold,
+            "threshold": raw_test < threshold,
             # Fund the same share of loans the grade A-B rule would.
-            "matched_to_grade_AB": p_test < matched_threshold,
+            "matched_to_grade_AB": raw_test < matched_threshold,
         }
 
+        policy_masks[family] = policies
         results[family] = {
             "quality_test_uncalibrated": quality(y["test"], raw_test),
             "quality_test_calibrated": quality(y["test"], p_test),
             "threshold": float(threshold),
             "matched_threshold": matched_threshold,
+            "calibrated_risk_at_threshold": risk_at_threshold,
             "policies": {name: evaluate_policy(test, mask) for name, mask in policies.items()},
         }
         print(
-            f"\n{family}: threshold={threshold:.3f}  "
+            f"\n{family}: threshold={threshold:.3f} (~{risk_at_threshold:.1%} risk)  "
             f"test log_loss {results[family]['quality_test_uncalibrated']['log_loss']:.5f} "
             f"-> {results[family]['quality_test_calibrated']['log_loss']:.5f} after calibration"
         )
@@ -145,6 +166,42 @@ def evaluate() -> dict:
         "grade_AB": test["grade"].is_in(["A", "B"]).to_numpy(),
     }
     results["baselines"] = {name: evaluate_policy(test, mask) for name, mask in baselines.items()}
+
+    # --- 4. is the edge real, or noise? (D-054) ------------------------------
+    draws = params["profit"]["bootstrap_draws"]
+    comparisons = {
+        "lightgbm_threshold_vs_fund_all": (
+            policy_masks["lightgbm"]["threshold"],
+            baselines["fund_all"],
+        ),
+        "lightgbm_threshold_vs_grade_AB": (
+            policy_masks["lightgbm"]["threshold"],
+            baselines["grade_AB"],
+        ),
+        "lightgbm_matched_vs_grade_AB": (
+            policy_masks["lightgbm"]["matched_to_grade_AB"],
+            baselines["grade_AB"],
+        ),
+        "logreg_matched_vs_grade_AB": (
+            policy_masks["logistic_regression"]["matched_to_grade_AB"],
+            baselines["grade_AB"],
+        ),
+        "lightgbm_vs_logreg_matched": (
+            policy_masks["lightgbm"]["matched_to_grade_AB"],
+            policy_masks["logistic_regression"]["matched_to_grade_AB"],
+        ),
+    }
+    results["significance"] = {
+        name: bootstrap_difference(test, a, b, draws=draws, seed=params["seed"])
+        for name, (a, b) in comparisons.items()
+    }
+    print("\nbootstrap (return per dollar, 95% CI):")
+    for name, stats in results["significance"].items():
+        print(
+            f"   {name:34s} {stats['mean_difference']:+.4f} "
+            f"[{stats['ci_low']:+.4f}, {stats['ci_high']:+.4f}]  "
+            f"P(better)={stats['prob_better']:.3f}"
+        )
     for name, metrics in results["baselines"].items():
         print(
             f"{name:20s} funded {metrics['share_funded']:6.1%}  "
