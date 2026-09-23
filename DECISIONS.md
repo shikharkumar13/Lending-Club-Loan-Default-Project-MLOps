@@ -77,6 +77,10 @@ deleted, so the history stays readable.
 | [D-057](#d-057-ship-one-bundle-not-four-artifacts) | Ship one bundle (model + calibrator + threshold + economics) | Serving | Accepted | 2026-09-23 |
 | [D-058](#d-058-never-pickle-from-__main__) | Never pickle classes defined in `__main__` | Serving | Accepted | 2026-09-23 |
 | [D-059](#d-059-serving-dependencies-are-separate-from-training-ones) | Serving dependencies separate from training ones | Tooling | Accepted | 2026-09-23 |
+| [D-060](#d-060-a-promotion-gate-judged-on-money) | Retraining has a promotion gate, judged on money | Modeling | Accepted | 2026-09-23 |
+| [D-061](#d-061-the-gate-never-looks-at-the-test-year) | The gate never looks at the test year | Validation | Accepted | 2026-09-23 |
+| [D-062](#d-062-ci-runs-the-whole-pipeline-on-synthetic-loans) | CI runs the whole pipeline on synthetic loans | Structure | Accepted | 2026-09-23 |
+| [D-063](#d-063-the-demo-bundle-refuses-to-overwrite-a-real-one) | The demo bundle refuses to overwrite a real one | Serving | Accepted | 2026-09-23 |
 
 ---
 
@@ -751,6 +755,54 @@ deleted, so the history stays readable.
   difference **4.9e-07** (API rounding to six decimals), maximum expected-return
   difference **$0.005** (rounding to cents), and **every funding decision
   identical**. That is the Phase 5 exit criterion met.
+
+### D-060: A promotion gate, judged on money
+- **Decision:** The Prefect flow ends with a champion/challenger gate. A newly
+  trained bundle replaces the live one only if its funding policy earns more
+  **return per dollar** on validation data, by more than a 0.0005 margin.
+- **Why judged on money:** a model can improve its log loss and still pick a
+  worse portfolio. The gate should test the thing the system is for.
+- **Why a margin:** without one, production would be swapped for a 0.00001
+  improvement — noise — and every swap carries real risk.
+- **Demonstrated:** running the flow on unchanged data produced
+  "REJECTED - candidate +0.08803 vs champion +0.08803 (+0.00000, below the
+  0.0005 margin)". A scheduled retrain with no gate is a way to ship a worse
+  model automatically, with every task green.
+
+### D-061: The gate never looks at the test year
+- **Decision:** The promotion gate scores candidates on the policy-tuning half
+  of 2014. The flow still recomputes the 2015 test metrics, but they are
+  logged as "report only" and no decision uses them.
+- **Why:** the test year is scored once, on purpose. A gate that consulted it
+  on every retrain would turn it into another tuning set — each run picking
+  whatever happens to score best there — and the headline result would slowly
+  stop meaning anything.
+- **Production note:** in a real deployment the fixed 2015 test year would be
+  replaced by a rolling recent window, with the gate still judging on data the
+  candidate has never seen.
+
+### D-062: CI runs the whole pipeline on synthetic loans
+- **Decision:** `lending_club.testing.synthetic` generates loans whose default
+  risk genuinely depends on grade, FICO and loan-to-income. The end-to-end test
+  runs the real code over them: clean -> label -> split -> preprocess -> train
+  -> calibrate -> choose a policy -> bundle -> serve over HTTP, and asserts the
+  model reaches AUC > 0.60 on the planted signal.
+- **Why:** GitHub runners have no access to the 1.6 GB dataset, and "every unit
+  passes" is not "the pipeline works". This catches wiring mistakes — a renamed
+  column, a stage that no longer matches the next one — that unit tests cannot
+  see. It runs in under two seconds.
+- **CI jobs:** lint (`ruff check` + `format --check`), tests, then a container
+  job that builds a demo bundle, builds the image, starts it, and asserts
+  `/health` and `/predict` return a valid decision.
+
+### D-063: The demo bundle refuses to overwrite a real one
+- **Decision:** `build_demo_bundle()` raises `FileExistsError` if a bundle is
+  already present, unless `--force` is passed.
+- **Why:** found the hard way. Running the demo builder locally silently
+  replaced the real trained bundle with one fitted on synthetic data. The API
+  kept working and kept returning confident answers — from a toy model. CI
+  starts from a clean checkout, so the guard never fires there, and locally it
+  prevents a failure mode that would be very hard to notice.
 
 ---
 

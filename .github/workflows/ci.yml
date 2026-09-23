@@ -1,0 +1,96 @@
+name: CI
+
+# Runs on every push to main and on every pull request, so a broken pipeline is
+# caught before review rather than after merge.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  MLFLOW_DISABLE_AGENT_HINT: "1"
+
+jobs:
+  quality:
+    name: Lint and tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+
+      - name: Install dependencies
+        run: uv sync --frozen --extra train --extra dev
+
+      - name: Lint
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+
+      # The real 1.6 GB dataset is not in the repo, so the tests that need it
+      # skip themselves. The end-to-end test runs the whole pipeline on
+      # synthetic loans instead, which is what catches wiring mistakes.
+      - name: Tests
+        run: uv run pytest -q --junit-xml=test-results.xml
+
+      - name: Publish test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: test-results.xml
+
+  container:
+    name: Docker image
+    needs: quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+
+      - name: Install dependencies
+        run: uv sync --frozen --extra train --extra dev
+
+      # The image needs a bundle to serve. CI trains a throwaway one on
+      # synthetic loans: this job proves the image builds and serves, not that
+      # the model is any good.
+      - name: Build a demo bundle
+        run: uv run python -m lending_club.testing
+
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          load: true
+          tags: lending-club-api:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Smoke test the container
+        run: |
+          docker run -d --name api -p 8000:8000 lending-club-api:ci
+          curl --retry 30 --retry-delay 2 --retry-all-errors --fail -s localhost:8000/health
+          echo
+          curl --fail -s -X POST localhost:8000/predict \
+            -H 'Content-Type: application/json' \
+            -d @.github/fixtures/application.json | tee decision.json
+          echo
+          python -c "
+          import json, sys
+          decision = json.load(open('decision.json'))
+          assert decision['decision'] in {'fund', 'decline'}, decision
+          assert 0 <= decision['probability_of_default'] <= 1, decision
+          print('container returned a valid decision:', decision['decision'])
+          "
+          docker rm -f api

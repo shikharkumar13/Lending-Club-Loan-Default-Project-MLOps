@@ -27,6 +27,7 @@ train = [
     "matplotlib>=3.9",
     "seaborn>=0.13",
     "dvc>=3.55",            # data + pipeline versioning
+    "prefect>=3.8.6",
 ]
 dev = [
     "pytest>=8.3",

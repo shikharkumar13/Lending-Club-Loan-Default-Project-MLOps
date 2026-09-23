@@ -7,7 +7,7 @@ investor could see at listing time**, and fund a loan only when its
 - [`PLAN.md`](PLAN.md) — full project plan, phase by phase
 - [`DECISIONS.md`](DECISIONS.md) — every decision, with the reasoning
 
-> **Status:** Phase 5 complete. The model is trained, evaluated and served behind a REST API.
+> **Status:** Phase 6 complete. Orchestrated retraining with a promotion gate, and CI on every pull request.
 > Full setup and run instructions land in Phase 8.
 
 ## Result on the 2015 test year (scored once)
@@ -58,6 +58,9 @@ uv run uvicorn lending_club.serving.app:app --reload    # http://localhost:8000/
 docker build -t lending-club-api .
 docker run -d --name lc-api -p 8001:8000 lending-club-api   # http://localhost:8001/docs
 curl localhost:8001/health
+
+# retrain end to end, with the promotion gate (~100s)
+PREFECT_API_URL= PREFECT_SERVER_ALLOW_EPHEMERAL_MODE=true uv run python flows/retrain.py
 ```
 
 ## Data

@@ -96,6 +96,19 @@ class LoanDecisionModel:
         return joblib.load(path or default_bundle_path())
 
 
+def prepare_for_decision(frame, params: dict) -> pd.DataFrame:
+    """polars processed frame -> the pandas frame `decide()` expects.
+
+    `decide` needs the model inputs plus `term_months`, which is not a feature
+    (it is always 36 in v1) but is required for the interest calculation.
+    """
+    from lending_club.features.pipeline import to_model_frame
+
+    applications = to_model_frame(frame, params)
+    applications["term_months"] = frame["term_months"].to_numpy()
+    return applications
+
+
 def default_bundle_path() -> Path:
     return path_of("bundle_dir") / BUNDLE_FILENAME
 

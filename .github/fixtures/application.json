@@ -1,0 +1,11 @@
+{
+  "loan_amnt": 12000, "term_months": 36, "int_rate": 11.99, "installment": 398.52,
+  "grade": "B", "sub_grade": "B3", "purpose": "debt_consolidation",
+  "initial_list_status": "w", "application_date": "Jun-2015", "annual_inc": 72000,
+  "emp_length": "10+ years", "home_ownership": "MORTGAGE",
+  "verification_status": "Source Verified", "addr_state": "CA", "dti": 16.4,
+  "earliest_cr_line": "Aug-2003", "fico_range_low": 690, "fico_range_high": 694,
+  "delinq_2yrs": 0, "inq_last_6mths": 1, "open_acc": 9, "pub_rec": 0,
+  "revol_bal": 8400, "revol_util": 42.1, "total_acc": 21, "acc_now_delinq": 0,
+  "pub_rec_bankruptcies": 0, "collections_12_mths_ex_med": 0
+}
