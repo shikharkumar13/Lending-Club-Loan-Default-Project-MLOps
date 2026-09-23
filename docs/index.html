@@ -1,0 +1,1645 @@
+
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>The Lending Club Credit Book</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<style>
+:root{
+  --paper:#F3F5F4;
+  --surface:#FFFFFF;
+  --surface-sunk:#E9EDEB;
+  --ink:#101C19;
+  --ink-soft:#33443F;
+  --muted:#5C6B66;
+  --rule:#D2DAD7;
+  --rule-strong:#B4C0BC;
+  --accent:#0E6E62;
+  --accent-bright:#2A9D8F;
+  --accent-wash:#E2EFEC;
+  --gain:#1B6B4C;
+  --loss:#B23A26;
+  --amber:#8A5E0F;
+  --amber-wash:#F6EEDC;
+  --loss-wash:#F8E8E4;
+
+  --display:"Newsreader",Georgia,"Times New Roman",serif;
+  --body:"Public Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+
+  --measure:68ch;
+  --wide:1080px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0D1412;
+    --surface:#141D1A;
+    --surface-sunk:#101816;
+    --ink:#E2E9E6;
+    --ink-soft:#BAC7C2;
+    --muted:#8A9B95;
+    --rule:#243330;
+    --rule-strong:#354844;
+    --accent:#5AC9B6;
+    --accent-bright:#6FD8C4;
+    --accent-wash:#132824;
+    --gain:#54B98C;
+    --loss:#E38270;
+    --amber:#D9A94E;
+    --amber-wash:#251E10;
+    --loss-wash:#261715;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0D1412;
+  --surface:#141D1A;
+  --surface-sunk:#101816;
+  --ink:#E2E9E6;
+  --ink-soft:#BAC7C2;
+  --muted:#8A9B95;
+  --rule:#243330;
+  --rule-strong:#354844;
+  --accent:#5AC9B6;
+  --accent-bright:#6FD8C4;
+  --accent-wash:#132824;
+  --gain:#54B98C;
+  --loss:#E38270;
+  --amber:#D9A94E;
+  --amber-wash:#251E10;
+  --loss-wash:#261715;
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--body);
+  font-size:16px;
+  line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ---------- shell ---------- */
+.shell{display:block}
+@media (min-width:1080px){
+  .shell{
+    display:grid;
+    grid-template-columns:248px minmax(0,1fr);
+    gap:0;
+    align-items:start;
+  }
+}
+
+/* ---------- table of contents rail ---------- */
+.rail{
+  border-bottom:1px solid var(--rule);
+  background:var(--surface);
+  padding:16px;
+}
+.rail-title{
+  font-family:var(--mono);
+  font-size:10.5px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin:0 0 10px;
+}
+.rail nav{display:none}
+.rail[data-open="true"] nav{display:block}
+.rail-toggle{
+  display:block;width:100%;text-align:left;
+  background:none;border:1px solid var(--rule-strong);border-radius:2px;
+  color:var(--ink);font-family:var(--mono);font-size:12px;
+  padding:8px 10px;cursor:pointer;
+}
+.rail-toggle:hover{border-color:var(--accent)}
+@media (min-width:1080px){
+  .rail{
+    position:sticky;
+    top:env(safe-area-inset-top,0px);
+    height:100dvh;
+    overflow-y:auto;
+    border-bottom:none;
+    border-right:1px solid var(--rule);
+    padding:28px 20px 40px;
+  }
+  .rail nav{display:block}
+  .rail-toggle{display:none}
+}
+.rail ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:1px}
+.rail li{margin:0}
+.rail a{
+  display:flex;gap:9px;align-items:baseline;
+  text-decoration:none;color:var(--ink-soft);
+  font-size:13.5px;line-height:1.35;
+  padding:5px 6px;border-radius:2px;
+}
+.rail a:hover{background:var(--accent-wash);color:var(--accent)}
+.rail a .n{
+  font-family:var(--mono);font-size:10.5px;color:var(--muted);
+  min-width:1.6em;font-variant-numeric:tabular-nums;
+}
+.rail .sub a{padding-left:28px;font-size:12.5px;color:var(--muted)}
+.rail hr{border:0;border-top:1px solid var(--rule);margin:14px 0 10px}
+
+/* ---------- content ---------- */
+.content{
+  padding-inline:clamp(16px,5vw,56px);
+  padding-block:0 96px;
+  min-width:0;
+}
+.content > *{max-width:var(--measure);margin-inline:auto}
+.content > .wide{max-width:var(--wide)}
+
+/* ---------- masthead ---------- */
+.masthead{
+  max-width:var(--wide);
+  padding-block:clamp(40px,7vw,76px) 34px;
+  border-bottom:2px solid var(--ink);
+}
+.eyebrow{
+  font-family:var(--mono);font-size:11px;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--accent);margin:0 0 18px;
+}
+h1{
+  font-family:var(--display);
+  font-weight:500;
+  font-size:clamp(2.3rem,6.2vw,4rem);
+  line-height:1.03;
+  letter-spacing:-.022em;
+  margin:0 0 20px;
+  text-wrap:balance;
+}
+.standfirst{
+  font-family:var(--display);
+  font-size:clamp(1.08rem,2.4vw,1.32rem);
+  line-height:1.55;
+  color:var(--ink-soft);
+  max-width:56ch;margin:0;
+}
+.byline{
+  margin-top:24px;font-family:var(--mono);font-size:11.5px;
+  color:var(--muted);display:flex;flex-wrap:wrap;gap:8px 18px;
+}
+.byline a{color:var(--accent);text-decoration:none;border-bottom:1px solid var(--rule-strong)}
+.byline a:hover{border-color:var(--accent)}
+
+/* ---------- key figures strip ---------- */
+.figures{
+  max-width:var(--wide);
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  border-bottom:1px solid var(--rule);
+  margin-bottom:48px;
+}
+.figures div{padding:18px 20px 20px;border-right:1px solid var(--rule)}
+.figures div:last-child{border-right:none}
+.figures dt{
+  font-family:var(--mono);font-size:10px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--muted);margin:0 0 6px;
+}
+.figures dd{
+  margin:0;font-family:var(--display);font-size:1.75rem;
+  font-variant-numeric:tabular-nums;line-height:1.1;letter-spacing:-.01em;
+}
+.figures dd small{display:block;font-family:var(--body);font-size:11.5px;color:var(--muted);margin-top:5px;letter-spacing:0}
+
+/* ---------- typography ---------- */
+h2{
+  font-family:var(--display);font-weight:500;
+  font-size:clamp(1.7rem,3.6vw,2.4rem);
+  line-height:1.12;letter-spacing:-.018em;
+  margin:72px 0 6px;text-wrap:balance;
+}
+h2 .part{
+  display:block;font-family:var(--mono);font-size:10.5px;
+  letter-spacing:.18em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:12px;font-weight:500;
+}
+h3{
+  font-family:var(--display);font-weight:600;
+  font-size:1.26rem;line-height:1.25;letter-spacing:-.008em;
+  margin:40px 0 4px;text-wrap:balance;
+}
+h4{
+  font-family:var(--mono);font-weight:600;font-size:11.5px;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+  margin:30px 0 4px;
+}
+p{margin:14px 0}
+.lede{font-size:1.06rem;color:var(--ink-soft)}
+a{color:var(--accent)}
+strong{font-weight:600}
+em{font-style:italic}
+code{
+  font-family:var(--mono);font-size:.86em;
+  background:var(--surface-sunk);padding:1px 5px;border-radius:2px;
+  border:1px solid var(--rule);
+}
+ul,ol{margin:14px 0;padding-left:1.25em}
+li{margin:7px 0}
+li::marker{color:var(--accent)}
+hr.sep{
+  border:0;border-top:1px solid var(--rule);
+  margin:56px auto;max-width:var(--measure);
+}
+
+/* ---------- callouts ---------- */
+.trap,.note,.aside{
+  border-left:3px solid;padding:16px 18px;margin:26px 0;
+  border-radius:0 2px 2px 0;
+}
+.trap{border-color:var(--loss);background:var(--loss-wash)}
+.note{border-color:var(--amber);background:var(--amber-wash)}
+.aside{border-color:var(--accent);background:var(--accent-wash)}
+.trap .label,.note .label,.aside .label{
+  font-family:var(--mono);font-size:10px;letter-spacing:.14em;
+  text-transform:uppercase;display:block;margin-bottom:7px;font-weight:600;
+}
+.trap .label{color:var(--loss)}
+.note .label{color:var(--amber)}
+.aside .label{color:var(--accent)}
+.trap p:first-of-type,.note p:first-of-type,.aside p:first-of-type{margin-top:0}
+.trap p:last-child,.note p:last-child,.aside p:last-child{margin-bottom:0}
+
+/* ---------- decision card ---------- */
+.decision{
+  border:1px solid var(--rule);border-top:2px solid var(--accent);
+  background:var(--surface);padding:18px 20px;margin:26px 0;border-radius:0 0 2px 2px;
+}
+.decision .id{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;
+  color:var(--accent);font-weight:600;
+}
+.decision h5{
+  font-family:var(--display);font-size:1.1rem;font-weight:600;
+  margin:5px 0 12px;line-height:1.3;
+}
+.decision dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:7px 14px}
+.decision dt{
+  font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted);padding-top:4px;
+}
+.decision dd{margin:0}
+@media (max-width:560px){
+  .decision dl{grid-template-columns:1fr;gap:2px}
+  .decision dd{margin-bottom:10px}
+}
+
+/* ---------- exhibits (diagrams always on paper) ---------- */
+.exhibit{
+  margin:34px auto;
+  border:1px solid var(--rule);
+  background:#FCFDFC;
+  border-radius:2px;
+  overflow:hidden;
+}
+.exhibit .head{
+  padding:11px 16px;border-bottom:1px solid var(--rule);
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.11em;
+  text-transform:uppercase;color:#5C6B66;background:#F1F4F3;
+  display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
+}
+.exhibit .body{padding:20px 16px;overflow-x:auto;color:#101C19}
+.exhibit .mermaid,.exhibit pre.mermaid{
+  background:transparent;margin:0;display:flex;justify-content:center;min-width:min-content;
+}
+.exhibit figcaption{
+  padding:12px 16px;border-top:1px solid var(--rule);
+  font-size:13px;color:#4A5A55;background:#F1F4F3;
+}
+.exhibit img{display:block;width:100%;height:auto}
+
+/* ---------- tables ---------- */
+.tablewrap{overflow-x:auto;margin:26px 0;border:1px solid var(--rule);border-radius:2px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:440px}
+caption{
+  caption-side:top;text-align:left;padding:11px 14px;
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--rule);
+}
+th,td{padding:9px 14px;text-align:left;border-bottom:1px solid var(--rule);vertical-align:top}
+thead th{
+  font-family:var(--mono);font-size:10px;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--muted);font-weight:600;
+  border-bottom:1px solid var(--rule-strong);
+}
+tbody tr:last-child td{border-bottom:none}
+td.num,th.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:12.5px}
+tr.hi td{background:var(--accent-wash);font-weight:600}
+.gain{color:var(--gain);font-weight:600}
+.loss{color:var(--loss);font-weight:600}
+.warn{color:var(--amber);font-weight:600}
+
+/* ---------- code ---------- */
+pre{
+  background:var(--surface-sunk);border:1px solid var(--rule);
+  border-radius:2px;padding:14px 16px;overflow-x:auto;
+  font-family:var(--mono);font-size:12.5px;line-height:1.6;margin:22px 0;
+  color:var(--ink);
+}
+pre code{background:none;border:none;padding:0;font-size:inherit}
+.cap{font-size:12.5px;color:var(--muted);margin-top:-12px}
+
+/* ---------- tool cards ---------- */
+.tools{display:grid;gap:16px;margin:28px 0}
+@media (min-width:760px){.tools{grid-template-columns:1fr 1fr}}
+.tool{
+  border:1px solid var(--rule);background:var(--surface);
+  padding:16px 18px;border-radius:2px;display:flex;flex-direction:column;gap:9px;
+}
+.tool .nm{
+  font-family:var(--mono);font-size:13px;font-weight:600;color:var(--accent);
+}
+.tool .role{
+  font-size:11px;font-family:var(--mono);letter-spacing:.09em;text-transform:uppercase;
+  color:var(--muted);margin-top:-6px;
+}
+.tool p{margin:0;font-size:14px;line-height:1.55}
+.tool .q{
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--muted);display:block;margin-bottom:2px;
+}
+
+/* ---------- timeline svg ---------- */
+.svgwrap{overflow-x:auto;margin:0}
+.svgwrap svg{display:block;min-width:560px;width:100%;height:auto}
+.s-label{font-family:"IBM Plex Mono",monospace;font-size:10px;fill:#5C6B66;letter-spacing:.06em}
+.s-title{font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:600;fill:#101C19}
+.s-year{font-family:"IBM Plex Mono",monospace;font-size:10px;fill:#5C6B66}
+
+/* ---------- misc ---------- */
+.pathbox{
+  border:1px solid var(--rule-strong);background:var(--surface);
+  padding:18px 20px;margin:28px 0;border-radius:2px;
+}
+.pathbox h4{margin-top:0}
+.pathbox ol{margin-bottom:0}
+footer{
+  max-width:var(--wide);margin:80px auto 0;padding-top:24px;
+  border-top:2px solid var(--ink);
+  font-size:13px;color:var(--muted);
+}
+footer a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="shell">
+
+<aside class="rail" id="rail">
+  <p class="rail-title">Contents</p>
+  <button class="rail-toggle" id="railToggle" aria-expanded="false" aria-controls="railNav">Show contents</button>
+  <nav id="railNav">
+    <ol>
+      <li><a href="#orientation"><span class="n">00</span><span>Orientation</span></a></li>
+      <li><a href="#problem"><span class="n">01</span><span>Why the metric is money</span></a></li>
+      <li><a href="#data"><span class="n">02</span><span>The data, and what was thrown away</span></a></li>
+      <li><a href="#leakage"><span class="n">03</span><span>Four ways to cheat</span></a></li>
+      <li><a href="#modeling"><span class="n">04</span><span>Modelling and honest validation</span></a></li>
+      <li><a href="#decision"><span class="n">05</span><span>From probability to decision</span></a></li>
+      <li><a href="#serving"><span class="n">06</span><span>Serving: the bundle</span></a></li>
+      <li><a href="#automation"><span class="n">07</span><span>Automation and the promotion gate</span></a></li>
+      <li><a href="#monitoring"><span class="n">08</span><span>Monitoring when labels arrive late</span></a></li>
+      <li><a href="#fairness"><span class="n">09</span><span>Fairness, and one open decision</span></a></li>
+      <li><a href="#toolkit"><span class="n">10</span><span>The MLOps toolkit</span></a></li>
+      <li><a href="#audit"><span class="n">11</span><span>The adversarial audit</span></a></li>
+      <li><a href="#run"><span class="n">12</span><span>Running it yourself</span></a></li>
+    </ol>
+    <hr>
+    <ol class="sub">
+      <li><a href="#glossary"><span class="n">§</span><span>Glossary</span></a></li>
+    </ol>
+  </nav>
+</aside>
+
+<main class="content">
+
+<header class="masthead">
+  <p class="eyebrow">A complete walkthrough · Lending Club 2007 to 2018</p>
+  <h1>The Lending&nbsp;Club<br>Credit Book</h1>
+  <p class="standfirst">A machine learning system that decides which peer-to-peer loans to fund, and the reasoning behind every choice in it. Why accuracy is the wrong metric. Why a model trained on 2013 data was already stale by January 2016.</p>
+  <p class="byline">
+    <span>621,022 matured loans</span>
+    <span>80 recorded decisions</span>
+    <span>118 tests</span>
+    <span><a href="https://github.com/shikharkumar13/Lending-Club-Loan-Default-Project-MLOps">Source on GitHub</a></span>
+  </p>
+</header>
+
+<dl class="figures">
+  <div><dt>Business result</dt><dd>+7.35¢<small>returned per dollar invested, against +6.55¢ for funding everything</small></dd></div>
+  <div><dt>Model quality</dt><dd>0.683<small>ROC-AUC on 2015, scored exactly once</small></dd></div>
+  <div><dt>Loans monitored</dt><dd>988,585<small>issued 2016 to 2018, replayed as 36 monthly batches</small></dd></div>
+  <div><dt>Input drift</dt><dd>43 to 60%<small>of features drifted in every single month</small></dd></div>
+</dl>
+
+<!-- ============================================================ -->
+<h2 id="orientation"><span class="part">Part 00</span>Orientation</h2>
+
+<p class="lede">This is a guide to a complete machine learning system: not only a model, but the machinery around it that makes the model trustworthy enough to act on. It assumes you know roughly what a classifier is and nothing beyond that.</p>
+
+<p>The project answers one question. An investor on a peer-to-peer lending platform sees a list of loans. Each shows an amount, an interest rate, a grade the platform assigned, and a profile of the borrower. Some will be repaid with interest. Some will default. Which should the investor fund?</p>
+
+<p>That sounds like a classification problem, and for the first ten minutes it is. The interesting parts sit elsewhere. Most of the columns in the raw data would let you cheat. The obvious metric is worthless here. A default does not lose all your money. The right answer turns out not to be "reject bad loans" at all. And once the model is deployed you cannot tell whether it still works, because the answer arrives three years late.</p>
+
+<h3>How to read this</h3>
+
+<div class="pathbox">
+  <h4>Three routes through</h4>
+  <ol>
+    <li>For the ideas, read parts 01, 03, 05 and 08. Money as the metric, the four kinds of leakage, turning a probability into a decision, and monitoring a model whose labels arrive years late. These transfer to other problems.</li>
+    <li>For the engineering, read parts 06, 07 and 10. How a model becomes a service, what makes retraining safe, and what each tool in the stack does.</li>
+    <li>To evaluate the work, start at part 11, an adversarial audit of the finished project and the real defects it found. Then part 09, which holds the one decision still deliberately left open.</li>
+  </ol>
+</div>
+
+<h3>The shape of the system</h3>
+
+<p>Everything below hangs off this diagram. The left column is the reproducible pipeline that turns a raw CSV into a deployable artifact. The right side is what happens to that artifact once it exists.</p>
+
+<figure class="exhibit wide">
+  <div class="head"><span>Exhibit 1</span><span>System architecture</span></div>
+  <div class="body">
+<pre class="mermaid">
+%%{init:{'theme':'base','themeVariables':{'primaryColor':'#EAF1EF','primaryTextColor':'#101C19','primaryBorderColor':'#0E6E62','lineColor':'#5C6B66','secondaryColor':'#F1F4F3','tertiaryColor':'#FCFDFC','fontFamily':'IBM Plex Mono, monospace','fontSize':'12px'}}}%%
+flowchart TB
+  CSV[("Raw CSV<br/>2.26M loans · 1.68 GB")]
+  subgraph PIPE["Reproducible pipeline: one command, dvc repro"]
+    direction TB
+    A["<b>ingest</b><br/>keep only allowlisted columns"]
+    B["<b>prepare</b><br/>row-level features · label · maturity filter"]
+    C["<b>split</b><br/>by issue date · schema validation"]
+    D["<b>train</b><br/>3 model families · time-based CV · MLflow"]
+    E["<b>evaluate</b><br/>calibrate · tune policy · score test once"]
+    F["<b>package</b><br/>model + calibrator + threshold + economics"]
+    A --> B --> C --> D --> E --> F
+  end
+  subgraph OPS["Operations"]
+    direction TB
+    G["<b>FastAPI + Docker</b><br/>/predict"]
+    H["<b>monitoring</b><br/>36 monthly batches · drift"]
+    I["<b>trigger</b><br/>persistent drift, then retrain"]
+    J["<b>Prefect flow</b><br/>full retrain"]
+    K["<b>promotion gate</b><br/>judged in dollars"]
+    H --> I --> J --> K
+  end
+  CSV --> A
+  F --> G
+  F --> H
+  K -.->|"only if better"| F
+</pre>
+  </div>
+  <figcaption>The bundle produced by <code>package</code> is the unit that gets served, monitored and audited. Nothing downstream ever loads a bare model.</figcaption>
+</figure>
+
+<hr class="sep">
+
+<!-- ============================================================ -->
+<h2 id="problem"><span class="part">Part 01</span>Why the metric is money</h2>
+
+<h3>What peer-to-peer lending is</h3>
+
+<p>Lending Club connected borrowers who wanted a personal loan with investors who wanted to lend. A borrower applies. The platform runs its own underwriting, approves or rejects, and for approved loans assigns a grade from A to G with an interest rate to match. Grade A loans are the safest and pay the least interest. Grade G loans are the riskiest and pay the most.</p>
+
+<p>The approved loan is then listed. Investors browse the listings and choose which to put money into. A loan runs for a fixed term, and this project covers 36-month loans. During that term the borrower makes a fixed monthly payment called the installment. If they pay to the end, the investor gets their principal back plus interest. If they stop paying, the loan is eventually charged off, and the investor keeps whatever was recovered.</p>
+
+<div class="aside">
+  <span class="label">The constraint that shapes everything</span>
+  <p>The model never sees a rejected applicant. Every loan in the data already passed Lending Club's underwriting. So this system cannot answer "should this person get credit?" It answers "of the loans already approved and priced, which are worth buying?" That distinction runs through the whole project, and it is the first thing stated in the model card.</p>
+</div>
+
+<h3>Accuracy measures the wrong thing</h3>
+
+<p>About 86% of the loans in this dataset were repaid. So a model that predicts "never defaults" for every loan is 86% accurate and completely useless, because it gives the investor no way to tell loans apart.</p>
+
+<p>This is the standard problem with imbalanced classification. When one outcome is much more common than the other, accuracy rewards you for ignoring the rare one, and the rare one is the point.</p>
+
+<p>Even a good accuracy number would not answer the investor's question. Consider two mistakes. Fund a loan that defaults and you lose part of your money. Decline a loan that would have repaid and you lose the interest you would have earned. Those are not equally bad, and how bad each one is depends on the loan's amount and interest rate. A classification metric treats every error as one unit of wrong. An investor counts dollars. So the project's headline metric is realized return per dollar invested.</p>
+
+<h3>What a default actually costs</h3>
+
+<p>A default does not lose all your money. When a Lending Club loan is charged off, the borrower has usually made payments for a while, and some further amount is recovered afterwards. Measured on this dataset's training loans:</p>
+
+<div class="tablewrap">
+  <table>
+    <caption>The two economic constants, measured rather than assumed</caption>
+    <thead><tr><th>Quantity</th><th class="num">Value</th><th>What it means</th></tr></thead>
+    <tbody>
+      <tr><td>Loss given default (LGD)</td><td class="num">0.3657</td><td>A charged-off loan loses about 37% of the funded amount. It still returns roughly 63%.</td></tr>
+      <tr><td>Prepayment factor</td><td class="num">0.8288</td><td>A repaid loan returns only 83% of the interest the contract promised, because borrowers pay off early, often by refinancing.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>Both numbers matter. Assume a default loses 100% of the money and you will be far too cautious, declining profitable loans. Assume a repaid loan pays the full contractual interest and you will overestimate every return by about 17%.</p>
+
+<div class="note">
+  <span class="label">A subtlety worth the detour</span>
+  <p>Both constants are dollar-weighted: total dollars lost divided by total dollars lent, not the average of per-loan ratios. A portfolio's return is decided by dollars, so a $35,000 loan has to count more than a $1,000 one. The two methods genuinely disagree here. The per-loan average puts LGD at 0.3732, the dollar-weighted figure at 0.3657, because smaller loans default somewhat more often.</p>
+</div>
+
+<h3>The bridge from probability to dollars</h3>
+
+<p>A classifier outputs a probability. An investor needs a decision. Expected value connects them:</p>
+
+<pre><code>E[return] = (1 - p) x gain_if_repaid  -  p x loss_if_default
+
+where   gain_if_repaid = (installment x term - amount) x 0.8288
+        loss_if_default = 0.3657 x amount
+        p               = the model's predicted default probability</code></pre>
+
+<p>This one equation explains why the rest of the project looks the way it does. The decision multiplies by the predicted probability, so the probability has to be right in value, not merely ranked correctly. A model that confidently says 2% when the truth is 20% wrecks the arithmetic even if it ranks every loan in the correct order. That requirement drives the choice of training metric and forces an extra calibration step, both covered in part 04.</p>
+
+<hr class="sep">
+
+<!-- ============================================================ -->
+<h2 id="data"><span class="part">Part 02</span>The data, and what was thrown away</h2>
+
+<p>The source is <code>accepted_2007_to_2018Q4.csv</code>: 2,260,702 loans, 1.68 GB, 151 columns, from a public Kaggle mirror of Lending Club's own release. The file's SHA-256 is recorded in the project so anyone can confirm they have the same data.</p>
+
+<p>Of those 2.26 million loans, the project uses 621,022. Understanding why three quarters were discarded is most of the work of this part.</p>
+
+<h3>Filter one: only loans with a known outcome</h3>
+
+<p>A loan's <code>loan_status</code> can be Fully Paid, Charged Off, Default, Current, In Grace Period, or various stages of Late. Only the first three are final. A loan still marked Current has no label, since nobody yet knows how it ends, so it cannot be used for supervised training.</p>
+
+<p>The target is defined accordingly. Charged Off and Default become 1, Fully Paid becomes 0, and everything else is dropped.</p>
+
+<div class="note">
+  <span class="label">A guard that earns its keep</span>
+  <p>The code raises an error if it meets a status value it has never seen. If Lending Club ever republished the data with a new status, a naive filter would silently drop those loans and nobody would notice the dataset had shrunk. Failing loudly forces a human to classify the new value deliberately.</p>
+</div>
+
+<h3>Filter two: only loans old enough to have finished</h3>
+
+<p>This filter is the subtle one, and getting it wrong produces a classic mistake called survivorship or maturity bias.</p>
+
+<p>The dataset is a snapshot taken at the end of 2018. A 36-month loan issued in June 2018 has only been running six months by then. It cannot possibly be Fully Paid yet. The only way it has a final status is if it ended early, which for a young loan almost always means it was charged off.</p>
+
+<p>Keep recent loans and your labelled sample is quietly poisoned. The recent portion contains defaults but almost no successes. A model trained on it learns that recent loans are catastrophically risky, which is an artifact of the calendar rather than anything about credit.</p>
+
+<p>The project measured this rather than assuming it:</p>
+
+<div class="tablewrap">
+  <table>
+    <caption>Share of 36-month loans with no final outcome by the 2018Q4 snapshot</caption>
+    <thead><tr><th>Issued in</th><th class="num">Unresolved</th><th>Usable for training?</th></tr></thead>
+    <tbody>
+      <tr><td>2015</td><td class="num">0.05%</td><td><span class="gain">Yes.</span> Essentially all matured.</td></tr>
+      <tr><td>2016</td><td class="num">28%</td><td><span class="loss">No.</span> Badly biased.</td></tr>
+      <tr><td>2017</td><td class="num">60%</td><td><span class="loss">No.</span></td></tr>
+      <tr><td>2018</td><td class="num">88%</td><td><span class="loss">No.</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>The cutoff is therefore December 2015. Everything issued afterwards is excluded from training, and later put to a different use entirely as simulated production traffic for drift monitoring in part 08.</p>
+
+<figure class="exhibit wide">
+  <div class="head"><span>Exhibit 2</span><span>How the eleven years of data are used</span></div>
+  <div class="body">
+  <div class="svgwrap">
+  <svg viewBox="0 0 860 260" role="img" aria-label="Timeline showing 2007 to 2013 used for training, 2014 for calibration and policy tuning, 2015 for the final test, and 2016 to 2018 for monitoring only">
+    <text x="0" y="16" class="s-title">DATA SPLIT BY LOAN ISSUE DATE, NEVER AT RANDOM</text>
+
+    <rect x="0" y="40" width="330" height="40" fill="#0E6E62"/>
+    <text x="12" y="65" style="font-family:'IBM Plex Mono',monospace;font-size:12px;fill:#FFFFFF;font-weight:600">TRAIN</text>
+    <text x="90" y="65" style="font-family:'IBM Plex Mono',monospace;font-size:10px;fill:#CFE8E3">175,426 loans · 12.63% default</text>
+
+    <rect x="336" y="40" width="150" height="40" fill="#2A9D8F"/>
+    <text x="346" y="59" style="font-family:'IBM Plex Mono',monospace;font-size:11px;fill:#FFFFFF;font-weight:600">VALIDATION</text>
+    <text x="346" y="73" style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;fill:#E4F3F0">162,570 · calibrate + tune</text>
+
+    <rect x="492" y="40" width="150" height="40" fill="#8A5E0F"/>
+    <text x="502" y="59" style="font-family:'IBM Plex Mono',monospace;font-size:11px;fill:#FFFFFF;font-weight:600">TEST</text>
+    <text x="502" y="73" style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;fill:#F6EEDC">283,026 · scored once</text>
+
+    <rect x="648" y="40" width="212" height="40" fill="#E9EDEB" stroke="#B4C0BC"/>
+    <text x="658" y="59" style="font-family:'IBM Plex Mono',monospace;font-size:11px;fill:#33443F;font-weight:600">MONITORING ONLY</text>
+    <text x="658" y="73" style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;fill:#5C6B66">988,585 · mostly unlabelled</text>
+
+    <line x1="0" y1="92" x2="860" y2="92" stroke="#B4C0BC"/>
+    <text x="0" y="108" class="s-year">2007</text>
+    <text x="300" y="108" class="s-year">2013</text>
+    <text x="392" y="108" class="s-year">2014</text>
+    <text x="548" y="108" class="s-year">2015</text>
+    <text x="700" y="108" class="s-year">2016 to 2018</text>
+
+    <text x="0" y="150" class="s-title">INSIDE THE TRAINING YEARS: EXPANDING-WINDOW CROSS-VALIDATION</text>
+
+    <rect x="0" y="168" width="120" height="20" fill="#0E6E62"/>
+    <rect x="124" y="168" width="60" height="20" fill="#E9C46A"/>
+    <text x="196" y="183" class="s-label">fold 1 · train up to 2010, validate 2011</text>
+
+    <rect x="0" y="194" width="184" height="20" fill="#0E6E62"/>
+    <rect x="188" y="194" width="60" height="20" fill="#E9C46A"/>
+    <text x="260" y="209" class="s-label">fold 2 · train up to 2011, validate 2012</text>
+
+    <rect x="0" y="220" width="248" height="20" fill="#0E6E62"/>
+    <rect x="252" y="220" width="60" height="20" fill="#E9C46A"/>
+    <text x="324" y="235" class="s-label">fold 3 · train up to 2012, validate 2013</text>
+  </svg>
+  </div>
+  </div>
+  <figcaption>Each fold trains on everything earlier and validates on the next calendar year, the way the model would really be used. The validation year is split again: the first half fits the calibrator, the second half tunes the funding threshold.</figcaption>
+</figure>
+
+<h3>Why the split is by date</h3>
+
+<p>A random train/test split would let the model learn from 2013 loans and be scored on 2010 loans. That is impossible in production, since you cannot train on the future, and it makes results look better than they are, because the model gets to see the economic conditions of the period it is being tested on.</p>
+
+<p>Splitting by issue date simulates reality. Train on the past, predict the future. It also makes the test harder and the resulting number smaller, which is the point.</p>
+
+<div class="note">
+  <span class="label">Why not sklearn's TimeSeriesSplit?</span>
+  <p>Scikit-learn ships a <code>TimeSeriesSplit</code> that looks made for this. It is not used, because it splits by row count rather than by calendar. Lending Club's volume grew enormously over the period, so equal-sized row chunks would carve 2007 to 2011 into a single fold and slice 2014 into several. The project writes its own splitter so each fold is a real calendar year.</p>
+</div>
+
+<h3>What a loan looks like to the model</h3>
+
+<p>Twenty-nine raw columns are permitted as inputs. A few of them are replaced by derived versions, and the final set the model receives is 30 columns, which encoding then expands into 73 numeric features. The derived features are worth naming, because each one encodes a piece of domain judgement:</p>
+
+<div class="tablewrap wide">
+  <table>
+    <caption>Derived features, and the reasoning behind each</caption>
+    <thead><tr><th>Feature</th><th>Built from</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td><code>fico_mid</code></td><td>FICO low and high</td><td>FICO is reported as a 4 to 5 point band. The midpoint carries the same information in one column instead of two nearly identical ones.</td></tr>
+      <tr><td><code>credit_history_months</code></td><td>issue date minus earliest credit line</td><td>Uses the issue date rather than today's date, so the feature is point-in-time correct.</td></tr>
+      <tr><td><code>loan_to_income</code></td><td>loan amount over income</td><td>$20,000 means something different to a $40k earner and a $400k earner. The ratio carries the burden.</td></tr>
+      <tr><td><code>installment_to_income</code></td><td>installment x 12 over income</td><td>The monthly squeeze, which is what actually causes missed payments.</td></tr>
+      <tr><td><code>emp_length_years</code></td><td>"10+ years" becomes 10</td><td>Employment length is ordered, so it stays a number. One-hot encoding would throw the ordering away.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h3>Missing values: three kinds, three treatments</h3>
+
+<p>Beginners are usually taught to fill missing values with the median. That is right about a third of the time. This project distinguishes three cases.</p>
+
+<p><strong>Ordinary missing.</strong> The value exists but was not recorded. Fill with the median learned from the training fold only.</p>
+
+<p><strong>Structurally missing.</strong> <code>mths_since_last_delinq</code> is blank when the borrower has never been delinquent. That is not absent data, it is the most informative value in the column. Filling it with the median would claim the borrower was delinquent an average amount of time ago, which is false. Instead it gets a sentinel far outside the real range, 999, which tree models can split on cleanly.</p>
+
+<p><strong>Missing as a signal.</strong> For three columns, whether the value is missing predicts default on its own. <code>emp_length_years</code> is 4.3% missing, and those loans default at 18.2% against 12.4%. <code>pub_rec_bankruptcies</code> is 0.8% missing, 24.5% against 12.5%. <code>revol_util</code> is 0.1% missing, 16.9% against 12.6%. These get the median and an extra 0/1 column recording that they were missing.</p>
+
+<div class="trap">
+  <span class="label">A trap that cost two bugs</span>
+  <p>Scikit-learn's <code>SimpleImputer</code> silently drops a column that is entirely missing in the data it is fitted on. If that happened in one cross-validation fold, the number of features would change between folds and a served model would break. Fixed with <code>keep_empty_features=True</code>.</p>
+  <p>Similarly, <code>SimpleImputer(add_indicator=True)</code> only creates a "was missing" column for columns that actually contained a missing value during fitting. In a fold with none, the column vanishes, which is the same trap wearing a different hat. Fixed by using <code>MissingIndicator(features="all")</code>, which always produces the column.</p>
+</div>
+
+<hr class="sep">
+
+<!-- ============================================================ -->
+<h2 id="leakage"><span class="part">Part 03</span>Four ways to cheat</h2>
+
+<p class="lede">Data leakage is when information reaches the model that it would not have at the moment of the real decision. It is the most common way a machine learning project produces an impressive number that means nothing. This project defends against four distinct kinds.</p>
+
+<h3>1. Target leakage, or the columns that describe the future</h3>
+
+<p>The raw file has 151 columns. Most of them are recorded after the investor's decision:</p>
+
+<div class="tablewrap wide">
+  <table>
+    <caption>Examples of columns that would leak the answer</caption>
+    <thead><tr><th>Column</th><th>What it records</th><th>Available at listing?</th></tr></thead>
+    <tbody>
+      <tr><td><code>total_pymnt</code></td><td>Total paid so far</td><td><span class="loss">No.</span> Known only after the loan runs.</td></tr>
+      <tr><td><code>recoveries</code></td><td>Money recovered after charge-off</td><td><span class="loss">No.</span> Only exists because it defaulted.</td></tr>
+      <tr><td><code>last_pymnt_d</code></td><td>Date of last payment</td><td><span class="loss">No.</span></td></tr>
+      <tr><td><code>last_fico_range_high</code></td><td>Most recent credit score</td><td><span class="loss">No.</span> Updated during the loan.</td></tr>
+      <tr><td><code>debt_settlement_flag</code></td><td>Whether a settlement was agreed</td><td><span class="loss">No.</span> Implies default.</td></tr>
+      <tr><td><code>int_rate</code></td><td>The rate the platform set</td><td><span class="gain">Yes.</span> Shown on the listing.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>Including <code>recoveries</code> would produce a model with near-perfect accuracy, because a non-zero recovery is a default. It would also be worthless, since at decision time that column is always empty.</p>
+
+<div class="decision">
+  <span class="id">D-006</span>
+  <h5>An allowlist rather than a blocklist</h5>
+  <dl>
+    <dt>Decision</dt><dd>Name the 29 columns that are permitted. Everything else is dropped at ingestion and can never reach the model.</dd>
+    <dt>Why</dt><dd>A blocklist requires you to think of every dangerous column. If the dataset gains a column, or you overlook one, it silently becomes a feature. With an allowlist, a new column is excluded by default and you have to add it deliberately. Safety should be the state you get by doing nothing.</dd>
+    <dt>Enforced by</dt><dd>Four separate tests, plus a list of forbidden name prefixes checked at several pipeline stages.</dd>
+  </dl>
+</div>
+
+<h3>2. Preprocessing leakage, the invisible kind</h3>
+
+<p>This one catches careful people. Suppose you fill missing incomes with the median income. Compute that median over the whole dataset before splitting, and the median now contains information from your test loans, which then flows into the training data. The same applies to percentile caps, category frequencies and scaling factors.</p>
+
+<p>The effect is small per statistic and invisible in the code. It reliably inflates results.</p>
+
+<p>The project solves this structurally by dividing every transformation into two layers:</p>
+
+<figure class="exhibit wide">
+  <div class="head"><span>Exhibit 3</span><span>Two-layer preprocessing</span></div>
+  <div class="body">
+<pre class="mermaid">
+%%{init:{'theme':'base','themeVariables':{'primaryColor':'#EAF1EF','primaryTextColor':'#101C19','primaryBorderColor':'#0E6E62','lineColor':'#5C6B66','fontFamily':'IBM Plex Mono, monospace','fontSize':'12px'}}}%%
+flowchart LR
+  R[Raw loan row] --> LA
+  subgraph LA["LAYER A: safe before the split"]
+    direction TB
+    A1["parse ' 36 months' to 36"]
+    A2["FICO low and high to midpoint"]
+    A3["issue date minus credit line"]
+    A4["amount over income"]
+  end
+  LA --> SP{{"train / validation / test<br/>split by date"}}
+  SP --> LB
+  subgraph LB["LAYER B: must be fitted"]
+    direction TB
+    B1["median imputation"]
+    B2["99.5th percentile cap"]
+    B3["category frequencies"]
+    B4["standard scaling"]
+  end
+  LB --> M["73 features, then the model"]
+</pre>
+  </div>
+  <figcaption>Layer A uses only one row's own values, so running it before the split cannot leak anything. Layer B learns a statistic from many rows, so it lives inside a scikit-learn <code>Pipeline</code> that cross-validation refits on every fold.</figcaption>
+</figure>
+
+<p>This works because <code>Pipeline</code> makes the correct behaviour automatic instead of a matter of discipline. When cross-validation calls <code>fit</code> on a fold, every learned statistic inside the pipeline is recomputed from that fold's training rows alone. You cannot forget.</p>
+
+<div class="aside">
+  <span class="label">Proven, not assumed</span>
+  <p>A test called <code>test_cv_never_fits_on_its_own_validation_rows</code> plants a fake estimator that records exactly which rows it was fitted on, runs cross-validation, and asserts that no validation row ever appeared in a training call. A machine checks the guarantee, rather than a human reading the code carefully.</p>
+</div>
+
+<h3>3. Temporal leakage, or training on the future</h3>
+
+<p>Part 02 covered this: all splits are by issue date. It applies to cross-validation too. The folds expand forwards in time, as Exhibit 2 shows, and a fold never validates on a year earlier than its training data.</p>
+
+<h3>4. Evaluation leakage, or reusing the test set</h3>
+
+<p>Look at the test result, adjust something, look again, and the test set has become a tuning set. Its number no longer estimates performance on unseen data. It estimates performance on data you have been quietly optimising against.</p>
+
+<p>The project's rule is that 2015 is scored exactly once, at the very end. Everything that shapes the model, including hyperparameters, the calibrator and the funding threshold, is chosen on 2014.</p>
+
+<p>That rule started as a convention maintained by reading the code carefully. An audit later flagged it as the weakest link, and it was made structural:</p>
+
+<div class="decision">
+  <span class="id">D-080</span>
+  <h5>Policy tuning cannot reach the test year</h5>
+  <dl>
+    <dt>Decision</dt><dd>Calibration and threshold selection moved into a function <code>tune_policy()</code> that receives the calibration and tuning frames by name and is never handed the test frame.</dd>
+    <dt>Why</dt><dd>Previously everything sat in one scope alongside the test predictions, so "scored once" held because nobody made a mistake. Now a leak would have to be added deliberately. The most important claim in the project was the only one with no structural support.</dd>
+  </dl>
+</div>
+
+<hr class="sep">
+
+<!-- ============================================================ -->
+<h2 id="modeling"><span class="part">Part 04</span>Modelling and honest validation</h2>
+
+<h3>Start with baselines you have to beat</h3>
+
+<p>Before any model, the project establishes what "no model" looks like. There are two baselines. The first is Lending Club's own grade, turned into a classifier that predicts each grade's historical default rate. This is the real competitor, since the platform already did risk assessment, and a model that cannot beat it adds nothing. The second is funding everything, which is the return an investor gets by buying every listed loan.</p>
+
+<p>Without these, a return of +7.35¢ per dollar is a number floating in space. With them it becomes a claim about doing better than the obvious alternatives.</p>
+
+<h3>The metric that gets optimised</h3>
+
+<div class="tablewrap wide">
+  <table>
+    <caption>Choosing a training metric</caption>
+    <thead><tr><th>Metric</th><th>Measures</th><th>Verdict</th></tr></thead>
+    <tbody>
+      <tr><td>Accuracy</td><td>Share of correct labels</td><td><span class="loss">Rejected.</span> "Never defaults" scores 86%.</td></tr>
+      <tr><td>ROC-AUC</td><td>Whether risky loans rank above safe ones</td><td><span class="warn">Reported, not optimised.</span> Ranking is necessary but not sufficient, since it is blind to whether "0.2" really means 20%.</td></tr>
+      <tr><td>Log loss</td><td>How well-calibrated the probabilities are in value</td><td><span class="gain">Optimised.</span> Punishes confident mistakes severely, which is exactly what breaks the expected-value equation.</td></tr>
+      <tr><td>Brier score</td><td>Squared error of probabilities</td><td>Reported as a second calibration check.</td></tr>
+      <tr><td>PR-AUC</td><td>Ranking quality for the minority class</td><td>Reported, since it is more informative than ROC-AUC under imbalance.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>The logic chain is short. The funding rule multiplies by <em>p</em>, so <em>p</em> has to be accurate in value, so the training metric has to punish miscalibration. That gives log loss.</p>
+
+<h3>Class imbalance, and what was deliberately not done</h3>
+
+<p>With 14% defaults, the standard advice is to oversample the minority class with SMOTE or set <code>class_weight="balanced"</code>. The project does neither, and this is one of its more instructive decisions.</p>
+
+<div class="decision">
+  <span class="id">D-078</span>
+  <h5>No resampling, and <code>class_weight=balanced</code> deleted from the search</h5>
+  <dl>
+    <dt>Decision</dt><dd>Train on the natural class distribution. Handle imbalance through the choice of metric and through calibration, rather than by altering the data.</dd>
+    <dt>Why</dt><dd>Reweighting deliberately distorts the predicted probabilities away from the true base rate. That is fine if you only need ranking, and fatal here, because the profit calculation consumes the probability directly. Measured: <code>balanced</code> scored 0.632 log loss against 0.353, a catastrophic degradation.</dd>
+    <dt>Why removed rather than kept</dt><dd>It wasted half the logistic regression search budget on every run, and left a trap. Under a ranking metric like AUC it is not penalised, so a future change of tuning metric would have quietly selected it.</dd>
+  </dl>
+</div>
+
+<h3>The two models</h3>
+
+<p>Logistic regression is the interpretable baseline. It fits a weighted sum of the features and squashes it into a probability. It needs scaled inputs so its penalty applies evenly, and one-hot encoded categories, and it cannot represent interactions unless you build them by hand.</p>
+
+<p>LightGBM is a gradient-boosted decision tree ensemble. It builds hundreds of small trees, each correcting the previous ones' errors. It finds interactions automatically, ignores feature scale, and handles the mix of numeric and categorical data well. It is also far more capable of overfitting, which is why the validation design matters.</p>
+
+<p>Hyperparameters are chosen by randomised search, meaning 20 random combinations rather than the full grid. A full grid over 7 settings would be thousands of fits. Random sampling finds a nearly as good configuration for a fraction of the compute, because only a few of the settings matter much.</p>
+
+<h3>Calibration, or making 0.2 mean 20%</h3>
+
+<p>Models trained for ranking are often miscalibrated. They separate risky from safe correctly while the numbers themselves are systematically off. Since the profit equation consumes the number, this has to be fixed.</p>
+
+<p>The fix is isotonic regression, a flexible monotone mapping from raw score to observed frequency, fitted on held-out 2014 loans. Monotone means it never reorders anything. It only stretches and compresses the scale.</p>
+
+<div class="trap">
+  <span class="label">A discovery that changed the design</span>
+  <p>Isotonic regression is a step function. On the 283,026 test loans it produced only 255 distinct probability values, and one of those steps contained 39,792 loans, all assigned exactly the same probability.</p>
+  <p>That is fine for reading a probability. It is dangerous for a threshold rule, because a cut-off landing inside such a block moves 14% of the portfolio at once, and which loans get funded is then decided arbitrarily.</p>
+  <p>So ranking policies use the raw model score, which is continuous, and the policy degrades smoothly. The calibrated probability is used only where a true probability is required: the expected-value arithmetic and human-readable output.</p>
+</div>
+
+<h3>Results, and an honest reading of them</h3>
+
+<div class="tablewrap wide">
+  <table>
+    <caption>Cross-validated on 2007 to 2013, expanding-window folds</caption>
+    <thead><tr><th>Model</th><th class="num">Log loss</th><th class="num">ROC-AUC</th><th class="num">PR-AUC</th><th class="num">Brier</th><th class="num">Configs tried</th></tr></thead>
+    <tbody>
+      <tr><td>Lending Club grade (baseline)</td><td class="num">0.36015</td><td class="num">0.6232</td><td class="num">0.1663</td><td class="num">0.10473</td><td class="num">1</td></tr>
+      <tr><td>Logistic regression</td><td class="num">0.35345</td><td class="num">0.6618</td><td class="num">0.2048</td><td class="num">0.10331</td><td class="num">3</td></tr>
+      <tr class="hi"><td>LightGBM</td><td class="num">0.35172</td><td class="num">0.6672</td><td class="num">0.2079</td><td class="num">0.10300</td><td class="num">20</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>A first draft of this project stopped there and declared LightGBM the winner. An audit called that out, for a reason worth absorbing.</p>
+
+<p>The gap between LightGBM and logistic regression is 0.00173 log loss. The spread between folds is 0.026, fifteen times larger, because 2011, 2012 and 2013 are genuinely different years. Comparing two averages tells you nothing when the year-to-year variation dwarfs the difference you are claiming.</p>
+
+<p>Both models see identical folds, so that variation is common to both, and the right comparison is paired, fold by fold:</p>
+
+<div class="tablewrap wide">
+  <table>
+    <caption>Paired comparison across folds, where lower log loss is better</caption>
+    <thead><tr><th>Validation year</th><th class="num">2011</th><th class="num">2012</th><th class="num">2013</th><th>Verdict</th></tr></thead>
+    <tbody>
+      <tr><td>LightGBM</td><td class="num">0.31888</td><td class="num">0.38146</td><td class="num">0.35481</td><td></td></tr>
+      <tr><td>Logistic regression</td><td class="num">0.32006</td><td class="num">0.38156</td><td class="num">0.35873</td><td></td></tr>
+      <tr class="hi"><td>Difference</td><td class="num">+0.00118</td><td class="num">+0.00010</td><td class="num">+0.00392</td><td>Wins 3 of 3, mean +0.00173 with SD 0.00197</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>LightGBM does win every fold, which is a real result. But the variation in its margin is as large as the margin itself, and it received nearly seven times the hyperparameter search budget, which biases the comparison in its favour. The honest summary is that it is consistently ahead by a little, not decisively better. Per-fold scores are kept in the report so anyone can check rather than take it on trust.</p>
+
+<p>On the 2015 test year, scored once: log loss 0.3992, ROC-AUC 0.6834, Brier 0.1206.</p>
+
+<div class="note">
+  <span class="label">Is 0.68 AUC good?</span>
+  <p>For consumer credit, yes. This is a realistic number. If a loan-default model reports 0.95, the overwhelmingly likely explanation is leakage rather than brilliance. Human financial behaviour is only so predictable from an application form, and a modest, honest number is a sign of a correctly built pipeline.</p>
+</div>
+
+<figure class="exhibit wide">
+  <div class="head"><span>Exhibit 4</span><span>Which features drive the predictions (SHAP)</span></div>
+  <div class="body"><img src="figures/shap_summary.png" alt="SHAP summary plot showing sub_grade, log annual income and interest rate as the most influential features"></div>
+  <figcaption>The model leans heavily on Lending Club's own <code>sub_grade</code> and <code>int_rate</code>. It is largely refining the platform's pricing rather than replacing it, which is an honest description of what it does.</figcaption>
+</figure>
+
+<hr class="sep">
+
+<!-- ============================================================ -->
+<h2 id="decision"><span class="part">Part 05</span>From probability to decision</h2>
+
+<h3>The finding that reshaped the project</h3>
+
+<p>Apply the expected-value rule, funding whenever E[return] is above zero, and it funds 99.88% of all loans.</p>
+
+<p>The reason is that Lending Club priced the loans. A grade-G borrower pays 25% or more in interest precisely because they are likely to default, and the rate is set so that the expected value is positive anyway. At these rates almost every loan is worth funding in isolation.</p>
+
+<div class="aside">
+  <span class="label">What this changes</span>
+  <p>The model's value is not in rejecting negative-value loans, because there are barely any. Its value is ranking under a capital constraint. If you have $1M and there are $10M of loans, which do you buy? That reframing changes what the model is for and how it should be evaluated.</p>
+</div>
+
+<p>So the deployed rule is a tuned threshold: fund when the raw risk score is below a cut-off chosen to maximise return per dollar. That cut-off, selected on the second half of 2014, is 0.14, which corresponds to a calibrated default risk of about 14.6%.</p>
+
+<figure class="exhibit wide">
+  <div class="head"><span>Exhibit 5</span><span>The decision path for one loan</span></div>
+  <div class="body">
+<pre class="mermaid">
+%%{init:{'theme':'base','themeVariables':{'primaryColor':'#EAF1EF','primaryTextColor':'#101C19','primaryBorderColor':'#0E6E62','lineColor':'#5C6B66','fontFamily':'IBM Plex Mono, monospace','fontSize':'12px'}}}%%
+flowchart TB
+  L["Loan listing<br/>29 raw fields"] --> V{"valid?<br/>fields consistent<br/>with each other"}
+  V -->|no| X["HTTP 422<br/>rejected, not scored"]
+  V -->|yes| P["pipeline<br/>73 features"]
+  P --> S["raw risk score"]
+  P --> C["calibrated probability"]
+  S --> T{"score below 0.14 ?"}
+  C --> E["expected return in $<br/>(1-p)·gain - p·loss"]
+  E --> T2{"expected return above 0 ?"}
+  T -->|no| D1["DECLINE<br/>score_above_threshold"]
+  T -->|yes| T2
+  T2 -->|no| D2["DECLINE<br/>negative_expected_return"]
+  T2 -->|yes| F["FUND<br/>score_below_threshold"]
+</pre>
+  </div>
+  <figcaption>Two conditions rather than one. The threshold is what binds in practice. The expected-value floor exists so the service can never return a funding decision next to a negative expected return.</figcaption>
+</figure>
+
+<h3>Comparing fairly with equal selectivity</h3>
+
+<p>Any selection policy can look better by being pickier. Fund only the safest 5% of loans and your return per dollar will look wonderful, and you will have deployed almost no capital, which is not a usable strategy.</p>
+
+<p>So every comparison is also run at matched selectivity. Force the model to fund exactly the same share of loans as the grade A to B rule, then compare returns. That isolates whether the model is better at choosing from whether it is simply more conservative.</p>
+
+<div class="tablewrap wide">
+  <table>
+    <caption>2015 test year, realized returns over the roughly 3-year loan term</caption>
+    <thead><tr><th>Strategy</th><th class="num">Share funded</th><th class="num">Return / $</th><th class="num">Per $1B</th><th class="num">Defaults among funded</th></tr></thead>
+    <tbody>
+      <tr><td>Fund everything</td><td class="num">100%</td><td class="num">+0.0655</td><td class="num">$65.5M</td><td class="num">14.9%</td></tr>
+      <tr><td>Lending Club grade A to B</td><td class="num">57.2%</td><td class="num">+0.0718</td><td class="num">$71.8M</td><td class="num">9.1%</td></tr>
+      <tr><td>Logistic regression</td><td class="num">69.9%</td><td class="num">+0.0722</td><td class="num">$72.2M</td><td class="num">10.9%</td></tr>
+      <tr class="hi"><td>LightGBM, tuned threshold</td><td class="num">66.3%</td><td class="num">+0.0735</td><td class="num">$73.5M</td><td class="num">10.0%</td></tr>
+      <tr><td>Logistic regression, matched to A to B</td><td class="num">59.8%</td><td class="num">+0.0732</td><td class="num">$73.2M</td><td class="num">9.4%</td></tr>
+      <tr><td>LightGBM, matched to A to B</td><td class="num">58.0%</td><td class="num">+0.0738</td><td class="num">$73.8M</td><td class="num">9.0%</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>Read the last two rows against the grade rule. At essentially the same selectivity, the model earns more and defaults less.</p>
+
+<h3>Is the edge real, or luck?</h3>
+
+<p>A point estimate cannot tell you. A gap of 0.002 per dollar could easily be noise on a different set of loans. So each comparison is bootstrapped: resample the test loans with replacement 1,000 times, recompute both returns each time, and look at the distribution of the difference.</p>
+
+<div class="tablewrap wide">
+  <table>
+    <caption>Bootstrap, 1,000 draws, difference in return per dollar</caption>
+    <thead><tr><th>Comparison</th><th class="num">Difference</th><th class="num">95% CI</th></tr></thead>
+    <tbody>
+      <tr><td>LightGBM against fund everything</td><td class="num gain">+0.0080</td><td class="num">[+0.0072, +0.0087]</td></tr>
+      <tr><td>LightGBM against grade A to B</td><td class="num gain">+0.0021</td><td class="num">[+0.0015, +0.0027]</td></tr>
+      <tr><td>Logistic regression against grade A to B</td><td class="num gain">+0.0015</td><td class="num">[+0.0008, +0.0022]</td></tr>
+      <tr><td>LightGBM against logistic regression</td><td class="num">+0.0006</td><td class="num">[+0.0001, +0.0011]</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>Read that last row honestly. LightGBM's edge over a plain logistic regression is small, with an interval that nearly touches zero. The gap that matters is model against no model, which is four times larger.</p>
+
+<div class="note">
+  <span class="label">What the interval does not cover</span>
+  <p>These intervals measure sampling noise within one test year. They say nothing about a different credit cycle, which is the far larger risk and cannot be estimated from this data at all.</p>
+</div>
+
+<figure class="exhibit wide">
+  <div class="head"><span>Exhibit 6</span><span>Calibration and the profit curve</span></div>
+  <div class="body"><img src="figures/policy.png" alt="Left: calibration curve comparing uncalibrated and calibrated predictions against observed default rates. Right: profit curve showing return per dollar and share of loans funded across thresholds."></div>
+  <figcaption>Left: after isotonic calibration, predicted probabilities track observed default rates closely. Right: the trade-off the threshold navigates. As the cut-off loosens, more capital is deployed but return per dollar falls.</figcaption>
+</figure>
+
+<hr class="sep">
+
+<!-- ============================================================ -->
+<h2 id="serving"><span class="part">Part 06</span>Serving: the bundle</h2>
+
+<h3>Why shipping "the model" is not enough</h3>
+
+<p>A trained estimator is only one of four things needed to reproduce a funding decision, and they were produced at different stages from different data:</p>
+
+<div class="tablewrap wide">
+  <table>
+    <caption>What a single decision actually depends on</caption>
+    <thead><tr><th>Component</th><th>Fitted on</th><th>If it goes missing</th></tr></thead>
+    <tbody>
+      <tr><td>Preprocessing and model</td><td>2007 to 2013</td><td>No predictions at all</td></tr>
+      <tr><td>Calibrator</td><td>2014 H1</td><td>Probabilities are wrong in value, so the profit maths breaks</td></tr>
+      <tr><td>Funding threshold</td><td>2014 H2</td><td>No decision rule</td></tr>
+      <tr><td>LGD and prepayment</td><td>Training loans</td><td>Expected returns are wrong</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>Ship these separately and production drifts out of sync with the report, because someone updates the model and forgets the threshold. Bundled into one artifact, the service either has a complete, consistent decision or it has nothing.</p>
+
+<h3>Training and serving skew, and the one function that prevents it</h3>
+
+<p>The API asks callers for raw listing fields. It never asks for <code>fico_mid</code> or <code>credit_history_months</code>. A caller cannot reasonably be expected to know what those mean, and if they computed them slightly differently, say by dividing credit history days by 30 instead of 30.44, the model would silently score garbage.</p>
+
+<p>So both the training pipeline and the API call the same function, <code>derive_features()</code>. Skew is not merely unlikely, it is structurally impossible.</p>
+
+<div class="aside">
+  <span class="label">Verified on real loans</span>
+  <p>200 real 2015 loans were scored both offline and through the running container. The maximum difference in predicted probability was 4.94 x 10⁻⁷, and all 200 decisions were identical.</p>
+</div>
+
+<h3>Validating input like a loan, not like a form</h3>
+
+<p>An early version of the API accepted anything structurally well-formed. An audit found three ways to get a confident answer out of nonsense, all since fixed:</p>
+
+<div class="tablewrap wide">
+  <table>
+    <caption>Input validation added after the audit</caption>
+    <thead><tr><th>Sent</th><th>Before</th><th>Now</th></tr></thead>
+    <tbody>
+      <tr><td><code>home_ownership: "MORGAGE"</code> (typo)</td><td><span class="loss">200 and a confident score</span></td><td><span class="gain">422</span></td></tr>
+      <tr><td>FICO low 800, high 400</td><td><span class="loss">200</span>, silently uses 600</td><td><span class="gain">422</span></td></tr>
+      <tr><td>$12,000 at 11.99% with a $14.77 installment</td><td><span class="loss">200</span>, "fund" beside -$13,066</td><td><span class="gain">422</span></td></tr>
+      <tr><td><code>addr_state: "ND"</code> (never in training)</td><td>200</td><td><span class="gain">200</span>, deliberately</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>That last row is the interesting one. North Dakota genuinely never appears in the training window. Rejecting it would turn a legitimate application into a client error. So states validate against the 51 real USPS codes rather than against the training data, and a real state the model has not seen becomes a business event for the drift monitor to report.</p>
+
+<div class="trap">
+  <span class="label">The corrupt loans were real</span>
+  <p>The $14.77 on $12,000 example is not hypothetical hostility. Checking the amortization formula against the stated installment across all 621,022 loans, it matches to within 0.01% for 99% of them, but 1,015 loans (0.16%) are off by more than 1%. One lists a $14.77 monthly payment on $6,000 at 6.89%, where the true payment is $185.</p>
+  <p>Those rows produced <code>decision: "fund"</code> beside an expected return of -$13,066. The validation that now rejects them also immediately failed one of the project's own tests, which had been raising an interest rate without updating the installment, passing for weeks against an internally impossible loan.</p>
+</div>
+
+<h3>The container</h3>
+
+<p>The Docker image is multi-stage. A builder stage installs dependencies, then only the resulting environment and the application code are copied into a clean runtime image, so the build tools never ship. It runs as a non-root user, declares a <code>HEALTHCHECK</code>, and carries 36 packages rather than the roughly 200 the training environment needs. MLflow, DVC, SHAP and the plotting libraries all sit in a separate optional dependency group that the image never installs.</p>
+
+<hr class="sep">
+
+<!-- ============================================================ -->
+<h2 id="automation"><span class="part">Part 07</span>Automation and the promotion gate</h2>
+
+<h3>Retraining on a schedule is dangerous without a gate</h3>
+
+<p>Models go stale, so teams schedule retraining. The failure mode is that a bad training run reaches production silently. The pipeline succeeded, every task was green, and the model is worse.</p>
+
+<div class="decision">
+  <span class="id">D-060 and D-061</span>
+  <h5>A promotion gate, judged in dollars, on validation data</h5>
+  <dl>
+    <dt>Decision</dt><dd>A retrained model replaces the live one only if it improves return per dollar by more than a 0.0005 margin, measured on validation data.</dd>
+    <dt>Why money</dt><dd>A model can improve its log loss and still pick a worse portfolio. The gate should judge the thing you actually care about.</dd>
+    <dt>Why a margin</dt><dd>Swapping production for a 0.00001 improvement is churn on noise, and every swap carries real risk.</dd>
+    <dt>Why never the test year</dt><dd>A gate that consulted the test set on every retrain would erode it into another tuning set, and the headline result would slowly stop meaning anything.</dd>
+  </dl>
+</div>
+
+<figure class="exhibit wide">
+  <div class="head"><span>Exhibit 7</span><span>Champion against challenger</span></div>
+  <div class="body">
+<pre class="mermaid">
+%%{init:{'theme':'base','themeVariables':{'primaryColor':'#EAF1EF','primaryTextColor':'#101C19','primaryBorderColor':'#0E6E62','lineColor':'#5C6B66','fontFamily':'IBM Plex Mono, monospace','fontSize':'12px'}}}%%
+flowchart TB
+  T["retrain: ingest, prepare, split, train, evaluate"] --> CB["candidate bundle"]
+  CB --> SC["score candidate on 2014 H2<br/>return per dollar"]
+  CH["champion, currently live"] --> SC2["score champion on the same loans"]
+  SC --> G{"candidate minus champion<br/>above 0.0005 ?"}
+  SC2 --> G
+  G -->|yes| PR["PROMOTE<br/>candidate becomes live"]
+  G -->|no| RJ["REJECT<br/>champion stays"]
+</pre>
+  </div>
+  <figcaption>Demonstrated live: retraining on unchanged data produced an identical model and the gate correctly refused to swap, reporting +0.08803 against +0.08803, a difference of +0.00000, below the 0.0005 margin.</figcaption>
+</figure>
+
+<h3>Continuous integration on data nobody has</h3>
+
+<p>CI runners have no access to a 1.68 GB dataset. Running only unit tests would prove that every part works, but not that the parts fit together.</p>
+
+<p>The solution is synthetic loans with planted risk. A generator produces loans whose default probability genuinely depends on grade, FICO and loan-to-income. CI then runs the real code end to end over them, cleaning, labelling, splitting, preprocessing, training, calibrating, choosing a policy, bundling and serving over HTTP, then asserts the model reaches AUC above 0.60 on the planted signal. It takes under two seconds and catches wiring mistakes that unit tests cannot see.</p>
+
+<div class="trap">
+  <span class="label">A near-miss worth repeating</span>
+  <p>The demo-bundle builder, run locally, silently overwrote the real trained bundle with one fitted on synthetic data. The API kept working perfectly, returning confident answers from a toy model. The fix was a guard that refuses to overwrite an existing bundle without an explicit <code>--force</code>. CI starts from a clean checkout so the guard never fires there, and locally it prevents a failure that would be very hard to notice.</p>
+</div>
+
+<hr class="sep">
+
+<!-- ============================================================ -->
+<h2 id="monitoring"><span class="part">Part 08</span>Monitoring when labels arrive late</h2>
+
+<p class="lede">This is the most transferable idea in the project. A 36-month loan funded today reveals whether it was a good decision in three years, and waiting is not a monitoring strategy.</p>
+
+<h3>The setup</h3>
+
+<p>The 988,585 loans issued between 2016 and 2018, deliberately excluded from training, are replayed as 36 monthly production batches. Each is scored by the deployed bundle exactly as the API would score it.</p>
+
+<h3>Why the visible labels are a trap</h3>
+
+<p>Some of those loans do have final outcomes, and it is tempting to score the model on them. That would be a serious mistake.</p>
+
+<p>A loan issued in June 2018 can only have finished by the 2018Q4 snapshot if it ended early, either paid off ahead of schedule or charged off in its first months. The loans you can see are the least representative ones.</p>
+
+<div class="tablewrap">
+  <table>
+    <caption>The visible default rate swings on label maturity alone</caption>
+    <thead><tr><th>Batch</th><th class="num">Outcome known</th><th class="num">Observed default rate</th></tr></thead>
+    <tbody>
+      <tr><td>2016-01</td><td class="num">99%</td><td class="num">14.3%</td></tr>
+      <tr><td>2016-06</td><td class="num">66%</td><td class="num">20.5%</td></tr>
+      <tr><td>2018-12</td><td class="num">3%</td><td class="num">12.6%</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>Nothing about the model or the world changed to produce that swing. Only the amount of elapsed time did. Charted on a dashboard it would look exactly like a model failing and then recovering. So label coverage is reported as context and never used as a quality metric.</p>
+
+<h3>What gets watched instead</h3>
+
+<p>Two things are visible immediately: the inputs, meaning whether incoming applications still resemble training data, and the model's own output, meaning whether the score distribution is moving.</p>
+
+<figure class="exhibit wide">
+  <div class="head"><span>Exhibit 8</span><span>Three years of monitoring</span></div>
+  <div class="body"><img src="figures/drift.png" alt="Four stacked charts across 2016 to 2018: share of features drifted stays between 0.43 and 0.60 well above the 0.30 trigger; prediction drift rises from 0.03 to 0.28; share of loans funded stays stable near 0.7; share with a known outcome collapses from 99 percent to 3 percent."></div>
+  <figcaption>The bottom panel is the point of the exercise. The share of loans whose outcome is known collapses towards the present, which is why none of the other three panels can be an accuracy measurement.</figcaption>
+</figure>
+
+<h3>Measuring drift so the months stay comparable</h3>
+
+<div class="decision">
+  <span class="id">D-066</span>
+  <h5>The statistical test is pinned, and drift is measured on raw inputs</h5>
+  <dl>
+    <dt>Decision</dt><dd>Wasserstein distance for numeric columns, Jensen-Shannon for categorical, threshold 0.15, applied to the 30 raw model inputs.</dd>
+    <dt>Why pinned</dt><dd>Left to choose, Evidently picks a test based on sample size, using a distance test for large samples and a p-value test for small ones. A 45,000-loan month and a 900-loan month would then be measured with different tests running in opposite directions, where high means drift in one and low means drift in the other, and the monthly series would not be comparable at all.</dd>
+    <dt>Why raw inputs</dt><dd>A transformed column is partly an artifact of the fitted preprocessor, and "feature 47 drifted" is not actionable, while "income verification mix changed" is. A test asserts the monitored set equals the model's input set, so a feature cannot be added without being watched.</dd>
+  </dl>
+</div>
+
+<h3>From a number to a decision</h3>
+
+<p>A drift figure on a dashboard is not yet a decision. The trigger turns the monthly reports into one of three outcomes: do nothing, retrain, or call an engineer.</p>
+
+<figure class="exhibit wide">
+  <div class="head"><span>Exhibit 9</span><span>The retraining trigger</span></div>
+  <div class="body">
+<pre class="mermaid">
+%%{init:{'theme':'base','themeVariables':{'primaryColor':'#EAF1EF','primaryTextColor':'#101C19','primaryBorderColor':'#0E6E62','lineColor':'#5C6B66','fontFamily':'IBM Plex Mono, monospace','fontSize':'12px'}}}%%
+flowchart TB
+  B["monthly batch"] --> Q{"data quality:<br/>missing jump, or<br/>unseen category?"}
+  Q -->|yes, and new| I["ALERT: investigate<br/>an engineer, not a retrain"]
+  Q -->|already known| SU["suppressed<br/>reported once, not monthly"]
+  B --> D{"drift share above 0.30<br/>or prediction drift above 0.15?"}
+  D -->|no| OK["clean, reset the run"]
+  D -->|yes| R{"2 consecutive<br/>months?"}
+  R -->|no| W["wait, one month<br/>is often an artifact"]
+  R -->|yes, first time| RT["ALERT: retrain"]
+  R -->|yes, already fired| SU2["suppressed<br/>one alert per episode"]
+</pre>
+  </div>
+  <figcaption>Two independent alert types with different owners, plus suppression on both paths.</figcaption>
+</figure>
+
+<p>Persistence is required because a single month is often an artifact, whether a marketing push, a holiday, or a product change that reverts. Requiring the same breach in consecutive months trades a month of delay for far fewer false alarms. Retraining is not free either, since it consumes the promotion gate and every model swap carries risk.</p>
+
+<p>The two alert types are separate because retraining fixes a world that has moved. It does not fix a column that suddenly arrives empty, and firing "retrain" at a broken feed would train the next model on the same broken data. Different problem, different owner, different urgency.</p>
+
+<div class="trap">
+  <span class="label">Alert fatigue, caught in development</span>
+  <p>The first version of the trigger produced 37 alerts across 36 months. The same "addr_state has a new value: ND" fired every single month for three years.</p>
+  <p>An alert that fires every month is a log line, and a page people learn to ignore is worse than no page at all. Adding suppression, so that a new category is permanent knowledge reported once and a retrain fires once per episode, took it from 37 alerts to 3.</p>
+</div>
+
+<h3>What the monitoring found</h3>
+
+<div class="tablewrap">
+  <table>
+    <caption>36 months of simulated production</caption>
+    <thead><tr><th>Signal</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>Share of model inputs drifted against training</td><td>43 to 60%, in every single month</td></tr>
+      <tr><td>Prediction drift</td><td>0.03 rising to 0.28, breaching from 2017-12</td></tr>
+      <tr><td>Share of loans funded</td><td>Stable, 0.63 to 0.73</td></tr>
+      <tr><td>Alerts raised</td><td>3: one retrain, two investigate</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>The headline is that a model trained on 2007 to 2013 was already operating on a materially shifted population by January 2016. The two investigate alerts are real findings: <code>addr_state=ND</code> and <code>home_ownership=ANY</code>, values that never appear in the training window. Neither breaks the service, and both are worth knowing about.</p>
+
+<hr class="sep">
+
+<!-- ============================================================ -->
+<h2 id="fairness"><span class="part">Part 09</span>Fairness, and one open decision</h2>
+
+<p>The dataset contains no protected attributes, no race, sex or age, so disparate treatment cannot be measured directly. What can be measured is whether outcomes differ across <code>addr_state</code>, a well documented proxy for race and income in the US.</p>
+
+<p>A model card that merely asserts "state may be a proxy" is box-ticking. This one measures it.</p>
+
+<h3>Finding 1: funding rates differ sharply by state</h3>
+
+<p>Against an overall funding rate of 66.3%, the spread runs from 47.8% in Nevada to 74.0% in Massachusetts, a gap of 26 points.</p>
+
+<h3>Finding 2: a big gap is not automatically a problem</h3>
+
+<p>Some groups genuinely are riskier, and a funding gap that reflects real risk is the model doing its job. The question is whether the gap is earned. Comparing the correlation between each group's mean predicted score and its actual default rate:</p>
+
+<div class="tablewrap wide">
+  <table>
+    <caption>Is the funding gap explained by real differences in default?</caption>
+    <thead><tr><th>Grouped by</th><th>Funding-rate spread</th><th class="num">Score against actual outcome</th></tr></thead>
+    <tbody>
+      <tr><td><code>purpose</code></td><td>14.2% (small business) to 82.0% (credit card)</td><td class="num gain">+0.94</td></tr>
+      <tr><td><code>home_ownership</code></td><td>58.1% (rent) to 75.2% (mortgage)</td><td class="num">+1.00 *</td></tr>
+      <tr class="hi"><td><code>addr_state</code></td><td>47.8% (NV) to 74.0% (MA)</td><td class="num">+0.51</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p class="cap">* Only three groups, so a correlation of 1.00 across three points is nearly meaningless. Shown for contrast, not as evidence.</p>
+
+<p><code>purpose</code> spreads far wider than <code>addr_state</code>, with small-business loans funded at 14% and credit-card refinancing at 82%, and that spread is almost entirely explained by real differences in default. <code>addr_state</code> spreads less and is explained half as well.</p>
+
+<h3>Finding 3: the model is not equally right about each state</h3>
+
+<p>Among loans the policy funded, the realized default rate ranges from 5.8% in Oregon to 14.3% in Arkansas, against 10.0% overall. The stated 14.6% risk bar means something materially different depending on where the borrower lives.</p>
+
+<h3>Finding 4: the feature earns none of it</h3>
+
+<p><code>addr_state</code> carries just 1.6% of total SHAP weight. Refitting the selected model without it entirely:</p>
+
+<div class="tablewrap">
+  <table>
+    <caption>Ablation: LightGBM refit on the training split, scored on 2014</caption>
+    <thead><tr><th></th><th class="num">Log loss</th><th class="num">ROC-AUC</th></tr></thead>
+    <tbody>
+      <tr><td>With <code>addr_state</code></td><td class="num">0.37692</td><td class="num">0.6769</td></tr>
+      <tr><td>Without <code>addr_state</code></td><td class="num">0.37693</td><td class="num gain">0.6770</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>A difference of 0.00001 log loss, with AUC fractionally better without it.</p>
+
+<div class="decision" style="border-top-color:var(--amber)">
+  <span class="id" style="color:var(--amber)">D-071 · STATUS: OPEN</span>
+  <h5><code>addr_state</code> is a proxy that earns nothing</h5>
+  <dl>
+    <dt>Recommendation</dt><dd>Remove it. A feature that is a recognised proxy for protected characteristics, produces a 26-point funding spread and a 2.5x spread in realized error, and contributes no measurable predictive value, does not belong in a credit model.</dd>
+    <dt>Why still open</dt><dd>It is a modelling change rather than a documentation one. It invalidates every published number, the deployed bundle and the monitoring baseline, so it is the owner's call, not something to slip into a documentation phase.</dd>
+    <dt>Revisit if</dt><dd>The model is ever used for anything resembling an approval decision. At that point this stops being a recommendation.</dd>
+  </dl>
+</div>
+
+<p>This is the only entry in the project's 80-decision log marked Open, deliberately. A model card that documents a known issue with measurements and an explicit recommendation is more credible than one with nothing open, because it shows someone looked.</p>
+
+<hr class="sep">
+
+<!-- ============================================================ -->
+<h2 id="toolkit"><span class="part">Part 10</span>The MLOps toolkit</h2>
+
+<p class="lede">Every tool here earns its place by removing a specific failure mode. The useful question is not what a tool does, but what goes wrong without it.</p>
+
+<h4>Data and computation</h4>
+<div class="tools">
+  <div class="tool">
+    <span class="nm">Polars</span><span class="role">dataframes</span>
+    <p><span class="q">What</span>A dataframe library like pandas, built in Rust with lazy evaluation.</p>
+    <p><span class="q">Why here</span>The raw CSV is 1.68 GB. <code>scan_csv</code> reads it lazily and applies column selection and filters before loading, so only the 34 needed columns ever enter memory.</p>
+    <p><span class="q">Without it</span>pandas would load all 151 columns and need several GB of RAM.</p>
+  </div>
+  <div class="tool">
+    <span class="nm">pandas</span><span class="role">the sklearn boundary</span>
+    <p><span class="q">What</span>The standard Python dataframe.</p>
+    <p><span class="q">Why here</span>scikit-learn, LightGBM and SHAP all expect pandas. The project converts at exactly one place, the function that hands features to a model, so the boundary is explicit instead of scattered.</p>
+  </div>
+  <div class="tool">
+    <span class="nm">Parquet</span><span class="role">storage format</span>
+    <p><span class="q">What</span>A columnar binary file format.</p>
+    <p><span class="q">Why here</span>Columnar means reading three columns does not read the rest. It also stores types, so a column that was an integer is still an integer when reloaded. CSV forgets.</p>
+  </div>
+  <div class="tool">
+    <span class="nm">Pandera</span><span class="role">data validation</span>
+    <p><span class="q">What</span>Schema validation for dataframes, where you declare expected columns, types and ranges.</p>
+    <p><span class="q">Why here</span>It runs inside the split stage, so bad data fails there, loudly, instead of surfacing as a strange metric three stages later.</p>
+    <p><span class="q">Without it</span>A silently changed dtype becomes a debugging session.</p>
+  </div>
+</div>
+
+<h4>Modelling</h4>
+<div class="tools">
+  <div class="tool">
+    <span class="nm">scikit-learn</span><span class="role">pipelines and metrics</span>
+    <p><span class="q">What</span>The standard Python ML library.</p>
+    <p><span class="q">Why here</span>Mostly for <code>Pipeline</code> and <code>ColumnTransformer</code>, which are the leakage defence described in part 03. They make refitting per fold automatic rather than something you have to remember.</p>
+  </div>
+  <div class="tool">
+    <span class="nm">LightGBM</span><span class="role">the main model</span>
+    <p><span class="q">What</span>Gradient-boosted decision trees.</p>
+    <p><span class="q">Why here</span>Strong on tabular data, finds interactions automatically, handles missing values natively, and trains fast enough for a 20-config search across 3 folds.</p>
+    <p><span class="q">Configured with</span><code>deterministic: true</code>, because without it multithreaded training varies between machines, which matters when you report log loss to five decimals and promote on a 0.0005 margin.</p>
+  </div>
+  <div class="tool">
+    <span class="nm">MLflow</span><span class="role">experiment tracking</span>
+    <p><span class="q">What</span>Records every training run, with parameters, metrics and artifacts, in a queryable store with a web UI.</p>
+    <p><span class="q">Why here</span>The search runs 24 configurations. Without tracking, "which settings gave 0.35172?" is unanswerable a week later.</p>
+    <p><span class="q">Structure</span>One parent run per model family, one nested child per configuration, backed by SQLite.</p>
+  </div>
+  <div class="tool">
+    <span class="nm">SHAP</span><span class="role">explanations</span>
+    <p><span class="q">What</span>Assigns each feature a contribution to each individual prediction, based on cooperative game theory.</p>
+    <p><span class="q">Why here</span>"The model said no" is not an acceptable answer to a rejected borrower or a regulator. SHAP also revealed that <code>addr_state</code> carries only 1.6% of the weight, which is the evidence behind D-071.</p>
+  </div>
+</div>
+
+<h4>Reproducibility</h4>
+<div class="tools">
+  <div class="tool">
+    <span class="nm">DVC</span><span class="role">data and pipeline versioning</span>
+    <p><span class="q">What</span>Git for data. Large files live outside git, and a small pointer file with a checksum is committed instead. It also defines the pipeline as a dependency graph.</p>
+    <p><span class="q">Why here</span>Two jobs at once. Git cannot hold a 1.68 GB CSV. And <code>dvc repro</code> reruns a stage only when its code, inputs or parameters changed, so anyone can rebuild every published number from the raw CSV with one command, and nobody has to remember which script to run in which order.</p>
+    <p><span class="q">Subtlety</span>A parameter hardcoded in Python is invisible to DVC. That is why the calibration split date was moved into <code>params.yaml</code>. While it sat in code, changing a real methodological choice would not have triggered a rerun.</p>
+  </div>
+  <div class="tool">
+    <span class="nm">params.yaml</span><span class="role">single source of config</span>
+    <p><span class="q">What</span>One file holding every setting: paths, dates, feature groups, thresholds, search spaces, seeds.</p>
+    <p><span class="q">Why here</span>Configuration in code means experiments cannot be traced back to an exact setup, and DVC cannot see changes. Every module reads its settings through one loader.</p>
+  </div>
+  <div class="tool">
+    <span class="nm">uv</span><span class="role">dependency management</span>
+    <p><span class="q">What</span>A fast Python package manager that writes a lockfile pinning every transitive dependency to an exact version and hash.</p>
+    <p><span class="q">Why here</span>"Works on my machine" is a reproducibility failure. CI and Docker both install with <code>--frozen</code>, so they get byte-identical environments.</p>
+    <p><span class="q">Neat detail</span>Serving dependencies are the default set, and training tools live in an optional <code>train</code> group, so the container ships 36 packages instead of roughly 200.</p>
+  </div>
+  <div class="tool">
+    <span class="nm">Random seeds</span><span class="role">determinism</span>
+    <p><span class="q">What</span>A fixed seed, 42, threaded through model initialisation, the hyperparameter sampler, the bootstrap and every subsample.</p>
+    <p><span class="q">Why here</span>Without it, rerunning gives slightly different numbers and you cannot tell a real improvement from noise.</p>
+  </div>
+</div>
+
+<h4>Quality</h4>
+<div class="tools">
+  <div class="tool">
+    <span class="nm">pytest</span><span class="role">tests, 118 of them</span>
+    <p><span class="q">What</span>Python's testing framework.</p>
+    <p><span class="q">Why here</span>The tests encode the project's rules, not only its functions: that no forbidden column reaches the model, that CV never fits on validation rows, that the API matches offline scoring, that a funded loan never carries a negative expected return.</p>
+  </div>
+  <div class="tool">
+    <span class="nm">ruff and pre-commit</span><span class="role">linting and formatting</span>
+    <p><span class="q">What</span>An extremely fast linter and formatter, wired to run automatically before every commit.</p>
+    <p><span class="q">Why here</span>Style debates cost time and produce nothing. Automating them removes the conversation.</p>
+  </div>
+  <div class="tool">
+    <span class="nm">GitHub Actions</span><span class="role">continuous integration</span>
+    <p><span class="q">What</span>Runs checks automatically on every push and pull request.</p>
+    <p><span class="q">Why here</span>Two jobs: lint plus 118 tests, then a container job that builds the image, starts it, and asserts it returns a valid decision.</p>
+    <p><span class="q">Lesson learned</span>The workflow failed on its first real run. <code>cache-to: type=gha</code> needs BuildKit's <code>docker-container</code> driver, and without <code>setup-buildx-action</code> the default driver cannot export a cache. A CI workflow that has never actually run is an untested script.</p>
+  </div>
+  <div class="tool">
+    <span class="nm">Docker</span><span class="role">packaging</span>
+    <p><span class="q">What</span>Packages the application and its entire environment into a portable image.</p>
+    <p><span class="q">Why here</span>The model behaves identically on a laptop and a server. Multi-stage build, non-root user, healthcheck.</p>
+  </div>
+</div>
+
+<h4>Serving and operations</h4>
+<div class="tools">
+  <div class="tool">
+    <span class="nm">FastAPI</span><span class="role">the HTTP service</span>
+    <p><span class="q">What</span>A Python web framework that generates interactive API documentation from type annotations.</p>
+    <p><span class="q">Why here</span>A model nobody can call is not deployed. The bundle loads once at startup, since loading per request would add about 100ms and could serve two model versions at the same time during a deploy.</p>
+  </div>
+  <div class="tool">
+    <span class="nm">Pydantic</span><span class="role">request validation</span>
+    <p><span class="q">What</span>Declarative data validation through Python types.</p>
+    <p><span class="q">Why here</span>It is the boundary between the outside world and the model. Enums for closed category sets, ranges for numerics, and cross-field checks that catch loans whose fields contradict each other.</p>
+  </div>
+  <div class="tool">
+    <span class="nm">Prefect</span><span class="role">orchestration</span>
+    <p><span class="q">What</span>Turns a Python script into a monitored workflow with retries, timeouts and a run history.</p>
+    <p><span class="q">Why here</span>Retraining is a multi-step job where any step can fail. Prefect gives per-task retries, timeouts, and visibility into which step failed and why.</p>
+  </div>
+  <div class="tool">
+    <span class="nm">Evidently</span><span class="role">drift detection</span>
+    <p><span class="q">What</span>Compares two datasets column by column and reports distribution shift, with HTML reports.</p>
+    <p><span class="q">Why here</span>It does the statistically awkward part well. The project keeps the trigger logic in its own tested code, so the retraining decision does not depend on a third-party library's output shape.</p>
+    <p><span class="q">Practical note</span>Each HTML report is about 5.6 MB because it embeds the plotting library and the data. Thirty-six came to 201 MB, so only three are written, and the JSON summary covers every month.</p>
+  </div>
+</div>
+
+<hr class="sep">
+
+<!-- ============================================================ -->
+<h2 id="audit"><span class="part">Part 11</span>The adversarial audit</h2>
+
+<p>When the project was finished, it was reviewed again from scratch as if by a stranger, deliberately looking for reasons to reject it. That review is arguably the most useful artifact in the repository, because it shows what "finished" misses.</p>
+
+<h3>What it confirmed was sound</h3>
+
+<p>No target leakage. No preprocessing leakage. Time-based splits correct. Class imbalance handled appropriately. Metrics matched to the business problem. No sign of overfitting or an unrealistically good result. Seeds set, dependencies pinned, no hardcoded secrets.</p>
+
+<h3>The three critical findings</h3>
+
+<div class="tablewrap wide">
+  <table>
+    <caption>Critical defects, and what they revealed</caption>
+    <thead><tr><th>Finding</th><th>The problem</th><th>Fix</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>C1</strong><br>Contradictory output</td>
+        <td>The API returned <code>decision: "fund"</code> beside <code>expected_return_usd: -27,134</code>. The decision ignored expected return entirely, and nothing said so. On the test year, 10 of 187,752 funded loans had a negative expected return.</td>
+        <td>Funding now requires both conditions, plus a <code>decision_basis</code> field naming the rule that applied. The same floor was applied offline so that report and container describe one policy.</td>
+      </tr>
+      <tr>
+        <td><strong>C2</strong><br>Silent acceptance</td>
+        <td><code>home_ownership: "MORGAGE"</code> returned 200 with a confident score. The encoder setting that stops unknown categories crashing is exactly what removes the error signal, so an upstream rename would shift every prediction with nothing to alarm on.</td>
+        <td>Closed category sets rejected with 422, and states validated against the 51 real USPS codes so a genuine unseen state is monitored rather than rejected.</td>
+      </tr>
+      <tr>
+        <td><strong>C3</strong><br>Unsupported claim</td>
+        <td>"LightGBM is best" rested on a 0.00173 gap against a 0.026 between-fold spread, with unequal search budgets, and the per-fold scores were stripped from the report before writing, which made it impossible to check.</td>
+        <td>Per-fold scores kept, paired comparison added, search budgets recorded, and both README and model card rewritten to say "consistently ahead, by a little."</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<h3>Two things the fixes uncovered</h3>
+
+<p>Fixing C1 led to the discovery that the negative expected returns were real data rather than only hostile input, namely the 1,015 internally inconsistent loans described in part 06. And the new validation immediately failed one of the project's own tests, which had been quietly scoring an impossible loan for weeks.</p>
+
+<div class="aside">
+  <span class="label">The general lesson</span>
+  <p>Every one of these defects lived in the gap between components: between the decision rule and the number printed beside it, between the schema and the encoder, between an average and the folds it averaged. Unit tests pass happily on both sides of a gap like that. Auditing the seams is where the value is.</p>
+</div>
+
+<h3>Deliberately not fixed</h3>
+
+<p>Regenerable charts are committed to git. They render in the README on GitHub, and removing them for cleanliness would break what makes the repository readable at a glance.</p>
+
+<p>The API has no authentication. Adding token auth to a portfolio demo is theatre, since it would look like security without being any, so it is documented as a stated non-goal instead.</p>
+
+<hr class="sep">
+
+<!-- ============================================================ -->
+<h2 id="run"><span class="part">Part 12</span>Running it yourself</h2>
+
+<p>Requires Python 3.11 or 3.12, <a href="https://docs.astral.sh/uv/">uv</a>, and about 4 GB of free disk. Docker optional.</p>
+
+<pre><code># 1. install. The "train" extra carries MLflow, DVC, Evidently, SHAP
+uv sync --extra train --extra dev
+
+# 2. check the install. Needs no data, takes about 10 seconds
+uv run pytest                     # 118 tests
+
+# 3. get the data
+#    Download accepted_2007_to_2018Q4.csv from the Kaggle dataset
+#    wordsforthewise/lending-club and place it at:
+#      data/raw/accepted_2007_to_2018Q4.csv
+
+# 4. rebuild every published number from the raw CSV (about 30 min)
+uv run dvc repro</code></pre>
+
+<p>Then explore:</p>
+
+<pre><code>uv run mlflow ui --backend-store-uri sqlite:///mlflow.db   # every tuning run
+uv run uvicorn lending_club.serving.app:app --reload       # localhost:8000/docs
+
+# retrain end to end, with the promotion gate (about 100s)
+PREFECT_API_URL= PREFECT_SERVER_ALLOW_EPHEMERAL_MODE=true uv run python flows/retrain.py
+
+# replay 2016 to 2018 as monthly production batches (about 4 min)
+uv run python -m lending_club.monitoring.batches
+uv run python -m lending_club.monitoring.drift</code></pre>
+
+<p class="cap">One genuine reproducibility bug was found late. The README originally said <code>uv sync --extra dev</code>, which installs neither DVC nor MLflow nor Evidently, so <code>dvc repro</code>, the one command the whole project rests on, would have failed immediately for anyone following the instructions.</p>
+
+<hr class="sep">
+
+<!-- ============================================================ -->
+<h2 id="glossary"><span class="part">Reference</span>Glossary</h2>
+
+<div class="tablewrap wide">
+  <table>
+    <caption>Terms used above</caption>
+    <thead><tr><th>Term</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td>Charged off</td><td>The lender has written the loan off as a loss. The positive class in this project.</td></tr>
+      <tr><td>LGD</td><td>Loss given default, the share of the funded amount lost when a loan defaults. Measured here at 0.3657.</td></tr>
+      <tr><td>Prepayment</td><td>Paying a loan off early, often by refinancing. Reduces the interest the investor earns.</td></tr>
+      <tr><td>Installment</td><td>The fixed monthly payment, determined by amount, rate and term through the amortization formula.</td></tr>
+      <tr><td>Grade and sub-grade</td><td>Lending Club's own risk rating, A1 (safest) through G5. Available at listing time, so a legitimate feature.</td></tr>
+      <tr><td>DTI</td><td>Debt-to-income ratio, existing monthly debt payments divided by monthly income.</td></tr>
+      <tr><td>FICO</td><td>The standard US consumer credit score, roughly 300 to 850.</td></tr>
+      <tr><td>Data leakage</td><td>Information reaching the model that would not be available at the real decision point.</td></tr>
+      <tr><td>Calibration</td><td>Whether predicted probabilities match observed frequencies, meaning whether "0.2" really means 20%.</td></tr>
+      <tr><td>Log loss</td><td>A metric that punishes confident wrong probabilities severely. The tuning objective here.</td></tr>
+      <tr><td>ROC-AUC</td><td>Probability that a random defaulter is ranked riskier than a random non-defaulter. Pure ranking quality.</td></tr>
+      <tr><td>Brier score</td><td>Mean squared error of predicted probabilities. A calibration check.</td></tr>
+      <tr><td>Bootstrap</td><td>Resampling the data with replacement many times to estimate uncertainty in a statistic.</td></tr>
+      <tr><td>Drift</td><td>Change over time in the distribution of model inputs or outputs.</td></tr>
+      <tr><td>Champion and challenger</td><td>The live model against a newly trained candidate, compared before any swap.</td></tr>
+      <tr><td>Survivorship bias</td><td>Distortion from analysing only the cases that survived a selection process, here the loans old enough to have finished.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<footer>
+  <p>The Lending Club Credit Book, a complete walkthrough of a profit-based loan funding system built on the public Lending Club 2007 to 2018 dataset.</p>
+  <p>Every figure on this page is reproducible from the raw CSV with <code>dvc repro</code>. Source, full decision log and model card: <a href="https://github.com/shikharkumar13/Lending-Club-Loan-Default-Project-MLOps">github.com/shikharkumar13/Lending-Club-Loan-Default-Project-MLOps</a></p>
+  <p>Lending Club ended retail peer-to-peer lending in 2020. This is a historical study, and the patterns carry over to fintech and bank credit risk.</p>
+</footer>
+
+</main>
+</div>
+
+<script>
+(function(){
+  var rail = document.getElementById('rail');
+  var btn  = document.getElementById('railToggle');
+  if (btn && rail) {
+    btn.addEventListener('click', function(){
+      var open = rail.getAttribute('data-open') === 'true';
+      rail.setAttribute('data-open', open ? 'false' : 'true');
+      btn.setAttribute('aria-expanded', open ? 'false' : 'true');
+      btn.textContent = open ? 'Show contents' : 'Hide contents';
+    });
+    rail.addEventListener('click', function(e){
+      if (e.target.closest('a') && window.innerWidth < 1080) {
+        rail.setAttribute('data-open','false');
+        btn.setAttribute('aria-expanded','false');
+        btn.textContent = 'Show contents';
+      }
+    });
+  }
+})();
+</script>
+
+<!--claude-mermaid-runtime-begin:3477-->
+<style>.mermaid-diagram{margin-block:4px}.mermaid-diagram svg{display:block;margin:0 auto;max-width:100%;height:auto}</style>
+<script src="/_runtime/mermaid-11.16.1.min.js"></script>
+<script>(function(){
+var CFG={"palettes":{"light":{"surface":"#f4efe4","text":"#42392e","line":"#8a7f6d","border":"#7a6c52","bg":"#fffdf8"},"dark":{"surface":"#262b34","text":"#f2f3f5","line":"#a8adb8","border":"#9aa4b8","bg":"#1f232b"}}};
+if(typeof mermaid==='undefined')return;
+var pres=Array.prototype.slice.call(document.querySelectorAll('pre.mermaid')).filter(function(p){if(p.hasAttribute('data-claude-mermaid-claimed'))return false;p.setAttribute('data-claude-mermaid-claimed','1');return true;});
+if(!pres.length)return;
+var mq=window.matchMedia?window.matchMedia('(prefers-color-scheme: dark)'):null;
+var root=document.documentElement;
+var items=pres.map(function(pre){
+var mount=document.createElement('div');mount.className='mermaid-diagram';
+return {pre:pre,mount:mount,src:pre.textContent||''};
+});
+var seq=0;
+var renderGen=0;
+var lastKey='';
+function pageBg(fallback){
+var els=[document.body,document.documentElement];
+for(var i=0;i<els.length;i++){
+var c=els[i]&&getComputedStyle(els[i]).backgroundColor;
+if(c&&c!=='transparent'&&c!=='rgba(0, 0, 0, 0)')return c;
+}
+return fallback;
+}
+function render(){
+var theme=root.getAttribute('data-theme');
+var dark=theme==='dark'||(!!(mq&&mq.matches)&&theme!=='light');
+var pal=dark?CFG.palettes.dark:CFG.palettes.light;
+var bg=pageBg(pal.bg);
+var key=(dark?'d':'l')+'|'+bg;
+if(key===lastKey)return;
+lastKey=key;
+var gen=++renderGen;
+var font=getComputedStyle(document.body).fontFamily||'sans-serif';
+var nat={useMaxWidth:false};
+mermaid.initialize({
+startOnLoad:false,securityLevel:'strict',theme:'base',
+flowchart:nat,sequence:nat,er:nat,state:nat,class:nat,pie:nat,
+gantt:nat,journey:nat,timeline:nat,gitGraph:nat,mindmap:nat,xyChart:nat,
+quadrantChart:nat,sankey:nat,c4:nat,requirement:nat,block:nat,
+packet:nat,kanban:nat,architecture:nat,radar:nat,
+themeVariables:{background:bg,mainBkg:pal.surface,primaryColor:pal.surface,
+primaryTextColor:pal.text,lineColor:pal.line,primaryBorderColor:pal.border,
+nodeBorder:pal.border,clusterBorder:pal.border,edgeLabelBackground:bg,
+clusterBkg:'rgba(127,127,127,0.07)',titleColor:pal.text,
+darkMode:dark,rowOdd:bg,rowEven:'rgba(127,127,127,0.07)',
+attributeBackgroundColorOdd:bg,attributeBackgroundColorEven:'rgba(127,127,127,0.07)',
+fontSize:'16px',fontFamily:font},
+themeCSS:'.node rect, .node circle, .node polygon, .node path, .cluster rect { stroke-width: 2px; }'
+});
+items.forEach(function(it){
+var id='claude-mermaid-'+seq++;
+mermaid.render(id,it.src).then(function(r){
+if(gen!==renderGen)return;
+var prev=it.pre.previousElementSibling;
+if(prev&&prev.className==='mermaid-diagram'&&prev!==it.mount)return;
+it.mount.innerHTML=r.svg;
+if(!it.mount.parentNode)it.pre.parentNode.insertBefore(it.mount,it.pre);
+it.pre.style.display='none';
+},function(){
+var scratch=document.getElementById(id);
+if(scratch)scratch.parentNode.removeChild(scratch);
+scratch=document.getElementById('d'+id);
+if(scratch)scratch.parentNode.removeChild(scratch);
+if(gen!==renderGen)return;
+if(it.mount.parentNode)it.mount.parentNode.removeChild(it.mount);
+it.pre.style.display='';
+});
+});
+}
+render();
+if(mq&&mq.addEventListener)mq.addEventListener('change',render);
+if(typeof MutationObserver!=='undefined')new MutationObserver(render).observe(root,{attributes:true,attributeFilter:['data-theme']});
+})();</script>
+<!--claude-mermaid-runtime-end-->
+
+</body></html>
