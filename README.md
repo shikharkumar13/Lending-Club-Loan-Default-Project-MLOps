@@ -55,7 +55,9 @@ mlflow ui --backend-store-uri sqlite:///mlflow.db   # browse the experiments
 
 # serve the model
 uv run uvicorn lending_club.serving.app:app --reload    # http://localhost:8000/docs
-docker build -t lending-club-api . && docker run -p 8000:8000 lending-club-api
+docker build -t lending-club-api .
+docker run -d --name lc-api -p 8001:8000 lending-club-api   # http://localhost:8001/docs
+curl localhost:8001/health
 ```
 
 ## Data

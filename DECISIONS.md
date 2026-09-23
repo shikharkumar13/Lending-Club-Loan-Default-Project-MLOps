@@ -742,9 +742,15 @@ deleted, so the history stays readable.
 - **Why:** The container cannot use an experiment tracker or a plotting
   library. Every package shipped is extra image size, extra build time and
   extra attack surface. The split also documents which code is production code.
-- **Container details:** multi-stage build, non-root user, `libgomp1` for
-  LightGBM's OpenMP runtime (absent from `python:slim`), and a `HEALTHCHECK`
-  that calls `/health`.
+- **Container details:** multi-stage build, non-root user (`appuser`),
+  `libgomp1` for LightGBM's OpenMP runtime (absent from `python:slim`), and a
+  `HEALTHCHECK` that calls `/health`. Image size: **1.03 GB**, build time ~10s
+  after the dependency layer is cached.
+- **Verified end to end:** 200 real 2015 loans were scored through the running
+  container and compared with the offline pipeline. Maximum probability
+  difference **4.9e-07** (API rounding to six decimals), maximum expected-return
+  difference **$0.005** (rounding to cents), and **every funding decision
+  identical**. That is the Phase 5 exit criterion met.
 
 ---
 
