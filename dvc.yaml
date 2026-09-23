@@ -87,6 +87,18 @@ stages:
     outs:
       - artifacts/bundle
 
+  # Who gets funded, and where the model is wrong (D-071). Depends on the
+  # bundle: the audit must measure the policy that is actually deployed.
+  fairness:
+    cmd: python -m lending_club.fairness
+    deps:
+      - data/processed
+      - artifacts/bundle
+      - src/lending_club/fairness.py
+    metrics:
+      - reports/fairness.json:
+          cache: false
+
   # --- Phase 7: monitoring ---------------------------------------------------
   # Depends on the BUNDLE, not on the model: monitoring must measure what the
   # service actually deploys, including the calibrator and the threshold.

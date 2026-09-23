@@ -495,3 +495,25 @@ stages:
       hash: md5
       md5: dd7bc874089e2abcd94122b7432c354b
       size: 35461
+  fairness:
+    cmd: python -m lending_club.fairness
+    deps:
+    - path: artifacts/bundle
+      hash: md5
+      md5: f1869fb5936a58cdeb55d67327626838.dir
+      size: 1038727
+      nfiles: 2
+    - path: data/processed
+      hash: md5
+      md5: 6d8c0a392d8acd0867d28c058dc0db44.dir
+      size: 33593025
+      nfiles: 3
+    - path: src/lending_club/fairness.py
+      hash: md5
+      md5: a1a3cfd997cc8f14493c84117adc07b9
+      size: 5063
+    outs:
+    - path: reports/fairness.json
+      hash: md5
+      md5: 43bf54006a9c0381da2a2d6c12d3953d
+      size: 16779

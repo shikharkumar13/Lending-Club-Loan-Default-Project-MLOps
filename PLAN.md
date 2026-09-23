@@ -268,7 +268,9 @@ lending-club-default/
 - Model card: intended use, data, metrics, limitations, fairness notes
   (e.g. `addr_state` as a possible proxy for protected attributes)
 - **Done when:** someone new can clone the repo and follow the README to
-  reproduce the test results.
+  reproduce the test results. *(Done: README rewritten with a Mermaid
+  architecture diagram and a verified setup path, MODEL_CARD.md with a measured
+  fairness audit, `lending_club.fairness` + 5 tests; D-070, D-071.)*
 
 ---
 

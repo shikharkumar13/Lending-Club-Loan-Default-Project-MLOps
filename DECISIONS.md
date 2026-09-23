@@ -87,6 +87,8 @@ deleted, so the history stays readable.
 | [D-067](#d-067-the-retraining-trigger-needs-persistence-not-a-spike) | The retraining trigger needs persistence, not a spike | Monitoring | Accepted | 2026-09-23 |
 | [D-068](#d-068-drift-and-breakage-are-different-alerts) | Drift and breakage are different alerts | Monitoring | Accepted | 2026-09-23 |
 | [D-069](#d-069-the-html-report-is-written-for-three-months-not-thirty-six) | The HTML report is written for three months, not thirty-six | Monitoring | Accepted | 2026-09-23 |
+| [D-070](#d-070-documentation-that-can-be-re-run) | Documentation that can be re-run, not prose | Docs | Accepted | 2026-09-23 |
+| [D-071](#d-071-addr_state-is-a-proxy-that-earns-nothing) | `addr_state` is a proxy that earns nothing | Fairness | **Open** | 2026-09-23 |
 
 ---
 
@@ -884,6 +886,56 @@ deleted, so the history stays readable.
   Thirty-six of them came to 201 MB of artifact nobody would open. The JSON is
   the machine-readable record; the HTML is what a human opens when something
   fires, and any month can be regenerated on demand.
+
+### D-070: Documentation that can be re-run
+- **Decision:** the model card is a separate `MODEL_CARD.md`, not a README
+  section; the architecture diagram is Mermaid in the README, not a PNG; and the
+  fairness audit is a module (`lending_club.fairness`) with a DVC stage and
+  tests, not a paragraph of prose.
+- **Why:** documentation rots because nothing checks it. A Mermaid diagram is
+  diffable in a pull request and cannot silently disagree with a refactor the
+  way an exported image does. A fairness section that *asserts* "addr_state may
+  be a proxy" is box-ticking; one that regenerates `reports/fairness.json` from
+  the deployed bundle can be re-run when the model changes and will contradict
+  itself if the claim stops being true.
+- **Also fixed here:** the README told a new reader to run
+  `uv sync --extra dev`, which installs neither DVC, MLflow nor Evidently —
+  `dvc repro`, the one command the whole project rests on, would have failed
+  immediately. Verified with `uv sync --extra dev --dry-run`: it would have
+  uninstalled 185 packages. The Phase 8 exit criterion is that someone new can
+  clone and reproduce, so this counted as a real bug, not a typo.
+- **Rejected:** a `docs/` site (Sphinx/MkDocs). For a portfolio project the
+  audience reads the repository on GitHub; a build step between them and the
+  content is a cost with no benefit.
+
+### D-071: `addr_state` is a proxy that earns nothing
+- **Status: OPEN.** Recommended, deliberately not yet applied.
+- **Finding:** `addr_state` is a well-documented proxy for race and income in
+  the US. On the 2015 test year it produces:
+  - a funding-rate spread of **47.8% (NV) to 74.0% (MA)**, against 66.3% overall;
+  - a realized default rate among *funded* loans of **5.8% (OR) to 14.3% (AR)**,
+    against 10.0% overall — the model is not equally right about each state;
+  - a correlation between mean score and actual default across states of only
+    **+0.51**, versus **+0.94** for `purpose`. `purpose` spreads far wider
+    (14.2% to 82.0%) and is almost entirely earned; `addr_state` is not.
+- **And it contributes nothing.** 1.6% of total SHAP weight. Refitting the
+  selected LightGBM configuration on the training split without it:
+
+  | | log loss (2014) | ROC-AUC |
+  |---|---|---|
+  | with `addr_state` | 0.37692 | 0.6769 |
+  | without | 0.37693 | **0.6770** |
+
+  A difference of 0.00001, with AUC marginally *better* without the feature.
+- **Recommendation:** remove `addr_state` from `features.allowlist` and from
+  `features.groups.nominal`, then `dvc repro`. A feature that is a recognised
+  proxy, produces a 26-point funding spread and a 2.5x spread in realized error,
+  and earns no measurable accuracy, does not belong in a credit model.
+- **Why it is still open:** it is a modelling change, not a documentation one.
+  It invalidates every published number, the bundle and the monitoring baseline,
+  so it is the owner's call rather than something to slip into a docs phase.
+- **Revisit if:** the model is ever used for anything resembling an approval
+  decision — at that point this stops being a recommendation.
 
 ---
 
