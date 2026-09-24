@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/shikharkumar13/Lending-Club-Loan-Default-Project-MLOps/actions/workflows/ci.yml/badge.svg)](https://github.com/shikharkumar13/Lending-Club-Loan-Default-Project-MLOps/actions/workflows/ci.yml)
 
-Read the project report here: https://claude.ai/artifact/DVzSBjBUrSv9nJHk6Cbo7u
+Read the project report here: https://shikharkumar13.github.io/Lending-Club-Loan-Default-Project-MLOps/
 
 Predict whether a Lending Club loan will default, using **only information an
 investor could see at listing time**, and fund a loan only when its
